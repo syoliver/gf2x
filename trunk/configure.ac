@@ -1,5 +1,5 @@
 
-AC_INIT([gf2x], [0.9])
+AC_INIT([gf2x], [0.9.0.992])
 AC_CANONICAL_TARGET
 
 AC_SUBST([gf2x_lib_version], [1:0:0])
