@@ -1,22 +1,13 @@
-commit 2bf416a2f37975e795382b50f98bba6e3458d242
-Author: Emmanuel Thomé <Emmanuel.Thome@normalesup.org>
-Date:   Fri Mar 27 14:11:16 2009 +0100
-
-    release gf2x-0.9.0.992
-
- trunk/ChangeLog |   32 +++++++++++++-------------------
- 1 files changed, 13 insertions(+), 19 deletions(-)
-
-commit 5dbffa64e6fe1dea87ad5afbf6b4df4feaa15725
+commit 95b1e896f15114466741e5bb173fbd260bebf8f3
 Author: Emmanuel Thomé <Emmanuel.Thome@normalesup.org>
 Date:   Fri Mar 27 13:40:32 2009 +0100
 
-    preparation for 0.9.1 [ 0.9.0.992 ]
+    preparation for 0.9.1 [ 0.9.0.993 ]
     
         changes for solaris and windows
         added extern statements to header files (fixes build on mac os x)
 
- trunk/ChangeLog               |  199 ++++++++++++++++++++++++++++++-----------
+ trunk/ChangeLog               |  202 ++++++++++++++++++++++++++++++-----------
  trunk/Makefile.am             |    2 +-
  trunk/apps/halfgcd.cpp        |    1 +
  trunk/configure.ac            |    2 +-
@@ -25,8 +16,9 @@ Date:   Fri Mar 27 13:40:32 2009 +0100
  trunk/tests/check-mul.c       |    3 +-
  trunk/tuning/Makefile.am      |   86 +++++++++---------
  trunk/tuning/tune-lowlevel.pl |    6 +-
+ trunk/tuning/tunefft.c        |    1 +
  trunk/tuning/tunetoom.c       |    1 +
- 10 files changed, 220 insertions(+), 126 deletions(-)
+ 11 files changed, 224 insertions(+), 126 deletions(-)
 
 commit f7c429436e410aca5a5e7c80f7182c311f4e6ea5
 Author: thome <thome@e5c1114b-a573-4582-9dac-f72f410959ce>
