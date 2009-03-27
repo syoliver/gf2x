@@ -1,27 +1,20 @@
-commit 94df07d7c578068b4d54609738a2ce54c26ad166
+commit f0ad0ac687e6e052d87bfa78c8bf3cfe99d29e6f
 Author: Emmanuel Thomé <Emmanuel.Thome@normalesup.org>
-Date:   Fri Mar 27 11:42:27 2009 +0100
+Date:   Fri Mar 27 13:40:32 2009 +0100
 
-    release gf2x-0.9.1
-
- trunk/ChangeLog |  108 ++++++++++++++++++++++++++++++++++++++++++++++++++----
- 1 files changed, 100 insertions(+), 8 deletions(-)
-
-commit 1b719c78e9b26626b07a5ffad9ec3b22ed647cac
-Author: Emmanuel Thomé <Emmanuel.Thome@normalesup.org>
-Date:   Fri Mar 27 11:25:59 2009 +0100
-
-    preparation for 0.9.1
+    preparation for 0.9.1 [ 0.9.0.990 ]
     
-    increased version number to 0.9.1
-    added extern statements to header files (fixes build on mac os x)
+        changes for solaris and windows
+        added extern statements to header files (fixes build on mac os x)
 
- trunk/ChangeLog        |   80 ++++++++++++++++++++---------------------------
- trunk/apps/halfgcd.cpp |    1 +
- trunk/configure.ac     |    2 +-
- trunk/gf2x.h           |    8 ++--
- trunk/gf2x/gf2x-impl.h |   38 +++++++++++-----------
- 5 files changed, 59 insertions(+), 70 deletions(-)
+ trunk/ChangeLog          |  197 +++++++++++++++++++++++++++++++++-------------
+ trunk/Makefile.am        |    2 +-
+ trunk/apps/halfgcd.cpp   |    1 +
+ trunk/configure.ac       |    2 +-
+ trunk/gf2x.h             |    8 +-
+ trunk/gf2x/gf2x-impl.h   |   38 +++++-----
+ trunk/tuning/Makefile.am |   42 +++++-----
+ 7 files changed, 190 insertions(+), 100 deletions(-)
 
 commit f7c429436e410aca5a5e7c80f7182c311f4e6ea5
 Author: thome <thome@e5c1114b-a573-4582-9dac-f72f410959ce>
