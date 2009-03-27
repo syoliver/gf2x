@@ -54,49 +54,49 @@ if GF2X_32BIT_SOURCES
 LOWLEVEL+=tune_gen_mul1_w32k1
 nodist_tune_gen_mul1_w32k1_SOURCES=gen_mul1_w32k1.c
 tune_gen_mul1_w32k1_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w32k1.c: gen_bb_mul_code ; ./gen_bb_mul_code 32 1 > $@
+gen_mul1_w32k1.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 32 1 > $@
 CLEANFILES+=gen_mul1_w32k1.c
 
 LOWLEVEL+=tune_gen_mul1_w32k2
 nodist_tune_gen_mul1_w32k2_SOURCES=gen_mul1_w32k2.c
 tune_gen_mul1_w32k2_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w32k2.c: gen_bb_mul_code ; ./gen_bb_mul_code 32 2 > $@
+gen_mul1_w32k2.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 32 2 > $@
 CLEANFILES+=gen_mul1_w32k2.c
 
 LOWLEVEL+=tune_gen_mul1_w32k3
 nodist_tune_gen_mul1_w32k3_SOURCES=gen_mul1_w32k3.c
 tune_gen_mul1_w32k3_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w32k3.c: gen_bb_mul_code ; ./gen_bb_mul_code 32 3 > $@
+gen_mul1_w32k3.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 32 3 > $@
 CLEANFILES+=gen_mul1_w32k3.c
 
 LOWLEVEL+=tune_gen_mul1_w32k4
 nodist_tune_gen_mul1_w32k4_SOURCES=gen_mul1_w32k4.c
 tune_gen_mul1_w32k4_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w32k4.c: gen_bb_mul_code ; ./gen_bb_mul_code 32 4 > $@
+gen_mul1_w32k4.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 32 4 > $@
 CLEANFILES+=gen_mul1_w32k4.c
 
 LOWLEVEL+=tune_gen_mul1_w32k5
 nodist_tune_gen_mul1_w32k5_SOURCES=gen_mul1_w32k5.c
 tune_gen_mul1_w32k5_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w32k5.c: gen_bb_mul_code ; ./gen_bb_mul_code 32 5 > $@
+gen_mul1_w32k5.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 32 5 > $@
 CLEANFILES+=gen_mul1_w32k5.c
 
 LOWLEVEL+=tune_gen_mul1_w32k6
 nodist_tune_gen_mul1_w32k6_SOURCES=gen_mul1_w32k6.c
 tune_gen_mul1_w32k6_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w32k6.c: gen_bb_mul_code ; ./gen_bb_mul_code 32 6 > $@
+gen_mul1_w32k6.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 32 6 > $@
 CLEANFILES+=gen_mul1_w32k6.c
 
 LOWLEVEL+=tune_gen_mul1_w32k7
 nodist_tune_gen_mul1_w32k7_SOURCES=gen_mul1_w32k7.c
 tune_gen_mul1_w32k7_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w32k7.c: gen_bb_mul_code ; ./gen_bb_mul_code 32 7 > $@
+gen_mul1_w32k7.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 32 7 > $@
 CLEANFILES+=gen_mul1_w32k7.c
 
 LOWLEVEL+=tune_gen_mul1_w32k8
 nodist_tune_gen_mul1_w32k8_SOURCES=gen_mul1_w32k8.c
 tune_gen_mul1_w32k8_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w32k8.c: gen_bb_mul_code ; ./gen_bb_mul_code 32 8 > $@
+gen_mul1_w32k8.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 32 8 > $@
 CLEANFILES+=gen_mul1_w32k8.c
 endif
 
@@ -106,49 +106,49 @@ if GF2X_64BIT_SOURCES
 LOWLEVEL+=tune_gen_mul1_w64k1
 nodist_tune_gen_mul1_w64k1_SOURCES=gen_mul1_w64k1.c
 tune_gen_mul1_w64k1_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w64k1.c: gen_bb_mul_code ; ./gen_bb_mul_code 64 1 > $@
+gen_mul1_w64k1.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 64 1 > $@
 CLEANFILES+=gen_mul1_w64k1.c
 
 LOWLEVEL+=tune_gen_mul1_w64k2
 nodist_tune_gen_mul1_w64k2_SOURCES=gen_mul1_w64k2.c
 tune_gen_mul1_w64k2_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w64k2.c: gen_bb_mul_code ; ./gen_bb_mul_code 64 2 > $@
+gen_mul1_w64k2.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 64 2 > $@
 CLEANFILES+=gen_mul1_w64k2.c
 
 LOWLEVEL+=tune_gen_mul1_w64k3
 nodist_tune_gen_mul1_w64k3_SOURCES=gen_mul1_w64k3.c
 tune_gen_mul1_w64k3_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w64k3.c: gen_bb_mul_code ; ./gen_bb_mul_code 64 3 > $@
+gen_mul1_w64k3.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 64 3 > $@
 CLEANFILES+=gen_mul1_w64k3.c
 
 LOWLEVEL+=tune_gen_mul1_w64k4
 nodist_tune_gen_mul1_w64k4_SOURCES=gen_mul1_w64k4.c
 tune_gen_mul1_w64k4_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w64k4.c: gen_bb_mul_code ; ./gen_bb_mul_code 64 4 > $@
+gen_mul1_w64k4.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 64 4 > $@
 CLEANFILES+=gen_mul1_w64k4.c
 
 LOWLEVEL+=tune_gen_mul1_w64k5
 nodist_tune_gen_mul1_w64k5_SOURCES=gen_mul1_w64k5.c
 tune_gen_mul1_w64k5_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w64k5.c: gen_bb_mul_code ; ./gen_bb_mul_code 64 5 > $@
+gen_mul1_w64k5.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 64 5 > $@
 CLEANFILES+=gen_mul1_w64k5.c
 
 LOWLEVEL+=tune_gen_mul1_w64k6
 nodist_tune_gen_mul1_w64k6_SOURCES=gen_mul1_w64k6.c
 tune_gen_mul1_w64k6_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w64k6.c: gen_bb_mul_code ; ./gen_bb_mul_code 64 6 > $@
+gen_mul1_w64k6.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 64 6 > $@
 CLEANFILES+=gen_mul1_w64k6.c
 
 LOWLEVEL+=tune_gen_mul1_w64k7
 nodist_tune_gen_mul1_w64k7_SOURCES=gen_mul1_w64k7.c
 tune_gen_mul1_w64k7_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w64k7.c: gen_bb_mul_code ; ./gen_bb_mul_code 64 7 > $@
+gen_mul1_w64k7.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 64 7 > $@
 CLEANFILES+=gen_mul1_w64k7.c
 
 LOWLEVEL+=tune_gen_mul1_w64k8
 nodist_tune_gen_mul1_w64k8_SOURCES=gen_mul1_w64k8.c
 tune_gen_mul1_w64k8_LDADD=libtuneup-s1.la libtiming.la ../libgf2x.la
-gen_mul1_w64k8.c: gen_bb_mul_code ; ./gen_bb_mul_code 64 8 > $@
+gen_mul1_w64k8.c: gen_bb_mul_code$(EXEEXT) ; ./gen_bb_mul_code 64 8 > $@
 CLEANFILES+=gen_mul1_w64k8.c
 endif
 
@@ -186,7 +186,7 @@ endif
 ######################################################################
 EXTRA_PROGRAMS+=$(LOWLEVEL)
 tune-lowlevel: $(LOWLEVEL)
-	$(MAKE) -C $(top_builddir)
+	cd $(top_builddir) ; $(MAKE)
 	MAKE="$(MAKE)" srcdir=$(srcdir)	\
 	perl $(srcdir)/tune-lowlevel.pl $(LOWLEVEL)
 EXTRA_DIST+=tune-lowlevel.pl
@@ -206,14 +206,14 @@ tunetoom.res: tunetoom
 	./tunetoom -s 1.05 2048 -o tunetoom.res
 
 tune-toom: tunetoom.res update-thresholds
-	$(MAKE) -C $(top_builddir)
+	cd $(top_builddir) ; $(MAKE)
 	cat ../gf2x/gf2x-thresholds.h > tuned_thresholds.h
 	./update-thresholds -o tuned_thresholds.h < tunetoom.res
 	mkdir -p ../hardware/tuned/
 	mv -f tuned_thresholds.h ../hardware/tuned/gf2x-thresholds.h
 	rm -f ../gf2x/gf2x-thresholds.h
 	ln -sf ../hardware/tuned/gf2x-thresholds.h ../gf2x/
-	$(MAKE) -C $(top_builddir)
+	cd $(top_builddir) ; $(MAKE)
 
 ######################################################################
 EXTRA_PROGRAMS+=tunefft
@@ -224,13 +224,13 @@ tunefft.res: tunefft
 	./tunefft -s 1.02 8000000 -o tunefft.res
 
 tune-fft: tunefft.res update-thresholds
-	$(MAKE) -C $(top_builddir)
+	cd $(top_builddir) ; $(MAKE)
 	cat ../gf2x/gf2x-thresholds.h > tuned_thresholds.h
 	./update-thresholds -o tuned_thresholds.h < tunefft.res
 	mkdir -p ../hardware/tuned/
 	mv -f tuned_thresholds.h ../hardware/tuned/gf2x-thresholds.h
 	rm -f ../gf2x/gf2x-thresholds.h
 	ln -sf ../hardware/tuned/gf2x-thresholds.h ../gf2x/
-	$(MAKE) -C $(top_builddir)
+	cd $(top_builddir) ; $(MAKE)
 
 CLEANFILES+=$(EXTRA_PROGRAMS) $(EXTRA_LTLIBRARIES)
