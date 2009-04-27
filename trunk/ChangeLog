@@ -1,3 +1,48 @@
+commit 35ba77f83c1d3993e6e09eac65dff502c4ccb54a
+Author: Emmanuel Thomé <Emmanuel.Thome@normalesup.org>
+Date:   Mon Apr 27 21:23:02 2009 +0200
+
+    bump version number.
+
+ trunk/configure.ac |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit f74745576f249c4c91d664d02c507be7d7f9a31d
+Author: Emmanuel Thomé <Emmanuel.Thome@normalesup.org>
+Date:   Mon Apr 27 21:14:47 2009 +0200
+
+    Fixed extremely stupid bug in fft.
+    
+    That caused largeish multiplications to call toom above the max tuned fft
+    size (!).
+
+ trunk/gf2x.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 42584971ed77c2a8e78d1b229b9b4dcb26393188
+Author: Emmanuel Thomé <Emmanuel.Thome@normalesup.org>
+Date:   Fri Apr 17 23:36:03 2009 +0200
+
+    minor changes, now using libtool 2.2.
+
+ trunk/ChangeLog              |    9 +
+ trunk/Makefile.am            |    7 +-
+ trunk/README                 |    7 +-
+ trunk/acinclude.m4           |  155 -----
+ trunk/config.guess           |  853 -----------------------
+ trunk/config.sub             |  143 ----
+ trunk/config/acinclude.m4    |  155 +++++
+ trunk/config/config.guess    |  853 +++++++++++++++++++++++
+ trunk/config/config.sub      |  143 ++++
+ trunk/config/configfsf.guess | 1460 +++++++++++++++++++++++++++++++++++++++
+ trunk/config/configfsf.sub   | 1554 ++++++++++++++++++++++++++++++++++++++++++
+ trunk/configfsf.guess        | 1460 ---------------------------------------
+ trunk/configfsf.sub          | 1554 ------------------------------------------
+ trunk/configure.ac           |    8 +-
+ trunk/ntl_gf2x_mul_code.h    |   40 --
+ trunk/wipeout-autotools      |    2 +-
+ 16 files changed, 4185 insertions(+), 4218 deletions(-)
+
 commit 9c2c3523eba59a71abf0fc9d2c3cfe635227adbe
 Author: Emmanuel Thomé <Emmanuel.Thome@normalesup.org>
 Date:   Thu Apr 2 16:56:33 2009 +0200
