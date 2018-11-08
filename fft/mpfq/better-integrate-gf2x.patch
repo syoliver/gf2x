@@ -284,7 +284,7 @@ diff --git a/fft/mpfq/mpfq.h b/fft/mpfq/mpfq.h
 index 4ba2b9f..3d7717a 100644
 --- a/fft/mpfq/mpfq.h
 +++ b/fft/mpfq/mpfq.h
-@@ -8,7 +8,13 @@
+@@ -8,7 +8,10 @@
  #include <stdio.h>
  #include <stdlib.h>
  #include <string.h>
@@ -293,13 +293,10 @@ index 4ba2b9f..3d7717a 100644
 +#ifndef GF2X_WORDSIZE
 +#error "This file has been modified for use within gf2x. Please arrange so that gf2x-small.h is included before this file"
 +#endif
-+#ifndef GMP_LIMB_BITS
-+#define GMP_LIMB_BITS GF2X_WORDSIZE
-+#endif
  
  #ifdef __cplusplus
  extern "C" {
-@@ -20,43 +23,23 @@ extern "C" {
+@@ -19,44 +22,24 @@ extern "C" {
  /*** Constants for field_specify ***/
  
  #define MPFQ_DONE 0             /* At the end of the variadic option functions */

@@ -12,9 +12,6 @@
 #ifndef GF2X_WORDSIZE
 #error "This file has been modified for use within gf2x. Please arrange so that gf2x-small.h is included before this file"
 #endif
-#ifndef GMP_LIMB_BITS
-#define GMP_LIMB_BITS GF2X_WORDSIZE
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -125,24 +122,24 @@ static inline int mpfq_clzl(unsigned long x)
         static const int t[4] = { 2, 1, 0, 0 };
         int a = 0;
         int res;
-#if (GMP_LIMB_BITS == 64)
+#if (GF2X_WORDSIZE == 64)
         if (x >> 32) { a += 32; x >>= 32; }
 #endif  
         if (x >> 16) { a += 16; x >>= 16; }
         if (x >>  8) { a +=  8; x >>=  8; }
         if (x >>  4) { a +=  4; x >>=  4; }
         if (x >>  2) { a +=  2; x >>=  2; }
-        res = GMP_LIMB_BITS - 2 - a + t[x];
+        res = GF2X_WORDSIZE - 2 - a + t[x];
         return res;
 }
 static inline int mpfq_ctzl(unsigned long x)
 {
-	return GMP_LIMB_BITS - mpfq_clzl(x & - x);
+	return GF2X_WORDSIZE - mpfq_clzl(x & - x);
 }
 static inline int mpfq_parityl(unsigned long x)
 {
 	static const int t[4] = { 0, 1, 1, 0, };
-#if (GMP_LIMB_BITS == 64)
+#if (GF2X_WORDSIZE == 64)
 	x ^= (x >> 32);
 #endif
 	x ^= (x >> 16);
@@ -173,7 +170,7 @@ static inline int mpfq_parityl(unsigned long x)
 static inline int mpfq_clzlx(unsigned long * x, int n)
 {
 	int r = 0;
-	for( ; n > 0 && MPFQ_UNLIKELY(!x[n-1]) ; --n) r+=GMP_LIMB_BITS;
+	for( ; n > 0 && MPFQ_UNLIKELY(!x[n-1]) ; --n) r+=GF2X_WORDSIZE;
 	if (n == 0) return r;
 	r += mpfq_clzl(x[n-1]);
 	return r;
@@ -182,7 +179,7 @@ static inline int mpfq_clzlx(unsigned long * x, int n)
 static inline int mpfq_ctzlx(unsigned long * x, int n)
 {
 	int r = 0;
-	for( ; n > 0 && MPFQ_UNLIKELY(!*x) ; --n,++x) r+=GMP_LIMB_BITS;
+	for( ; n > 0 && MPFQ_UNLIKELY(!*x) ; --n,++x) r+=GF2X_WORDSIZE;
 	if (n == 0) return r;
 	r += mpfq_ctzl(*x);
 	return r;
@@ -229,6 +226,8 @@ static inline void malloc_failed() {
 }
 
 
+#if 0
+
 /* Given the fact that copies are always very small, we're probably
  * better off giving the compiler the opportunity to optimize all this
  * away.
@@ -257,6 +256,7 @@ static inline void mpfq_zero(mp_limb_t * dst, mp_size_t n) {
     for( ; n-- ; ) *dst++ = 0;
 }
 
+#endif
 
 
 #ifdef __cplusplus
