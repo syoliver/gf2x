@@ -120,6 +120,9 @@ EXTRA_DIST+=config/configfsf.guess
 EXTRA_DIST+=toom-gpl-placeholder.c
 EXTRA_DIST+=check-gf2x-version.c
 
+pkgconfigdir       = $(libdir)/pkgconfig
+pkgconfig_DATA     = gf2x.pc
+
 # This is really a maintainer-only command. This can be used for creating
 # a tarball with an LGPL-licensed gf2x. Note that when this is done,
 # configure must be re-run !
