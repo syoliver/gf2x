@@ -21,9 +21,7 @@
 
 /* Finds smallest irreducible factor of trinomial over GF(2) */
 
-#define VERSION 2.01
-
-#define USE_PDEP /* -mbmi2 should be added to CFLAGS */
+#define GF2X_FACTOR_VERSION 2.01
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +35,7 @@
 #include <assert.h>
 #include <omp.h>
 #include <sys/time.h>
-#ifdef USE_PDEP
+#ifdef GF2X_HAVE_BMI2_SUPPORT
 #include <x86intrin.h> /* for _pdep_u64 */
 #endif
 
@@ -419,7 +417,7 @@ print_gf2x (GF2X& a)
   printf ("\n");
 }
 
-#ifdef USE_PDEP
+#ifdef GF2X_HAVE_BMI2_SUPPORT
 /* b <- a^2 mod (x^r + x^s + 1)
    Assumes r and s are odd, and NTL_BITS_PER_LONG = 64.
    Assumes r-s >= 128.
@@ -561,7 +559,7 @@ fastsqr (GF2X& b, GF2X& a, _ntl_ulong r, _ntl_ulong s)
       exit (1);
     }
 #else
-#ifdef USE_PDEP
+#ifdef GF2X_HAVE_BMI2_SUPPORT
   return fastsqr_pdep (b, a, r, s);
 #else
   return fastsqr_old (b, a, r, s);
@@ -903,7 +901,7 @@ main (int argc, char *argv[])
     fprintf (stderr, "%s ", argv[i]);
   fprintf (stderr, "\n");
 
-  fprintf (stderr, "This is factor version %1.2f\n", VERSION);
+  fprintf (stderr, "This is factor version %1.2f\n", GF2X_FACTOR_VERSION);
   fprintf (stderr, "based on NTL version %s\n", NTL_VERSION);
 
   while (argc > 1 && argv[1][0] == '-')

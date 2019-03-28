@@ -62,10 +62,6 @@ AM_MAINTAINER_MODE([enable])
 
 LT_INIT()
 
-AC_ARG_ENABLE([ntl-checks],
-              [AS_HELP_STRING([--enable-ntl-checks],
-                              [Turn on ntl checks])])
-
 AC_ARG_ENABLE([hardware-specific-code],
               [AS_HELP_STRING([--enable-hardware-specific-code],
                               [Turn on all cpu-dependent optimized code (default is yes)])],
@@ -90,13 +86,6 @@ AC_ARG_ENABLE([sse41],
 AC_ARG_ENABLE([pclmul],
               [AS_HELP_STRING([--enable-pclmul],
                               [Turn on pclmul code (default is yes)])])
-
-if test "x$enable_ntl_checks" = xyes ; then
- MAYBE_APPS=apps
-else
- MAYBE_APPS=
-fi
-AC_SUBST([MAYBE_APPS])
 
 AC_ARG_ENABLE([fft-interface],
               [AS_HELP_STRING([--enable-fft-interface],

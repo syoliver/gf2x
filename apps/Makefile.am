@@ -1,14 +1,11 @@
-# put here the location of the NTL installation (for example /usr/local)
-NTL=
-
 # add -mbmi2 to use the pdep_u64 instruction
-AM_CPPFLAGS = -I$(top_srcdir) -T$(top_builddir) -fopenmp -std=c++11 -I$(NTL)/include
+AM_CXXFLAGS = $(GF2X_CFLAGS)
+LDADD = $(GF2X_LIBS) $(GF2X_RPATH_LIBS) -lgmp
 
-check_PROGRAMS=factor
+bin_PROGRAMS=factor
 factor_SOURCES=factor.cpp halfgcd.cpp
 noinst_HEADERS=halfgcd.hpp
 factor_LDFLAGS=-fopenmp
-factor_LDADD=../libgf2x.la $(NTL)/lib/libntl.a -lgmp
 
 LOG_COMPILER=$(SHELL) 2>/dev/null
 TESTS=check-factor-000.sh check-factor-001.sh	\

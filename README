@@ -26,7 +26,10 @@ Dependencies
 
 gf2x has no external dependencies.
 
-Some of the demos in the apps/ subdirectory require the gmp and NTL libraries.
+Some of the demos in the apps/ subdirectory require the gmp and NTL
+libraries. (use ./configure ; make from that directory. You may want to
+use PKG_CONFIG_PATH to have the autotools stuff there find gf2x
+properly).
 
 
 

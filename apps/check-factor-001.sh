@@ -1,1 +1,1 @@
-[ "`echo 12345 u | ./factor 7654321`" = "12345 6 p5b" ]
+[ "`echo 12345 u | ./factor 7654321 2>/dev/null | tail -n 1`" = "12345 6 p5b" ]
