@@ -33,6 +33,7 @@
 #define CANTOR_BASE_FIELD_SIZE 128
 #endif
 
+#include "gf2x.h"
 #include "gf2x-fake-fft.h"
 #include "gf2x-cantor-fft.h"
 #include "gf2x-ternary-fft.h"
