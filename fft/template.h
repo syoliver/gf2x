@@ -179,6 +179,17 @@ int XXX_check(
  * pointer-correct if relevant). This might be a noop if the transforms
  * are free of any pointers, which is always the case with gf2x. */
 
+#if 0 && defined(__GNU_MP__) /* we don't want a gmp dependency... */
+void XXX_fill_random(
+        XXX_info_srcptr o,
+        XXX_ptr ptr,
+        size_t n,
+        gmp_randstate_t rstate);
+/* fill n consecutive transforms with random data from the provided
+ * random state.
+ */
+#endif
+
 void XXX_add(
         XXX_info_srcptr o,
         XXX_ptr tc,
@@ -287,6 +298,15 @@ struct XXX_info {
     inline void prepare(ptr x, size_t n = 1) const { XXX_prepare(this, x, n); }
     inline bool check(srcptr x, size_t n, bool printf_diagnostics) const { return XXX_check(this, x, n, printf_diagnostics); }
     inline bool check(srcptr x, bool printf_diagnostics) const { return XXX_check(this, x, 1, printf_diagnostics); }
+#if 0 && defined(__GNU_MP__) /* we don't want a gmp dependency... */
+    inline void fill_random(ptr x, size_t n, gmp_randstate_t rstate) const {
+        XXX_fill_random(x, n, rstate);
+    }
+    inline void fill_random(ptr x, gmp_randstate_t rstate) const {
+        XXX_fill_random(x, 1, rstate);
+    }
+#endif
+
     inline void dft(ptr x, const unsigned long * F, size_t nF, ptr temp1) const {
         XXX_dft(this, x, F, nF, temp1);
     }

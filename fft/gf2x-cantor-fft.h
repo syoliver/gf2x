@@ -260,6 +260,17 @@ static inline int gf2x_cantor_fft_check(
  * pointer-correct if relevant). This might be a noop if the transforms
  * are free of any pointers, which is always the case with gf2x. */
 
+#if 0 && defined(__GNU_MP__) /* we don't want a gmp dependency... */
+extern void GF2X_EXPORTED gf2x_cantor_fft_fill_random(
+        gf2x_cantor_fft_info_srcptr o,
+        gf2x_cantor_fft_ptr ptr,
+        size_t n,
+        gmp_randstate_t rstate);
+/* fill n consecutive transforms with random data from the provided
+ * random state.
+ */
+#endif
+
 extern void GF2X_EXPORTED gf2x_cantor_fft_add(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_ptr tc,
@@ -365,6 +376,15 @@ struct gf2x_cantor_fft_info {
     inline void prepare(ptr x, size_t n = 1) const { gf2x_cantor_fft_prepare(this, x, n); }
     inline bool check(srcptr x, size_t n, bool printf_diagnostics) const { return gf2x_cantor_fft_check(this, x, n, printf_diagnostics); }
     inline bool check(srcptr x, bool printf_diagnostics) const { return gf2x_cantor_fft_check(this, x, 1, printf_diagnostics); }
+#if 0 && defined(__GNU_MP__) /* we don't want a gmp dependency... */
+    inline void fill_random(ptr x, size_t n, gmp_randstate_t rstate) const {
+        gf2x_cantor_fft_fill_random(x, n, rstate);
+    }
+    inline void fill_random(ptr x, gmp_randstate_t rstate) const {
+        gf2x_cantor_fft_fill_random(x, 1, rstate);
+    }
+#endif
+
     inline void dft(ptr x, const unsigned long * F, size_t nF, ptr temp1) const {
         gf2x_cantor_fft_dft(this, x, F, nF, temp1);
     }

@@ -898,6 +898,54 @@ void gf2x_ternary_fft_dft(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr t
     }
 }
 
+#if 0 && defined(__GNU_MP__) /* we don't want a gmp dependency... */
+/* annoying. */
+static void gf2x_ternary_fft_fill_random_inner(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr x, size_t n, size_t M, gmp_randstate_t rstate)
+{
+    size_t K = o->K;
+    size_t Np = compute_Np(M, K);
+    size_t np = W(Np);
+    for (size_t i = 0; i < K; i++) {
+        /* fill x with 2 * Np random bits */
+        mpz_t dummy;
+        dummy->_mp_d = x;
+        dummy->_mp_alloc = 2 * np;
+        dummy->_mp_size = 2 * np;
+        mpz_urandomb(dummy, rstate, 2 * Np);
+        x += 2 * np;
+    }
+}
+
+static inline void mpn_randomb_bits (mp_limb_t *rp, gmp_randstate_t rstate, mp_bitcnt_t N)
+{
+    mpz_t dummy;
+    dummy->_mp_d = rp;
+    dummy->_mp_alloc = W(N);
+    dummy->_mp_size = W(N);
+    mpz_urandomb(dummy, rstate, N);
+}
+
+void gf2x_ternary_fft_fill_random(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr x, size_t n, size_t M, gmp_randstate_t rstate)
+
+    for(size_t i = 0 ; i < n ; i++) {
+        gf2x_ternary_fft_ptr rp = gf2x_ternary_fft_get(o, x, k);
+        if (o->K == 0) {
+            mpn_randomb_bits(rp, rstate, W(o->bits_a + o->bits_b - 1));
+        } else if (!o->split){
+            gf2x_ternary_fft_fill_random_inner(o, rp, M, rstate);
+        } else {
+            size_t m1 = o->M;
+            size_t m2 = o->M - 1;
+            size_t K = o->K;
+            gf2x_ternary_fft_fill_random_inner(o, rp, m1, rstate);
+            size_t offset = 2 * K * compute_np(m1, K);
+            rp += offset;
+            gf2x_ternary_fft_fill_random_inner(o, rp, m2, rstate);
+        }
+    }
+}
+#endif
+
 static void gf2x_ternary_fft_compose_inner(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr tc, gf2x_ternary_fft_srcptr ta, gf2x_ternary_fft_srcptr tb, size_t M, gf2x_ternary_fft_ptr temp2)
 {
     size_t K = o->K;
