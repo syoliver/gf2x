@@ -136,6 +136,7 @@ typedef unsigned long gf2x_fake_fft_t;
 
 /* The section below is automatically generated */
 /* inline: transform_size alloc free get get_const zero cpy */
+/* inline: export import prepare check */
 
 typedef gf2x_fake_fft_t * gf2x_fake_fft_ptr;
 typedef const gf2x_fake_fft_t * gf2x_fake_fft_srcptr;
@@ -186,6 +187,40 @@ static inline void gf2x_fake_fft_cpy(
         gf2x_fake_fft_srcptr x,
         size_t n);
 /* Copy n consecutive transforms (named "cpy" by analogy to memcpy)/ */
+
+static inline void gf2x_fake_fft_export(
+        gf2x_fake_fft_info_srcptr o,
+        gf2x_fake_fft_ptr ptr,
+        size_t n);
+/* Export (serialize) n consecutive transforms in place. This is a noop
+ * if the transforms are free of any pointers, which is always the case
+ * with gf2x. */
+
+static inline void gf2x_fake_fft_import(
+        gf2x_fake_fft_info_srcptr o,
+        gf2x_fake_fft_ptr ptr,
+        size_t n);
+/* Import (deserialize) n consecutive transforms in place. This is a noop
+ * if the transforms are free of any pointers, which is always the case
+ * with gf2x. */
+
+static inline void gf2x_fake_fft_prepare(
+        gf2x_fake_fft_info_srcptr o,
+        gf2x_fake_fft_ptr ptr,
+        size_t n);
+/* Prepare n consecutive transforms in place so that they're
+ * pointer-correct, but do not set any of the internal data. It is
+ * conceivably simpler than gf2x_fake_fft_zero. This is a noop if the transforms
+ * are free of any pointers, which is always the case with gf2x. */
+
+static inline int gf2x_fake_fft_check(
+        gf2x_fake_fft_info_srcptr o,
+        gf2x_fake_fft_srcptr ptr,
+        size_t n,
+        int printf_diagnostics);
+/* Checks that the n consecutive transforms are valid (in particular,
+ * pointer-correct if relevant). This might be a noop if the transforms
+ * are free of any pointers, which is always the case with gf2x. */
 
 extern void GF2X_EXPORTED gf2x_fake_fft_add(
         gf2x_fake_fft_info_srcptr o,
@@ -290,6 +325,11 @@ struct gf2x_fake_fft_info {
     inline ptr get(ptr x, size_t k) const { return gf2x_fake_fft_get(this, x, k); }
     inline srcptr get(srcptr x, size_t k) const { return gf2x_fake_fft_get_const(this, x, k); }
     inline void zero(ptr x, size_t n = 1) { gf2x_fake_fft_zero(this, x, n); }
+    inline void to_export(ptr x, size_t n = 1) { gf2x_fake_fft_export(this, x, n); }
+    inline void to_import(ptr x, size_t n = 1) { gf2x_fake_fft_import(this, x, n); }
+    inline void prepare(ptr x, size_t n = 1) { gf2x_fake_fft_prepare(this, x, n); }
+    inline bool check(srcptr x, size_t n, bool printf_diagnostics) { return gf2x_fake_fft_check(this, x, n, printf_diagnostics); }
+    inline bool check(srcptr x, bool printf_diagnostics) { return gf2x_fake_fft_check(this, x, 1, printf_diagnostics); }
     inline void dft(ptr x,
             const unsigned long * F,
             size_t nF,
@@ -415,6 +455,24 @@ static inline void gf2x_fake_fft_cpy(gf2x_fake_fft_info_srcptr p, gf2x_fake_fft_
 {
     memcpy(y, x, n * gf2x_fake_fft_transform_size(p) * sizeof(gf2x_fake_fft_t));
 }
+
+static inline void gf2x_fake_fft_export(
+        gf2x_fake_fft_info_srcptr o GF2X_MAYBE_UNUSED,
+        gf2x_fake_fft_ptr ptr GF2X_MAYBE_UNUSED,
+        size_t n GF2X_MAYBE_UNUSED) {}
+static inline void gf2x_fake_fft_import(
+        gf2x_fake_fft_info_srcptr o GF2X_MAYBE_UNUSED,
+        gf2x_fake_fft_ptr ptr GF2X_MAYBE_UNUSED,
+        size_t n GF2X_MAYBE_UNUSED) {}
+static inline void gf2x_fake_fft_prepare(
+        gf2x_fake_fft_info_srcptr o GF2X_MAYBE_UNUSED,
+        gf2x_fake_fft_ptr ptr GF2X_MAYBE_UNUSED,
+        size_t n GF2X_MAYBE_UNUSED) {}
+static inline int gf2x_fake_fft_check(
+        gf2x_fake_fft_info_srcptr o GF2X_MAYBE_UNUSED,
+        gf2x_fake_fft_srcptr ptr GF2X_MAYBE_UNUSED,
+        size_t n GF2X_MAYBE_UNUSED,
+        int printf_diagnostics GF2X_MAYBE_UNUSED) { return 1; }
 
 #ifdef __cplusplus
 }

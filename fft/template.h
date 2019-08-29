@@ -145,6 +145,40 @@ void XXX_cpy(
         size_t n);
 /* Copy n consecutive transforms (named "cpy" by analogy to memcpy)/ */
 
+void XXX_export(
+        XXX_info_srcptr o,
+        XXX_ptr ptr,
+        size_t n);
+/* Export (serialize) n consecutive transforms in place. This is a noop
+ * if the transforms are free of any pointers, which is always the case
+ * with gf2x. */
+
+void XXX_import(
+        XXX_info_srcptr o,
+        XXX_ptr ptr,
+        size_t n);
+/* Import (deserialize) n consecutive transforms in place. This is a noop
+ * if the transforms are free of any pointers, which is always the case
+ * with gf2x. */
+
+void XXX_prepare(
+        XXX_info_srcptr o,
+        XXX_ptr ptr,
+        size_t n);
+/* Prepare n consecutive transforms in place so that they're
+ * pointer-correct, but do not set any of the internal data. It is
+ * conceivably simpler than XXX_zero. This is a noop if the transforms
+ * are free of any pointers, which is always the case with gf2x. */
+
+int XXX_check(
+        XXX_info_srcptr o,
+        XXX_srcptr ptr,
+        size_t n,
+        int printf_diagnostics);
+/* Checks that the n consecutive transforms are valid (in particular,
+ * pointer-correct if relevant). This might be a noop if the transforms
+ * are free of any pointers, which is always the case with gf2x. */
+
 void XXX_add(
         XXX_info_srcptr o,
         XXX_ptr tc,
@@ -248,6 +282,11 @@ struct XXX_info {
     inline ptr get(ptr x, size_t k) const { return XXX_get(this, x, k); }
     inline srcptr get(srcptr x, size_t k) const { return XXX_get_const(this, x, k); }
     inline void zero(ptr x, size_t n = 1) { XXX_zero(this, x, n); }
+    inline void to_export(ptr x, size_t n = 1) { XXX_export(this, x, n); }
+    inline void to_import(ptr x, size_t n = 1) { XXX_import(this, x, n); }
+    inline void prepare(ptr x, size_t n = 1) { XXX_prepare(this, x, n); }
+    inline bool check(srcptr x, size_t n, bool printf_diagnostics) { return XXX_check(this, x, n, printf_diagnostics); }
+    inline bool check(srcptr x, bool printf_diagnostics) { return XXX_check(this, x, 1, printf_diagnostics); }
     inline void dft(ptr x,
             const unsigned long * F,
             size_t nF,
