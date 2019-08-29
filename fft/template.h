@@ -191,7 +191,7 @@ void XXX_dft(
         XXX_ptr tr,
         const unsigned long * a,
         size_t bits_a,
-        XXX_t * temp1);
+        XXX_ptr temp1);
 /* Compute the dft of the polynomial pointed to by a. Attention: the size
  * is given in number of *bits*, not in number of unsigned longs.  temp1
  * must point to storage of size sizes[1], with sizes[] filled as in the
@@ -202,7 +202,7 @@ void XXX_ift(
         unsigned long * c,
         size_t bits_c,
         XXX_ptr tr,
-        XXX_t * temp1);
+        XXX_ptr temp1);
 /* Compute the ift of the transform tr, to polynomial pointed to by c.
  * Attention: the size is given in number of *bits*, not in number of
  * unsigned longs.  temp1 must point to storage of size sizes[1], with
@@ -213,7 +213,7 @@ void XXX_compose(
         XXX_ptr tc,
         XXX_srcptr ta,
         XXX_srcptr tb,
-        XXX_t * temp2);
+        XXX_ptr temp2);
 /* Compose two DFTs.  temp2 must point to storage of size sizes[2], with
  * sizes[] filled as in the XXX_info_get_alloc_sizes call. */
 
@@ -223,7 +223,7 @@ void XXX_addcompose_n(
         XXX_srcptr * ta,
         XXX_srcptr * tb,
         size_t n,
-        XXX_t * temp2);
+        XXX_ptr temp2);
 /* Compose 2n DFTs, and add the result to tc.  temp2 must point to
  * storage of size sizes[2], with sizes[] filled as in the
  * XXX_info_get_alloc_sizes call. */
@@ -233,7 +233,7 @@ void XXX_addcompose(
         XXX_ptr tc,
         XXX_srcptr ta,
         XXX_srcptr tb,
-        XXX_t * temp2);
+        XXX_ptr temp2);
 /* Compose 2 DFTs, and add the result to tc.  temp2 must point to storage
  * of size sizes[2], with sizes[] filled as in the
  * XXX_info_get_alloc_sizes call. */
@@ -287,18 +287,18 @@ struct XXX_info {
     inline void prepare(ptr x, size_t n = 1) const { XXX_prepare(this, x, n); }
     inline bool check(srcptr x, size_t n, bool printf_diagnostics) const { return XXX_check(this, x, n, printf_diagnostics); }
     inline bool check(srcptr x, bool printf_diagnostics) const { return XXX_check(this, x, 1, printf_diagnostics); }
-    inline void dft(ptr x, const unsigned long * F, size_t nF, XXX_t * temp1) const {
+    inline void dft(ptr x, const unsigned long * F, size_t nF, ptr temp1) const {
         XXX_dft(this, x, F, nF, temp1);
     }
-    inline void compose(ptr y, srcptr x1, srcptr x2, XXX_t * temp2) const
+    inline void compose(ptr y, srcptr x1, srcptr x2, ptr temp2) const
     {
         XXX_compose(this, y, x1, x2, temp2);
     }
-    inline void addcompose(ptr y, srcptr x1, srcptr x2, XXX_t * temp2) const
+    inline void addcompose(ptr y, srcptr x1, srcptr x2, ptr temp2) const
     {
         XXX_addcompose(this, y, x1, x2, temp2);
     }
-    inline void addcompose_n(ptr y, srcptr * x1, srcptr * x2, size_t n, XXX_t * temp2) const
+    inline void addcompose_n(ptr y, srcptr * x1, srcptr * x2, size_t n, ptr temp2) const
     {
         XXX_addcompose_n(this, y, x1, x2, n, temp2);
     }
@@ -310,7 +310,7 @@ struct XXX_info {
     {
         XXX_cpy(this, y, x, n);
     }
-    inline void ift(unsigned long * H, size_t Hl, ptr h, XXX_t * temp1) const
+    inline void ift(unsigned long * H, size_t Hl, ptr h, ptr temp1) const
     {
         XXX_ift(this, H, Hl, h, temp1);
     }
