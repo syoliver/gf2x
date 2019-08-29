@@ -83,6 +83,8 @@ void XXX_info_get_alloc_sizes(
  *                XXX_dft or XXX_ift call.
  *     sizes[2] : number of bytes of temp space that must be passed to each
  *                XXX_compose, XXX_addcompose, or XXX_addcompose_n call.
+ *                Note that the addcompose variants need two temp
+ *                buffers, of sizes sizes[2] and sizes[1], respectively.
  */
 
 #ifdef __cplusplus
@@ -234,20 +236,22 @@ void XXX_addcompose_n(
         XXX_srcptr * ta,
         XXX_srcptr * tb,
         size_t n,
-        XXX_ptr temp2);
-/* Compose 2n DFTs, and add the result to tc.  temp2 must point to
- * storage of size sizes[2], with sizes[] filled as in the
- * XXX_info_get_alloc_sizes call. */
+        XXX_ptr temp2,
+        XXX_ptr temp1);
+/* Compose 2n DFTs, and add the result to tc. temp1 and temp2 must point to
+ * storage of size sizes[1] and sizes[2], respectively, with sizes[]
+ * filled as in the XXX_info_get_alloc_sizes call. */
 
 void XXX_addcompose(
         XXX_info_srcptr o,
         XXX_ptr tc,
         XXX_srcptr ta,
         XXX_srcptr tb,
-        XXX_ptr temp2);
-/* Compose 2 DFTs, and add the result to tc.  temp2 must point to storage
- * of size sizes[2], with sizes[] filled as in the
- * XXX_info_get_alloc_sizes call. */
+        XXX_ptr temp2,
+        XXX_ptr temp1);
+/* Compose 2 DFTs, and add the result to tc. temp1 and temp2 must point to
+ * storage of size sizes[1] and sizes[2], respectively, with sizes[]
+ * filled as in the XXX_info_get_alloc_sizes call. */
 
 #ifdef __cplusplus
 }
@@ -314,13 +318,13 @@ struct XXX_info {
     {
         XXX_compose(this, y, x1, x2, temp2);
     }
-    inline void addcompose(ptr y, srcptr x1, srcptr x2, ptr temp2) const
+    inline void addcompose(ptr y, srcptr x1, srcptr x2, ptr temp2, ptr temp1) const
     {
-        XXX_addcompose(this, y, x1, x2, temp2);
+        XXX_addcompose(this, y, x1, x2, temp2, temp1);
     }
-    inline void addcompose_n(ptr y, srcptr * x1, srcptr * x2, size_t n, ptr temp2) const
+    inline void addcompose_n(ptr y, srcptr * x1, srcptr * x2, size_t n, ptr temp2, ptr temp1) const
     {
-        XXX_addcompose_n(this, y, x1, x2, n, temp2);
+        XXX_addcompose_n(this, y, x1, x2, n, temp2, temp1);
     }
     inline void add(ptr y, srcptr x1, srcptr x2) const
     {

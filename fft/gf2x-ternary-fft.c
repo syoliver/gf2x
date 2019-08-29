@@ -991,7 +991,7 @@ void gf2x_ternary_fft_add(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr t
     }
 }
 
-void gf2x_ternary_fft_addcompose_n(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr tc, gf2x_ternary_fft_srcptr * ta, gf2x_ternary_fft_srcptr * tb, size_t n, gf2x_ternary_fft_ptr temp2)
+void gf2x_ternary_fft_addcompose_n(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr tc, gf2x_ternary_fft_srcptr * ta, gf2x_ternary_fft_srcptr * tb, size_t n, gf2x_ternary_fft_ptr temp2, gf2x_ternary_fft_ptr temp1 GF2X_MAYBE_UNUSED)
 {
     gf2x_ternary_fft_ptr t = gf2x_ternary_fft_alloc(o, 1);
     for(size_t k = 0 ; k < n ; k++) {
@@ -1001,9 +1001,9 @@ void gf2x_ternary_fft_addcompose_n(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_
     gf2x_ternary_fft_free(o, t, 1);
 }
 
-void gf2x_ternary_fft_addcompose(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr tc, gf2x_ternary_fft_srcptr ta, gf2x_ternary_fft_srcptr tb, gf2x_ternary_fft_ptr temp2)
+void gf2x_ternary_fft_addcompose(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr tc, gf2x_ternary_fft_srcptr ta, gf2x_ternary_fft_srcptr tb, gf2x_ternary_fft_ptr temp2, gf2x_ternary_fft_ptr temp1 GF2X_MAYBE_UNUSED)
 {
-    gf2x_ternary_fft_addcompose_n(o, tc, &ta, &tb, 1, temp2);
+    gf2x_ternary_fft_addcompose_n(o, tc, &ta, &tb, 1, temp2, temp1);
 }
 
 void gf2x_ternary_fft_ift_inner(gf2x_ternary_fft_info_srcptr o, unsigned long * a, size_t bits_a, gf2x_ternary_fft_ptr tr, size_t M, gf2x_ternary_fft_ptr temp1)

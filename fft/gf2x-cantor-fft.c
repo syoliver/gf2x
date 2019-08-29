@@ -1390,7 +1390,7 @@ void gf2x_cantor_fft_compose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr
     }
 }
 
-void gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr * x1, gf2x_cantor_fft_srcptr * x2, size_t n, gf2x_cantor_fft_ptr temp2 GF2X_MAYBE_UNUSED)
+void gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr * x1, gf2x_cantor_fft_srcptr * x2, size_t n, gf2x_cantor_fft_ptr temp2 GF2X_MAYBE_UNUSED, gf2x_cantor_fft_ptr temp1 GF2X_MAYBE_UNUSED)
 {
     Kelt er;
 #if 0
@@ -1463,9 +1463,9 @@ void gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_ff
 #endif
 }
 
-void gf2x_cantor_fft_addcompose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2, gf2x_cantor_fft_ptr temp2 GF2X_MAYBE_UNUSED)
+void gf2x_cantor_fft_addcompose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2, gf2x_cantor_fft_ptr temp2, gf2x_cantor_fft_ptr temp1)
 {
-    gf2x_cantor_fft_addcompose_n(p, y, &x1, &x2, 1, temp2);
+    gf2x_cantor_fft_addcompose_n(p, y, &x1, &x2, 1, temp2, temp1);
 }
 
 void gf2x_cantor_fft_add(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2)

@@ -109,6 +109,8 @@ extern void GF2X_EXPORTED gf2x_ternary_fft_info_get_alloc_sizes(
  *                gf2x_ternary_fft_dft or gf2x_ternary_fft_ift call.
  *     sizes[2] : number of bytes of temp space that must be passed to each
  *                gf2x_ternary_fft_compose, gf2x_ternary_fft_addcompose, or gf2x_ternary_fft_addcompose_n call.
+ *                Note that the addcompose variants need two temp
+ *                buffers, of sizes sizes[2] and sizes[1], respectively.
  */
 
 #ifdef __cplusplus
@@ -260,20 +262,22 @@ extern void GF2X_EXPORTED gf2x_ternary_fft_addcompose_n(
         gf2x_ternary_fft_srcptr * ta,
         gf2x_ternary_fft_srcptr * tb,
         size_t n,
-        gf2x_ternary_fft_ptr temp2);
-/* Compose 2n DFTs, and add the result to tc.  temp2 must point to
- * storage of size sizes[2], with sizes[] filled as in the
- * gf2x_ternary_fft_info_get_alloc_sizes call. */
+        gf2x_ternary_fft_ptr temp2,
+        gf2x_ternary_fft_ptr temp1);
+/* Compose 2n DFTs, and add the result to tc. temp1 and temp2 must point to
+ * storage of size sizes[1] and sizes[2], respectively, with sizes[]
+ * filled as in the gf2x_ternary_fft_info_get_alloc_sizes call. */
 
 extern void GF2X_EXPORTED gf2x_ternary_fft_addcompose(
         gf2x_ternary_fft_info_srcptr o,
         gf2x_ternary_fft_ptr tc,
         gf2x_ternary_fft_srcptr ta,
         gf2x_ternary_fft_srcptr tb,
-        gf2x_ternary_fft_ptr temp2);
-/* Compose 2 DFTs, and add the result to tc.  temp2 must point to storage
- * of size sizes[2], with sizes[] filled as in the
- * gf2x_ternary_fft_info_get_alloc_sizes call. */
+        gf2x_ternary_fft_ptr temp2,
+        gf2x_ternary_fft_ptr temp1);
+/* Compose 2 DFTs, and add the result to tc. temp1 and temp2 must point to
+ * storage of size sizes[1] and sizes[2], respectively, with sizes[]
+ * filled as in the gf2x_ternary_fft_info_get_alloc_sizes call. */
 
 #ifdef __cplusplus
 }
@@ -345,13 +349,13 @@ struct gf2x_ternary_fft_info {
     {
         gf2x_ternary_fft_compose(this, y, x1, x2, temp2);
     }
-    inline void addcompose(ptr y, srcptr x1, srcptr x2, ptr temp2) const
+    inline void addcompose(ptr y, srcptr x1, srcptr x2, ptr temp2, ptr temp1) const
     {
-        gf2x_ternary_fft_addcompose(this, y, x1, x2, temp2);
+        gf2x_ternary_fft_addcompose(this, y, x1, x2, temp2, temp1);
     }
-    inline void addcompose_n(ptr y, srcptr * x1, srcptr * x2, size_t n, ptr temp2) const
+    inline void addcompose_n(ptr y, srcptr * x1, srcptr * x2, size_t n, ptr temp2, ptr temp1) const
     {
-        gf2x_ternary_fft_addcompose_n(this, y, x1, x2, n, temp2);
+        gf2x_ternary_fft_addcompose_n(this, y, x1, x2, n, temp2, temp1);
     }
     inline void add(ptr y, srcptr x1, srcptr x2) const
     {
