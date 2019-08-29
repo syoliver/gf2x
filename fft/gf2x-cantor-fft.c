@@ -1322,7 +1322,7 @@ void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
 #endif
 
 /* nF is a number of coefficients == number of bits ; a.k.a. degree + 1 */
-void gf2x_cantor_fft_init(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, ...)
+void gf2x_cantor_fft_info_init(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, ...)
 {
     unsigned int k;
     size_t Hl;
@@ -1346,13 +1346,17 @@ void gf2x_cantor_fft_init(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, ...)
 
 }
 
-void gf2x_cantor_fft_clear(gf2x_cantor_fft_info_t p)
+extern void GF2X_EXPORTED gf2x_cantor_fft_info_get_alloc_sizes(
+        gf2x_cantor_fft_info_srcptr p,
+        size_t sizes[3])
 {
-    memset(p, 0, sizeof(gf2x_cantor_fft_info_t));
+    sizes[0] = gf2x_cantor_fft_transform_size(p) * sizeof(gf2x_cantor_fft_t);
+    sizes[1] = 0;
+    sizes[2] = 0;
 }
 
 /* nF is a number of coefficients */
-void gf2x_cantor_fft_dft(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x, const unsigned long * F, size_t nF)
+void gf2x_cantor_fft_dft(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x, const unsigned long * F, size_t nF, gf2x_cantor_fft_t * temp1 GF2X_MAYBE_UNUSED)
 {
     size_t Fl = (nF + GF2X_WORDSIZE - 1) / GF2X_WORDSIZE;
     if (nF % GF2X_WORDSIZE) {
@@ -1379,14 +1383,14 @@ void gf2x_cantor_fft_dft(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x, 
 }
 
 
-void gf2x_cantor_fft_compose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2)
+void gf2x_cantor_fft_compose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2, gf2x_cantor_fft_t * temp2 GF2X_MAYBE_UNUSED)
 {
     for (size_t j = 0; j < transform_datasize(p) ; j++) {
         Kmul(y[j], x1[j], x2[j]);
     }
 }
 
-void gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr * x1, gf2x_cantor_fft_srcptr * x2, size_t n)
+void gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr * x1, gf2x_cantor_fft_srcptr * x2, size_t n, gf2x_cantor_fft_t * temp2 GF2X_MAYBE_UNUSED)
 {
     Kelt er;
 #if 0
@@ -1459,9 +1463,9 @@ void gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_ff
 #endif
 }
 
-void gf2x_cantor_fft_addcompose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2)
+void gf2x_cantor_fft_addcompose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2, gf2x_cantor_fft_t * temp2 GF2X_MAYBE_UNUSED)
 {
-    gf2x_cantor_fft_addcompose_n(p, y, &x1, &x2, 1);
+    gf2x_cantor_fft_addcompose_n(p, y, &x1, &x2, 1, temp2);
 }
 
 void gf2x_cantor_fft_add(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2)
@@ -1471,12 +1475,12 @@ void gf2x_cantor_fft_add(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, 
     }
 }
 
-void gf2x_cantor_fft_cpy(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x)
+void gf2x_cantor_fft_cpy(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x, size_t n)
 {
-    memcpy(y, x, transform_datasize(p)*sizeof(Kelt));
+    memcpy(y, x, n * transform_datasize(p) * sizeof(Kelt));
 }
 
-size_t gf2x_cantor_fft_size(const gf2x_cantor_fft_info_t p)
+size_t gf2x_cantor_fft_transform_size(const gf2x_cantor_fft_info_t p)
 {
     // the _size() is a number of Kelt of the result.
     // n normally, except when not truncating...
@@ -1489,7 +1493,7 @@ void gf2x_cantor_fft_ift(
         const gf2x_cantor_fft_info_t p,
         unsigned long * H,
         size_t nH,
-        gf2x_cantor_fft_ptr h)
+        gf2x_cantor_fft_ptr h, gf2x_cantor_fft_t * temp1 GF2X_MAYBE_UNUSED)
 {
     size_t Hl = (nH + GF2X_WORDSIZE - 1) / GF2X_WORDSIZE;
 
@@ -1532,11 +1536,11 @@ void gf2x_cantor_fft_zero(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x,
 {
     memset(x, 0, ((n << p->k) + n) * sizeof(Kelt));
 }
-void gf2x_cantor_fft_init_similar(gf2x_cantor_fft_info_ptr o, size_t bits_a, size_t bits_b, gf2x_cantor_fft_info_srcptr other GF2X_MAYBE_UNUSED)
+void gf2x_cantor_fft_info_init_similar(gf2x_cantor_fft_info_ptr o, gf2x_cantor_fft_info_srcptr other GF2X_MAYBE_UNUSED, size_t bits_a, size_t bits_b)
 {
-    gf2x_cantor_fft_init(o, bits_a, bits_b);
+    gf2x_cantor_fft_info_init(o, bits_a, bits_b);
 }
-int gf2x_cantor_fft_compatible(gf2x_cantor_fft_info_srcptr o1, gf2x_cantor_fft_info_srcptr o2)
+int gf2x_cantor_fft_info_compatible(gf2x_cantor_fft_info_srcptr o1, gf2x_cantor_fft_info_srcptr o2)
 {
     return o1->k == o2->k;
 }

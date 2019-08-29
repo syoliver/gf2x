@@ -43,7 +43,7 @@
 #define BITS_TO_WORDS(B,W)      iceildiv((B),(W))
 
 /* nF, nG : number of coefficients */
-void gf2x_fake_fft_init(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, ...)
+void gf2x_fake_fft_info_init(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, ...)
 {
     p->n1 = nF;
     p->n2 = nG;
@@ -54,8 +54,27 @@ void gf2x_fake_fft_init(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, ...)
     p->size = 2 * BITS_TO_WORDS(nc, ULONG_BITS);
 }
 
+void gf2x_fake_fft_info_init_similar(gf2x_fake_fft_info_ptr o, gf2x_fake_fft_info_srcptr other GF2X_MAYBE_UNUSED, size_t bits_a, size_t bits_b)
+{
+    gf2x_fake_fft_info_init(o, bits_a, bits_b);
+}
+
+int gf2x_fake_fft_compatible(gf2x_fake_fft_info_srcptr o1 GF2X_MAYBE_UNUSED, gf2x_fake_fft_info_srcptr o2 GF2X_MAYBE_UNUSED)
+{
+    return 1;
+}
+
+void gf2x_fake_fft_info_get_alloc_sizes(
+        gf2x_fake_fft_info_srcptr o,
+        size_t sizes[3])
+{
+    sizes[0] = o->size * sizeof(gf2x_fake_fft_t);
+    sizes[1] = 0;
+    sizes[2] = 0;
+}
+
 /* n is a number of coefficients ! */
-void gf2x_fake_fft_dft(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, const unsigned long * src, size_t n) {
+void gf2x_fake_fft_dft(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, const unsigned long * src, size_t n, gf2x_fake_fft_t * temp1 GF2X_MAYBE_UNUSED) {
     ASSERT(n <= p->n1 || n <= p->n2);
     size_t s = BITS_TO_WORDS(n, ULONG_BITS);
     memcpy(dst, src, s * sizeof(unsigned long));
@@ -74,17 +93,17 @@ void gf2x_fake_fft_dft(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_
  * okay, as long as it's understood as a means for truncating the data. So we
  * don't do checking for zero high bits.
  */
-void gf2x_fake_fft_ift(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, unsigned long * dst, size_t n, gf2x_fake_fft_srcptr src) {
+void gf2x_fake_fft_ift(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, unsigned long * dst, size_t n, gf2x_fake_fft_ptr src, gf2x_fake_fft_t * temp1 GF2X_MAYBE_UNUSED) {
     ASSERT(n <= p->n3);
     size_t t = BITS_TO_WORDS(n, ULONG_BITS);
     memcpy(dst, src, t * sizeof(unsigned long));
 }
-void gf2x_fake_fft_compose(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s1, gf2x_fake_fft_srcptr s2) {
+void gf2x_fake_fft_compose(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s1, gf2x_fake_fft_srcptr s2, gf2x_fake_fft_t * temp2 GF2X_MAYBE_UNUSED) {
     size_t n1 = BITS_TO_WORDS(p->n1, ULONG_BITS);
     size_t n2 = BITS_TO_WORDS(p->n2, ULONG_BITS);
     gf2x_mul(dst, s1, n1, s2, n2);
 }
-void gf2x_fake_fft_addcompose_n(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr * s1, gf2x_fake_fft_srcptr * s2, size_t n) {
+void gf2x_fake_fft_addcompose_n(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr * s1, gf2x_fake_fft_srcptr * s2, size_t n, gf2x_fake_fft_t * temp2 GF2X_MAYBE_UNUSED) {
     size_t n1 = BITS_TO_WORDS(p->n1, ULONG_BITS);
     size_t n2 = BITS_TO_WORDS(p->n2, ULONG_BITS);
     unsigned long * h = malloc(p->size * sizeof(unsigned long));
@@ -98,32 +117,14 @@ void gf2x_fake_fft_addcompose_n(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, g
     }
     free(h);
 }
-void gf2x_fake_fft_addcompose(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s1, gf2x_fake_fft_srcptr s2) {
-    gf2x_fake_fft_addcompose_n(p, dst, &s1, &s2, 1);
+void gf2x_fake_fft_addcompose(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s1, gf2x_fake_fft_srcptr s2, gf2x_fake_fft_t * temp2 GF2X_MAYBE_UNUSED) {
+    gf2x_fake_fft_addcompose_n(p, dst, &s1, &s2, 1, temp2);
 }
 void gf2x_fake_fft_add(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s1, gf2x_fake_fft_srcptr s2) {
     size_t i;
     for(i = 0 ; i < p->size ; i++) {
         dst[i] = s1[i] ^ s2[i];
     }
-}
-
-void gf2x_fake_fft_cpy(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s) {
-    memcpy(dst, s, (p->size)*sizeof(unsigned long));
-}
-
-size_t gf2x_fake_fft_size(gf2x_fake_fft_info_srcptr p) {
-    return p->size;
-}
-
-void gf2x_fake_fft_init_similar(gf2x_fake_fft_info_ptr o, size_t bits_a, size_t bits_b, gf2x_fake_fft_info_srcptr other GF2X_MAYBE_UNUSED)
-{
-    gf2x_fake_fft_init(o, bits_a, bits_b);
-}
-
-int gf2x_fake_fft_compatible(gf2x_fake_fft_info_srcptr o1 GF2X_MAYBE_UNUSED, gf2x_fake_fft_info_srcptr o2 GF2X_MAYBE_UNUSED)
-{
-    return 1;
 }
 
 /* vim: set sw=4 sta et: */

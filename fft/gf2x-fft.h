@@ -38,11 +38,4 @@
 #include "gf2x-cantor-fft.h"
 #include "gf2x-ternary-fft.h"
 
-#ifdef __cplusplus
-#include "gf2x-fft-adapter.hpp"
-DEFINE_FFT_ADAPTER(gf2x_fake_fft)
-DEFINE_FFT_ADAPTER(gf2x_cantor_fft)
-DEFINE_FFT_ADAPTER(gf2x_ternary_fft)
-#endif
-
 #endif	/* GF2X_FFT_H_ */

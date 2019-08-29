@@ -171,60 +171,77 @@ int docheck(size_t nf, size_t ng, int nrep)
 #define ALLOC1(E,x) E ## _t * E ## _ ## x = E ## _alloc(E, 1)
 
 #define SETUP(E, nf, ng)               				\
-    E ## _info_t E;						\
-    E ## _init(E, nf, ng);					\
+    E ## _info_t E, E ## _copy;					\
+    E ## _info_init(E, nf, ng);					\
+    E ## _info_copy(E ## _copy, E);                             \
+    assert(E ## _info_compatible(E, E ## _copy));         \
+    size_t E ## _fft_sizes[3];					\
+    E ## _info_get_alloc_sizes(E, E ## _fft_sizes);		\
+    E ## _t * E ## _temp1 = malloc(E ## _fft_sizes[1]);		\
+    E ## _t * E ## _temp2 = malloc(E ## _fft_sizes[2]);		\
     ALLOC1(E, tf1); ALLOC1(E, tg1);				\
     ALLOC1(E, tf2); ALLOC1(E, tg2);				\
-    E ## _ptr E ## _tfs[2] = { E ## _tf1, E ## _tf2, };           \
-    E ## _ptr E ## _tgs[2] = { E ## _tg1, E ## _tg2, };           \
+    E ## _ptr E ## _tfs[2] = { E ## _tf1, E ## _tf2, };         \
+    E ## _ptr E ## _tgs[2] = { E ## _tg1, E ## _tg2, };         \
     ALLOC1(E, th);                                              \
     ALLOC1(E, thx);
 
 #define SETUP3(E, nf, ng, K)           				\
-    E ## _info_t E;						\
-    E ## _init(E, nf, ng, K);					\
+    E ## _info_t E, E ## _copy;					\
+    E ## _info_init(E, nf, ng, K);				\
+    E ## _info_copy(E ## _copy, E);                             \
+    assert(E ## _info_compatible(E, E ## _copy));         \
+    size_t E ## _fft_sizes[3];					\
+    E ## _info_get_alloc_sizes(E, E ## _fft_sizes);		\
+    E ## _t * E ## _temp1 = malloc(E ## _fft_sizes[1]);		\
+    E ## _t * E ## _temp2 = malloc(E ## _fft_sizes[2]);		\
     ALLOC1(E, tf1); ALLOC1(E, tg1);				\
     ALLOC1(E, tf2); ALLOC1(E, tg2);				\
-    E ## _ptr E ## _tfs[2] = { E ## _tf1, E ## _tf2, };           \
-    E ## _ptr E ## _tgs[2] = { E ## _tg1, E ## _tg2, };           \
+    E ## _ptr E ## _tfs[2] = { E ## _tf1, E ## _tf2, };         \
+    E ## _ptr E ## _tgs[2] = { E ## _tg1, E ## _tg2, };         \
     ALLOC1(E, th);                                              \
     ALLOC1(E, thx);
 
 #define DO_zero_th(E) E ## _zero(E, E ## _th, 1)
 #define DO_zero_thx(E) E ## _zero(E, E ## _thx, 1)
-#define DO_dft_f1(E) E ## _dft(E, E ## _tf1, f1, nf1)
-#define DO_dft_g1(E) E ## _dft(E, E ## _tg1, g1, ng1)
-#define DO_dft_f2(E) E ## _dft(E, E ## _tf2, f2, nf2)
-#define DO_dft_g2(E) E ## _dft(E, E ## _tg2, g2, ng2)
-#define DO_comp1(E)  E ## _addcompose(E, E ## _th, E ## _tf1, E ## _tg1)
-#define DO_comp2(E)  E ## _addcompose(E, E ## _th, E ## _tf2, E ## _tg2)
-#define DO_compx(E)  E ## _addcompose_n(E, E ## _thx, (E ## _srcptr *) E ## _tfs, (E ## _srcptr *) E ## _tgs, 2)
-#define DO_ift_h(E)  E ## _ift(E, E ## _h, nh, E ## _th)
-#define DO_ift_hx(E) E ## _ift(E, E ## _hx, nh, E ## _thx)
+#define DO_dft_f1(E) E ## _dft(E, E ## _tf1, f1, nf1, E ## _temp1)
+#define DO_dft_g1(E) E ## _dft(E, E ## _tg1, g1, ng1, E ## _temp1)
+#define DO_dft_f2(E) E ## _dft(E ## _copy, E ## _tf2, f2, nf2, E ## _temp1)
+#define DO_dft_g2(E) E ## _dft(E ## _copy, E ## _tg2, g2, ng2, E ## _temp1)
+#define DO_comp1(E)  E ## _addcompose(E, E ## _th, E ## _tf1, E ## _tg1, E ## _temp2)
+#define DO_comp2(E)  E ## _addcompose(E, E ## _th, E ## _tf2, E ## _tg2, E ## _temp2)
+#define DO_compx(E)  E ## _addcompose_n(E, E ## _thx, (E ## _srcptr *) E ## _tfs, (E ## _srcptr *) E ## _tgs, 2, E ## _temp2)
+#define DO_ift_h(E)  E ## _ift(E, E ## _h, nh, E ## _th, E ## _temp1)
+#define DO_ift_hx(E) E ## _ift(E, E ## _hx, nh, E ## _thx, E ## _temp1)
 
 #define EXTRA_DISPLAY(E)  do {       					\
     display(#E "_tf1", (unsigned long *) E ## _tf1,                     \
-            E ## _size(E) * sizeof(E ## _t) / sizeof(unsigned long));   \
+            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));   \
     display(#E "_tg1", (unsigned long *) E ## _tg1,                     \
-            E ## _size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
+            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
     display(#E "_tf2", (unsigned long *) E ## _tf2,                     \
-            E ## _size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
+            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
     display(#E "_tg2", (unsigned long *) E ## _tg2,                     \
-            E ## _size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
+            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
     display(#E "_th",  (unsigned long *) E ## _th,                      \
-            E ## _size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
+            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
     display(#E "_thx",  (unsigned long *) E ## _thx,                    \
-            E ## _size(E) * sizeof(E ## _t) / sizeof(unsigned long));   \
+            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));   \
 } while (0)
 
-#define FREE1(E, x) E ## _free(E, E ## _ ## x, 1)
+#define FREE1(E, x) do {						\
+        E ## _free(E, E ## _ ## x, 1);					\
+    } while (0)
 
-#define LEAVE(E)        						\
+#define LEAVE(E) do {       						\
     FREE1(E, tf1); FREE1(E, tg1);			        	\
     FREE1(E, tf2); FREE1(E, tg2);		        		\
+    free(E ## _temp1);	    		                        	\
+    free(E ## _temp2);		    				        \
     FREE1(E, th);							\
     FREE1(E, thx);							\
-    E ## _clear(E);
+    E ## _info_clear(E);                                                \
+} while (0)
 
     unsigned int seed = random();
     srandom(seed);
@@ -363,9 +380,9 @@ int docheck(size_t nf, size_t ng, int nrep)
             abort();
         }
     }
-    LEAVE(gf2x_fake_fft)
-    LEAVE(gf2x_cantor_fft)
-    LEAVE(gf2x_ternary_fft)
+    LEAVE(gf2x_fake_fft);
+    LEAVE(gf2x_cantor_fft);
+    LEAVE(gf2x_ternary_fft);
 
     free(gf2x_fake_fft_h);
     free(gf2x_cantor_fft_h);
