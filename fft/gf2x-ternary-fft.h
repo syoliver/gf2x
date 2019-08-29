@@ -304,71 +304,44 @@ struct gf2x_ternary_fft_info {
     inline int order() const {
         return gf2x_ternary_fft_info_order(this);
     }
-    inline void get_alloc_sizes(size_t sizes[3]) {
+    inline void get_alloc_sizes(size_t sizes[3]) const {
         gf2x_ternary_fft_info_get_alloc_sizes(this, sizes);
     }
     inline size_t transform_size() const { return gf2x_ternary_fft_transform_size(this); }
-    inline ptr alloc(size_t n = 1) { return gf2x_ternary_fft_alloc(this, n); }
-    inline void free(ptr x, size_t n = 1) { gf2x_ternary_fft_free(this, x, n); }
+    inline ptr alloc(size_t n = 1) const { return gf2x_ternary_fft_alloc(this, n); }
+    inline void free(ptr x, size_t n = 1) const { gf2x_ternary_fft_free(this, x, n); }
     inline ptr get(ptr x, size_t k) const { return gf2x_ternary_fft_get(this, x, k); }
     inline srcptr get(srcptr x, size_t k) const { return gf2x_ternary_fft_get_const(this, x, k); }
-    inline void zero(ptr x, size_t n = 1) { gf2x_ternary_fft_zero(this, x, n); }
-    inline void to_export(ptr x, size_t n = 1) { gf2x_ternary_fft_export(this, x, n); }
-    inline void to_import(ptr x, size_t n = 1) { gf2x_ternary_fft_import(this, x, n); }
-    inline void prepare(ptr x, size_t n = 1) { gf2x_ternary_fft_prepare(this, x, n); }
-    inline bool check(srcptr x, size_t n, bool printf_diagnostics) { return gf2x_ternary_fft_check(this, x, n, printf_diagnostics); }
-    inline bool check(srcptr x, bool printf_diagnostics) { return gf2x_ternary_fft_check(this, x, 1, printf_diagnostics); }
-    inline void dft(ptr x,
-            const unsigned long * F,
-            size_t nF,
-            gf2x_ternary_fft_t * temp1)
-    {
+    inline void zero(ptr x, size_t n = 1) const { gf2x_ternary_fft_zero(this, x, n); }
+    inline void to_export(ptr x, size_t n = 1) const { gf2x_ternary_fft_export(this, x, n); }
+    inline void to_import(ptr x, size_t n = 1) const { gf2x_ternary_fft_import(this, x, n); }
+    inline void prepare(ptr x, size_t n = 1) const { gf2x_ternary_fft_prepare(this, x, n); }
+    inline bool check(srcptr x, size_t n, bool printf_diagnostics) const { return gf2x_ternary_fft_check(this, x, n, printf_diagnostics); }
+    inline bool check(srcptr x, bool printf_diagnostics) const { return gf2x_ternary_fft_check(this, x, 1, printf_diagnostics); }
+    inline void dft(ptr x, const unsigned long * F, size_t nF, gf2x_ternary_fft_t * temp1) const {
         gf2x_ternary_fft_dft(this, x, F, nF, temp1);
     }
-    inline void compose(
-            ptr y,
-            srcptr x1,
-            srcptr x2,
-            gf2x_ternary_fft_t * temp2)
+    inline void compose(ptr y, srcptr x1, srcptr x2, gf2x_ternary_fft_t * temp2) const
     {
         gf2x_ternary_fft_compose(this, y, x1, x2, temp2);
     }
-    inline void addcompose(
-            ptr y,
-            srcptr x1,
-            srcptr x2,
-            gf2x_ternary_fft_t * temp2)
+    inline void addcompose(ptr y, srcptr x1, srcptr x2, gf2x_ternary_fft_t * temp2) const
     {
         gf2x_ternary_fft_addcompose(this, y, x1, x2, temp2);
     }
-    inline void addcompose_n(
-            ptr y,
-            srcptr * x1,
-            srcptr * x2,
-            size_t n,
-            gf2x_ternary_fft_t * temp2)
+    inline void addcompose_n(ptr y, srcptr * x1, srcptr * x2, size_t n, gf2x_ternary_fft_t * temp2) const
     {
         gf2x_ternary_fft_addcompose_n(this, y, x1, x2, n, temp2);
     }
-    inline void add(
-            ptr y,
-            srcptr x1,
-            srcptr x2)
+    inline void add(ptr y, srcptr x1, srcptr x2) const
     {
         gf2x_ternary_fft_add(this, y, x1, x2);
     }
-    inline void cpy(
-            ptr y,
-            srcptr x,
-            size_t n)
+    inline void cpy(ptr y, srcptr x, size_t n) const
     {
         gf2x_ternary_fft_cpy(this, y, x, n);
     }
-    inline void ift(
-            unsigned long * H,
-            size_t Hl,
-            ptr h,
-            gf2x_ternary_fft_t * temp1)
+    inline void ift(unsigned long * H, size_t Hl, ptr h, gf2x_ternary_fft_t * temp1) const
     {
         gf2x_ternary_fft_ift(this, H, Hl, h, temp1);
     }
