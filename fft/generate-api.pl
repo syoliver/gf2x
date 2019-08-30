@@ -71,6 +71,7 @@ while (defined($_=<F>)) {
             # print "Performing pod modifiations for ${impl}_info\n";
             $ttext =~ s/^(\s*~XXX_info\(\))[^\}]*\}/$1 = default;/sm;
             $ttext =~ s/^(\s*XXX_info)\((XXX_info const &) o\)[^\}]*\}/$1($2) = default;/sm;
+            $ttext =~ s/^(\s*XXX_info& operator=)\((XXX_info const &) o\)[^\}]*\}/$1($2) = default;/sm;
         }
         $ttext =~ s/XXX/$impl/g;
 

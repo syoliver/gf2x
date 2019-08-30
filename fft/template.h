@@ -278,6 +278,11 @@ struct XXX_info {
     XXX_info(XXX_info const & o) {
         XXX_info_copy(this, &o);
     }
+    XXX_info& operator=(XXX_info const & o) {
+        XXX_info_clear(this);
+        XXX_info_copy(this, &o);
+        return *this;
+    }
     inline XXX_info(XXX_info const & other, size_t nF, size_t nG)
     {
         XXX_info_init_similar(this, &other, nF, nG);

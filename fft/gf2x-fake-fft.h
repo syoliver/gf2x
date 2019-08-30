@@ -321,6 +321,7 @@ struct gf2x_fake_fft_info {
     }
     ~gf2x_fake_fft_info() = default;
     gf2x_fake_fft_info(gf2x_fake_fft_info const &) = default;
+    gf2x_fake_fft_info& operator=(gf2x_fake_fft_info const &) = default;
     inline gf2x_fake_fft_info(gf2x_fake_fft_info const & other, size_t nF, size_t nG)
     {
         gf2x_fake_fft_info_init_similar(this, &other, nF, nG);

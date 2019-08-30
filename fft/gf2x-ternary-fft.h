@@ -309,6 +309,11 @@ struct gf2x_ternary_fft_info {
     gf2x_ternary_fft_info(gf2x_ternary_fft_info const & o) {
         gf2x_ternary_fft_info_copy(this, &o);
     }
+    gf2x_ternary_fft_info& operator=(gf2x_ternary_fft_info const & o) {
+        gf2x_ternary_fft_info_clear(this);
+        gf2x_ternary_fft_info_copy(this, &o);
+        return *this;
+    }
     inline gf2x_ternary_fft_info(gf2x_ternary_fft_info const & other, size_t nF, size_t nG)
     {
         gf2x_ternary_fft_info_init_similar(this, &other, nF, nG);
