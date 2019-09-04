@@ -67,6 +67,10 @@
 #define xxxCANTOR_GM            /* Use Gao-Mateer recursion */
 #define xxxCANTOR_GM_TRUNCATE   /* Use truncated variant */
 
+#ifdef CANTOR_GM
+#error "This is experimental code, and it seems to be slightly buggy. Do not use"
+#endif
+
 #include "mpfq/mpfq_name_K.h"
 
 /* It's a placeholder, really. After macro expansion, nobody really uses
@@ -1205,8 +1209,7 @@ void interpolateK_trunc(Kelt * f, unsigned int k, size_t length)
     reduceModTrunc(f, k, length);
 }
 
-#if (WLEN == 64)
-#if CANTOR_BASE_FIELD_SIZE == 128
+#if CANTOR_BASE_FIELD_SIZE == 2 * WLEN/*{{{*/
 void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
 {
     assert(Fl <= (1UL << k));
@@ -1225,7 +1228,33 @@ void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
     for (size_t i = 1; i < Fl ; ++i)
         F[i] = f[i][0] ^ f[i - 1][1];
 }
-#elif CANTOR_BASE_FIELD_SIZE == 64
+void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift, int k GF2X_MAYBE_UNUSED)
+{
+    size_t Fl = W(nF);
+    size_t words_full = W(nF + shift);
+    /* shift = Q * 64 + cnt */
+    size_t Q = I(shift);
+    size_t cnt = R(shift);
+    size_t tnc = WLEN - cnt;
+    assert((Q + Fl) < (1UL << k));
+    F[0] = f[Q][0];  /* wr:0 to 64; rd:Q*64 to Q*64+64 */
+    if (Q) F[0] ^= f[Q-1][1]; /* wr:0 to 64; rd:(Q-1)*64+64 to (Q-1)*64+64+64 */
+    for (size_t i = 1; i < Fl ; ++i) {
+        // rd: (Q+i)*64 to (Q+i)*64 and (Q+i-1)*64+64 to (Q+i-1)*64+64
+        // wr: i*64 to i*64+64
+        F[i] = f[Q + i][0] ^ f[Q + i - 1][1];
+    }
+    Rsh(F, F, Fl, cnt);
+    if (Q + Fl == words_full - 1) {
+        unsigned long e = f[Q + Fl][0];
+        if (Q+Fl)
+            e ^= f[Q + Fl - 1][1];
+        F[Fl - 1] |= e << tnc;
+    }
+    if (R(nF))
+        F[I(nF)] &= MASK(R(nF));
+}/*}}}*/
+#elif CANTOR_BASE_FIELD_SIZE == 64 && WLEN == 64/*{{{*/
 void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
 {
     size_t i;
@@ -1253,12 +1282,30 @@ void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
         F[i] = f[2*i][0] ^ (f[2*i+1][0] << 32) ^ (f[2*i-1][0] >> 32);
     }
 }
-#else
-#error  "Define CANTOR_BASE_FIELD_SIZE to 64 or 128"
-#endif
-
-#elif (WLEN == 32)
-#if CANTOR_BASE_FIELD_SIZE == 128
+void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift, int k GF2X_MAYBE_UNUSED)
+{
+    size_t Fl = W(nF);
+    size_t words_full = W(nF + shift);
+    /* shift = Q * 64 + cnt */
+    size_t Q = I(shift);
+    size_t cnt = R(shift);
+    size_t tnc = WLEN - cnt;
+    assert(2 * (Q + Fl) <= (1UL << k));
+    F[0] = f[2*Q][0] ^ (f[2*Q+1][0] << 32);
+    if (Q) F[0] ^= f[2*Q-1][0] >> 32;
+    for (size_t i = 1; i < Fl ; ++i)
+        F[i] = f[2*(Q + i)][0] ^ (f[2*(Q + i) + 1][0] << 32) ^ (f[2*(Q + i) - 1][0] >> 32);
+    Rsh(F, F, Fl, cnt);
+    if (Q + Fl == words_full - 1) {
+        unsigned long e = f[2*(Q + Fl)][0] ^ (f[2*(Q+Fl)+1][0] << 32);
+        if (Q+Fl)
+            e ^= (f[2*(Q + Fl) - 1][0] >> 32);
+        F[Fl - 1] |= e << tnc;
+    }
+    if (R(nF))
+        F[I(nF)] &= MASK(R(nF));
+}/*}}}*/
+#elif CANTOR_BASE_FIELD_SIZE == 128 && WLEN == 32/*{{{*/
 void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
 {
     size_t i;
@@ -1296,34 +1343,45 @@ void recomposeK(unsigned long * F, Kelt * f, size_t Fl, unsigned int k GF2X_MAYB
             F[i] = f[i/2][0] ^ f[i/2 - 1][2];
     }
 }
-#elif CANTOR_BASE_FIELD_SIZE == 64
-void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
+void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift, int k GF2X_MAYBE_UNUSED)
 {
-    /* We're computing a DFT of length 2^k, so we can accomodate 2^k*32
-     * bits in the coefficients. We need to make Fl*32 bits fit. Hence
-     * the following assertion.
-     */
-    assert(Fl <= (1UL << k));
-    for (size_t i = 0; i < Fl; ++i) {
-        /* Set low part of 64 bits from 32-bits in F[i] */
-        f[i][0] = F[i];
-        f[i][1] = 0;
+    size_t Fl = W(nF);
+    size_t words_full = W(nF + shift);
+    /* shift = Q * 32 + cnt */
+    size_t Q = I(shift);
+    size_t cnt = R(shift);
+    size_t tnc = WLEN - cnt;
+    assert((Q + Fl) <= (2UL << k));
+    size_t Qq = Q/2;
+    size_t Qr = Q&1;
+    F[0] = f[Qq][Qr];
+    if (Qq) F[0] ^= f[Qq-1][2+Qr];
+    size_t i = 1, j;
+    if (1 < Fl && Qr == 0) {
+        F[1] = f[Qq][1];
+        if (Qq) F[1] ^= f[Qq-1][3];
+        i++;
     }
-    memset(f + Fl, 0, ((1UL << k) - Fl) * sizeof(Kelt));
+    for (j = 1; i + 1 < Fl ; ++j, i += 2) {
+        F[i]   = f[Qq + j][0] ^ f[Qq + j - 1][2];
+        F[i+1] = f[Qq + j][1] ^ f[Qq + j - 1][3];
+    }
+    if (i < Fl) {
+        F[i]   = f[Qq + j][0] ^ f[Qq + j - 1][2];
+    }
+    Rsh(F, F, Fl, cnt);
+    if (Q + Fl == words_full - 1) {
+        unsigned long e = f[(Q + Fl)/2][(Q+Fl)&1];
+        if ((Q+Fl)/2)
+            e ^= f[(Q+Fl)/2-1][2+((Q+Fl)&1)];
+        F[Fl - 1] |= e << tnc;
+    }
+    if (R(nF))
+        F[I(nF)] &= MASK(R(nF));
 }
-
-void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
-{
-    assert(Fl <= (1UL << k));
-    F[0] = f[0][0];
-    for (size_t i = 1; i < Fl ; ++i)
-        F[i] = f[i][0] ^ f[i - 1][1];
-}
+/*}}}*/
 #else
-#error  "Define CANTOR_BASE_FIELD_SIZE to 64 or 128"
-#endif
-#else
-#error "define WLEN"
+#error  "Define CANTOR_BASE_FIELD_SIZE to 64 or 128 and WLEN to 32 or 64"
 #endif
 
 /* nF is a number of coefficients == number of bits ; a.k.a. degree + 1 */
@@ -1608,22 +1666,10 @@ int gf2x_cantor_fft_ift(
     if (p->mp_shift == 0) {
         recomposeK(H, h, Hl, p->k);
     } else {
-        size_t words_full = W(nH + p->mp_shift);
-        size_t ks = CANTOR_BASE_FIELD_SIZE / 2;
-        size_t pick = p->mp_shift / ks;
-        assert(pick + Hl <= (1UL << p->k));
-        H[0] = h[pick][0];
-        if (pick) H[0] ^= h[pick-1][1];
-        for (size_t i = 1; i < Hl ; ++i)
-            H[i] = h[pick + i][0] ^ h[pick + i - 1][1];
-        size_t cnt = R(p->mp_shift);
-        size_t tnc = WLEN - cnt;
-        Rsh(H, H, Hl, cnt);
-        if (words_full - pick == Hl + 1)
-            H[Hl - 1] |= (h[pick + Hl][0] ^ h[pick + Hl - 1][1]) << tnc;
-        if (R(nH))
-            H[I(nH)] &= MASK(R(nH));
+        recomposeK_bits(H, nH, h, p->mp_shift, p->k);
     }
+    if (R(nH))
+        H[I(nH)] &= MASK(R(nH));
     return 0;
 }
 

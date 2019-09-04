@@ -81,8 +81,9 @@
  * Note that this part of the library is still clearly development work.
  *
  * When this fail, we print the polynomials computed as lists of 64-bit
- * ints, to be parsed with magma by the companion code that gets printed
- * alongside the computation if the -m arg is passed to the program.
+ * (or 32-bit) integers, to be parsed with magma by the companion code
+ * that gets printed alongside the computation if the -m arg is passed to
+ * the program.
  *
  */
 
@@ -96,9 +97,8 @@ unsigned long next_seed;
  *
  * It is also possible to do some wide-range testing with:
  *
- * ./fft/gf2x_fft_check  -m | magma -b
+ * ./fft/gf2x_fft_check -m | magma -b
  *
- * (note that this testing has not been ported to 32-bit at this point)
  */
 int magma = 0;
 
@@ -467,9 +467,12 @@ void print_context_gf2x_fake_fft(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED)
     fputs(
             "\n\n/* fake fft (transform == identity) */\n"
             "clear;\n"
+            , stdout);
+    printf("w:=%d;\n", (int) ULONG_BITS);
+    fputs(
             "KP<x>:=PolynomialRing(GF(2));\n"
-            "Zseq_to_KP:=func<f|Polynomial(GF(2),&cat[Intseq(x,2,64):x in f])>;\n"
-            "KP_to_Zseq:=func<P,n|Intseq(Seqint(ChangeUniverse(Eltseq(P),Integers()),2),2^64,Ceiling(n/64))>;\n"
+            "Zseq_to_KP:=func<f|Polynomial(GF(2),&cat[Intseq(x,2,w):x in f])>;\n"
+            "KP_to_Zseq:=func<P,n|Intseq(Seqint(ChangeUniverse(Eltseq(P),Integers()),2),2^w,Ceiling(n/w))>;\n"
             "L:=KP;\n"
             "ks:=-1;\n"
             "KP_to_LP:=func<x|x>;\n"
@@ -495,13 +498,21 @@ void print_context_gf2x_cantor_fft(gf2x_cantor_fft_info_srcptr p GF2X_MAYBE_UNUS
     fputs(
         "\n\n/* Cantor additive fft */\n"
         "clear;\n"
-        , stdout);
-    printf("ks:=64;fft_k:=%d;\n",p->k);
-    fputs(
         "KP<x>:=PolynomialRing(GF(2));\n"
-        "Zseq_to_KP:=func<f|Polynomial(GF(2),&cat[Intseq(x,2,64):x in f])>;\n"
-        "KP_to_Zseq:=func<P,n|Intseq(Seqint(ChangeUniverse(Eltseq(P),Integers()),2),2^64,Ceiling(n/64))>;\n"
-        "L<z> := ext<GF(2) | x^128 + x^7 + x^2 + x + 1>;\n"
+        , stdout);
+#if (CANTOR_BASE_FIELD_SIZE == 128)
+        fputs("L<z> := ext<GF(2) | x^128 + x^7 + x^2 + x + 1>;\n", stdout);
+#elif (CANTOR_BASE_FIELD_SIZE == 64)
+        fputs("L<z> := ext<GF(2) | x^64 + x^4 + x^3 + x + 1>;\n", stdout);
+#else
+#error "CANTOR_BASE_FIELD_SIZE must be either 0 or 64"
+#endif
+    printf("w:=%d;\n", (int) ULONG_BITS);
+    printf("fft_k:=%d;\n",p->k);
+    fputs(
+        "ks:=Degree(L) div 2;\n"
+        "Zseq_to_KP:=func<f|Polynomial(GF(2),&cat[Intseq(x,2,w):x in f])>;\n"
+        "KP_to_Zseq:=func<P,n|Intseq(Seqint(ChangeUniverse(Eltseq(P),Integers()),2),2^w,Ceiling(n/w))>;\n"
         "LP<X> := PolynomialRing(L);\n"
         "KS:=func<X|Polynomial([KP|Polynomial(L[i..Minimum(#L,i+ks-1)]) : i in [1..#L by ks]]) where L is Eltseq(X)>;\n"
         "KP_to_LP:=func<f|Polynomial([L|Evaluate(c,L.1):c in Coefficients(KS(f))])>;\n"
@@ -523,8 +534,8 @@ void print_context_gf2x_cantor_fft(gf2x_cantor_fft_info_srcptr p GF2X_MAYBE_UNUS
         "LP_canonical:=func<x|x>;\n"
         "LP_add:=func<a,b|a+b>;LP_mul:=func<a,b|a*b>;\n"
         "L_evaluate:=func<P,n|[Evaluate(P,x):x in evalpoints[1..n]]>;\n"
-        "Zseq_to_Lseq:=func<X|[Evaluate(Zseq_to_KP(X[i..i+1]),L.1):i in [1..#X by 2]]>;\n"
-        "Lseq_to_Zseq:=func<X|&cat [KP_to_Zseq(Polynomial(c),128):c in X]>;\n"
+        "Zseq_to_Lseq:=func<X|[Evaluate(Zseq_to_KP(X[i..i+(Degree(L) div w)-1]),L.1):i in [1..#X by (Degree(L) div w)]]>;\n"
+        "Lseq_to_Zseq:=func<X|&cat [KP_to_Zseq(Polynomial(c),Degree(L)):c in X]>;\n"
         , stdout);
     fputs(interpolate_code, stdout);
     fputs("L_interpolate:=func<P,n|interpolate_generic(P, evalpoints[1..n])>;\n", stdout);
@@ -545,6 +556,7 @@ void print_context_gf2x_ternary_fft(gf2x_ternary_fft_info_srcptr p GF2X_MAYBE_UN
             "\n\n/* Schonhage ternary fft */\n"
             "clear;\n"
             , stdout);
+    printf("w:=%d;\n", (int) ULONG_BITS);
     if (p->K == 0) {
         printf("/* fall back to plain */\n");
         print_context_gf2x_fake_fft(NULL);
@@ -555,11 +567,11 @@ void print_context_gf2x_ternary_fft(gf2x_ternary_fft_info_srcptr p GF2X_MAYBE_UN
                 p->M, p->K, p->split);
         printf("fft_Np:=Ceiling(fft_M / (fft_K div 3)) * (fft_K div 3);\n");
         printf("ks:=fft_M;\n");
-        printf("fft_np:=Ceiling(fft_Np/64);fft_2np:=2*fft_np;\n");
+        printf("fft_np:=Ceiling(fft_Np/w);fft_2np:=2*fft_np;\n");
         fputs(
                 "KP<x>:=PolynomialRing(GF(2));\n"
-                "Zseq_to_KP:=func<f|Polynomial(GF(2),&cat[Intseq(x,2,64):x in f])>;\n"
-                "KP_to_Zseq:=func<P,n|Intseq(Seqint(ChangeUniverse(Eltseq(P),Integers()),2),2^64,Ceiling(n/64))>;\n"
+                "Zseq_to_KP:=func<f|Polynomial(GF(2),&cat[Intseq(x,2,w):x in f])>;\n"
+                "KP_to_Zseq:=func<P,n|Intseq(Seqint(ChangeUniverse(Eltseq(P),Integers()),2),2^w,Ceiling(n/w))>;\n"
                 "L<z> := quo<KP | x^(2*fft_Np) + x^fft_Np + 1>;\n"
                 "LP<X> := PolynomialRing(L);\n"
                 "KS:=func<X|Polynomial([KP|Polynomial(L[i..Minimum(#L,i+ks-1)]) : i in [1..#L by ks]]) where L is Eltseq(X)>;\n"
@@ -594,12 +606,12 @@ void print_context_gf2x_ternary_fft(gf2x_ternary_fft_info_srcptr p GF2X_MAYBE_UN
         printf("fft_Np2:=Ceiling(fft_M2 / (fft_K div 3)) * (fft_K div 3);\n");
         printf("ks1:=fft_M1;\n");
         printf("ks2:=fft_M2;\n");
-        printf("fft_np1:=Ceiling(fft_Np1 / 64);fft_2np1:=2*fft_np1;\n");
-        printf("fft_np2:=Ceiling(fft_Np2 / 64);fft_2np2:=2*fft_np2;\n");
+        printf("fft_np1:=Ceiling(fft_Np1 / w);fft_2np1:=2*fft_np1;\n");
+        printf("fft_np2:=Ceiling(fft_Np2 / w);fft_2np2:=2*fft_np2;\n");
         fputs(
                 "KP<x>:=PolynomialRing(GF(2));\n"
-                "Zseq_to_KP:=func<f|Polynomial(GF(2),&cat[Intseq(x,2,64):x in f])>;\n"
-                "KP_to_Zseq:=func<P,n|Intseq(Seqint(ChangeUniverse(Eltseq(P),Integers()),2),2^64,Ceiling(n/64))>;\n"
+                "Zseq_to_KP:=func<f|Polynomial(GF(2),&cat[Intseq(x,2,w):x in f])>;\n"
+                "KP_to_Zseq:=func<P,n|Intseq(Seqint(ChangeUniverse(Eltseq(P),Integers()),2),2^w,Ceiling(n/w))>;\n"
                 "L1<z> := quo<KP | x^(2*fft_Np1) + x^fft_Np1 + 1>;\n"
                 "L2<z> := quo<KP | x^(2*fft_Np2) + x^fft_Np2 + 1>;\n"
                 "LP1<X> := PolynomialRing(L1);\n"
