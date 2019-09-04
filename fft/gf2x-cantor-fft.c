@@ -949,6 +949,7 @@ static int multievaluateGM(Kelt * f, unsigned int k, size_t length GF2X_MAYBE_UN
         j++;
     }
 #endif
+    return 0;
 }
 #endif
 
