@@ -52,6 +52,7 @@ check_PROGRAMS=
 check_LTLIBRARIES=
 
 EXTRA_DIST=	\
+	gf2x-fft-impl-utils.h			\
 	mpfq/README.mpfq			\
 	mpfq/i386/mpfq_2_128.c			\
 	mpfq/i386/mpfq_2_128.h			\

@@ -43,6 +43,25 @@ void XXX_info_init(
  * of bits. Extra (stdarg) arguments may be passed for implementations
  * that have a use for it.  */
 
+void XXX_info_init_mp(
+        XXX_info_ptr p,
+        size_t bits_a,
+        size_t bits_b,
+        ...); 
+/* Used to compute middle products of polynomials with the given number
+ * of bits. That is, the result MP(a, b) consists of coefficients of
+ * degrees MIN(bits_a, bits_b)-1 to MAX(bits_a, bits_b)-1 (inclusive),
+ * forming a result with MAX(bits_a, bits_b)-MIN(bits_a, bits_b)+1
+ * coefficients.  Extra (stdarg) arguments may be passed for
+ * implementations that have a use for it.  */
+
+void XXX_info_init_empty(
+        XXX_info_ptr p);
+/* This is not really a constructor. Most often we expect this function
+ * to be a noop, or at most an inline. It is just meant to provide some
+ * default-initialization, so that info_clear does not choke.
+ */
+
 void XXX_info_clear(
         XXX_info_ptr p);
 /* Destructor for the info type. */
@@ -268,17 +287,21 @@ struct XXX_info {
     typedef XXX_ptr ptr;
     typedef XXX_srcptr srcptr;
 
+    inline XXX_info()
+    {
+        XXX_info_init_empty(this);
+    }
     inline XXX_info(size_t nF, size_t nG)
     {
         XXX_info_init(this, nF, nG);
     }
-    ~XXX_info() {
+    inline ~XXX_info() {
         XXX_info_clear(this);
     }
-    XXX_info(XXX_info const & o) {
+    inline XXX_info(XXX_info const & o) {
         XXX_info_copy(this, &o);
     }
-    XXX_info& operator=(XXX_info const & o) {
+    inline XXX_info& operator=(XXX_info const & o) {
         XXX_info_clear(this);
         XXX_info_copy(this, &o);
         return *this;
@@ -286,6 +309,17 @@ struct XXX_info {
     inline XXX_info(XXX_info const & other, size_t nF, size_t nG)
     {
         XXX_info_init_similar(this, &other, nF, nG);
+    }
+    /* Use named constructor idiom for the variants */
+    inline static XXX_info mul_info(size_t nF, size_t nG) {
+        XXX_info a;
+        XXX_info_init(&a, nF, nG);
+        return a;
+    }
+    inline static XXX_info mp_info(size_t nF, size_t nG) {
+        XXX_info a;
+        XXX_info_init_mp(&a, nF, nG);
+        return a;
     }
     inline bool compatible(XXX_info const & other) const {
         return XXX_info_compatible(this, &other);

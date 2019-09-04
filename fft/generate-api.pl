@@ -69,9 +69,10 @@ while (defined($_=<F>)) {
             $ttext =~ s/^((?!typedef)(?:\w+)) (XXX_\w+)\b/extern $1 GF2X_EXPORTED $2/mg;
         } elsif ($blobnum == 2 && @{$params->{'pod'}} && $params->{'pod'}->[0] eq 'yes') {
             # print "Performing pod modifiations for ${impl}_info\n";
-            $ttext =~ s/^(\s*~XXX_info\(\))[^\}]*\}/$1 = default;/sm;
-            $ttext =~ s/^(\s*XXX_info)\((XXX_info const &) o\)[^\}]*\}/$1($2) = default;/sm;
-            $ttext =~ s/^(\s*XXX_info& operator=)\((XXX_info const &) o\)[^\}]*\}/$1($2) = default;/sm;
+            $ttext =~ s/^(\s*(?:inline\s*)?~XXX_info)\(\)[^\}]*\}/$1() = default;/sm;
+            $ttext =~ s/^(\s*(?:inline\s*)?XXX_info)\((XXX_info const &) o\)[^\}]*\}/$1($2) = default;/sm;
+            $ttext =~ s/^(\s*(?:inline\s*)?XXX_info)\(\)[^\}]*\}/$1() = default;/sm;
+            $ttext =~ s/^(\s*(?:inline\s*)?XXX_info& operator=)\((XXX_info const &) o\)[^\}]*\}/$1($2) = default;/sm;
         }
         $ttext =~ s/XXX/$impl/g;
 

@@ -44,17 +44,18 @@
 #include "gf2x/gf2x-impl.h"
 
 #include "gf2x-cantor-fft.h"
+#include "gf2x-fft-impl-utils.h"
 
 /* Actually including mpfq is reserved for the c file. The header has
  * merely defined the main typedefs */
 #if CANTOR_BASE_FIELD_SIZE == 128
-#if GF2X_WORDSIZE == 64
+#if WLEN == 64
 #include "mpfq/x86_64/mpfq_2_128.h"
 #else
 #include "mpfq/i386/mpfq_2_128.h"
 #endif
 #else
-#if GF2X_WORDSIZE == 64
+#if WLEN == 64
 #include "mpfq/x86_64/mpfq_2_64.h"
 #else
 #include "mpfq/i386/mpfq_2_64.h"
@@ -111,7 +112,7 @@ Kfield K;
 */
 
 #if CANTOR_BASE_FIELD_SIZE == 128
-#if GF2X_WORDSIZE == 32
+#if WLEN == 32
 #define BETA(x,y,z,t) { x, y, z, t, }
 #else
 #define BETA(x,y,z,t) { y << 32 | x, t << 32 | z }
@@ -151,7 +152,7 @@ static const Kelt Betai[32] = {
     BETA(2252056148UL, 2850320680UL, 3455532848UL, 234262497UL),
 };
 #elif CANTOR_BASE_FIELD_SIZE == 64
-#if GF2X_WORDSIZE == 32
+#if WLEN == 32
 #define BETA(x,y) { x, y, }
 #else
 #define BETA(x,y) { y << 32 | x }
@@ -720,7 +721,7 @@ void gm_trick_trunc(unsigned int two_t, Kelt * f, Kelt * buf, size_t j, unsigned
     assert(k <= two_t);
     assert(n > (1UL << t));
     /* beware ; on 32-bit machines, two_t might be equal to 32... */
-    assert(two_t == GF2X_WORDSIZE || n <= (1UL << two_t));
+    assert(two_t == WLEN || n <= (1UL << two_t));
 
     size_t tau = 1UL << t;
     // long cn = (n+tau-1)>>t;      // Ceiling(n/tau);
@@ -1098,14 +1099,14 @@ static inline int gf2x_clzl(unsigned long x)
         static const int t[4] = { 2, 1, 0, 0 };
         int a = 0;
         int res;
-#if (GF2X_WORDSIZE == 64)
+#if (WLEN == 64)
         if (x >> 32) { a += 32; x >>= 32; }
 #endif  
         if (x >> 16) { a += 16; x >>= 16; }
         if (x >>  8) { a +=  8; x >>=  8; }
         if (x >>  4) { a +=  4; x >>=  4; }
         if (x >>  2) { a +=  2; x >>=  2; }
-        res = GF2X_WORDSIZE - 2 - a + t[x];
+        res = WLEN - 2 - a + t[x];
         return res;
 }
 
@@ -1114,8 +1115,8 @@ static inline int gf2x_clzl(unsigned long x)
    -x = 1...1(1-a)(1-b)(1-c)10...0, and x & (-x) = 0...000010...0 */
 static inline int gf2x_ctzl(unsigned long x)
 {
-  ASSERT(GF2X_WORDSIZE == sizeof(unsigned long) * CHAR_BIT);
-  return (GF2X_WORDSIZE - 1) - gf2x_clzl(x & - x);
+  ASSERT(WLEN == sizeof(unsigned long) * CHAR_BIT);
+  return (WLEN - 1) - gf2x_clzl(x & - x);
 }
 #endif
 
@@ -1200,7 +1201,7 @@ void interpolateK_trunc(Kelt * f, unsigned int k, size_t length)
     reduceModTrunc(f, k, length);
 }
 
-#if (GF2X_WORDSIZE == 64)
+#if (WLEN == 64)
 #if CANTOR_BASE_FIELD_SIZE == 128
 void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
 {
@@ -1252,7 +1253,7 @@ void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
 #error  "Define CANTOR_BASE_FIELD_SIZE to 64 or 128"
 #endif
 
-#elif (GF2X_WORDSIZE == 32)
+#elif (WLEN == 32)
 #if CANTOR_BASE_FIELD_SIZE == 128
 void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
 {
@@ -1318,7 +1319,7 @@ void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
 #error  "Define CANTOR_BASE_FIELD_SIZE to 64 or 128"
 #endif
 #else
-#error "define GF2X_WORDSIZE"
+#error "define WLEN"
 #endif
 
 /* nF is a number of coefficients == number of bits ; a.k.a. degree + 1 */
@@ -1328,13 +1329,10 @@ void gf2x_cantor_fft_info_init(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, .
     size_t Hl;
     size_t n;
 
-    /* Since internally we're working with 64-bit data, then it's really
-     * a hard 64 here, not GF2X_WORDSIZE : We're just deciding on the order
-     * of things.
-     */
-    const int keep_bits_per_coeff = CANTOR_BASE_FIELD_SIZE / 2;
-    size_t Fl = (nF + keep_bits_per_coeff - 1) / keep_bits_per_coeff;
-    size_t Gl = (nG + keep_bits_per_coeff - 1) / keep_bits_per_coeff;
+    /* Really CANTOR_BASE_FIELD_SIZE / 2 here, not WLEN ! */
+    size_t ks = CANTOR_BASE_FIELD_SIZE / 2;
+    size_t Fl = CEIL(nF, ks);
+    size_t Gl = CEIL(nG, ks);
 
     n = Hl = Fl + Gl;               // nb of Kelt of the result, with padding.
     for(k = 1; (1UL << k) < n ; k++) ;
@@ -1343,7 +1341,92 @@ void gf2x_cantor_fft_info_init(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, .
      * works. */
     p->k = k;
     p->n = n;
+    p->mp_shift = 0;
+}
 
+void gf2x_cantor_fft_info_init_mp(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, ...)
+{
+    unsigned int k;
+
+    /* Really CANTOR_BASE_FIELD_SIZE / 2 here, not WLEN ! */
+    size_t ks = CANTOR_BASE_FIELD_SIZE / 2;
+    size_t Fl = CEIL(nF, ks);
+    size_t Gl = CEIL(nG, ks);
+
+    /*
+    size_t first_wrapped_must_be_geq = MAX(nF, nG);
+    size_t first_nonwrapped_must_be_leq = MIN(nF, nG) - 1;
+
+     * we want (1<<k) * ks >= first_wrapped_must_be_geq
+     * and, if Fl+Gl-2>=(1<<k), then
+     * (Fl - 1 + Gl - 1 - (1<<k) + (1<<fk)) * ks + 2 * ks - 1 <= first_nonwrapped_must_be_leq
+     * ((Fl + Gl - 2 - (1<<k)) + (1<<fk)) * ks + 2 * ks - 1 <= first_nonwrapped_must_be_leq
+     * where (1<<fk) is for the index of the second leading coefficient
+     * of sk, and fk is the index of the second leading coefficient of
+     * (x+1)^k -- which is easy to tabulate.
+     *
+     * (it's not really 2*ks-1, in fact. We can probably take into
+     * account the actual lengths)
+     *
+     * Since fk>=1, the latter rewrites implies at the very least:
+     *
+     * (1<<k) * ks >= (Fl + Gl + 1) * ks - MIN(nF, nG)
+     *
+     * Note that this implies also, since Fl * ks > nF:
+     *
+     * (1<<k) * ks >= MAX(nF, nG)
+     *
+     * so that it is sufficient to check that
+     *
+     * ((1<<k) - (1<<fk)) * ks >= (Fl + Gl) * ks - MIN(nF, nG)
+     */
+    /* [Degree((x+1)^i-x^i):i in [0..63]]; */
+    int fk[64] = { -1, 0, 0, 2, 0, 4, 4, 6, 0, 8, 8, 10, 8, 12, 12, 14, 0, 16, 16, 18, 16, 20, 20, 22, 16, 24, 24, 26, 24, 28, 28, 30, 0, 32, 32, 34, 32, 36, 36, 38, 32, 40, 40, 42, 40, 44, 44, 46, 32, 48, 48, 50, 48, 52, 52, 54, 48, 56, 56, 58, 56, 60, 60, 62 };
+
+    size_t bound0a = Fl+Gl-1;
+    size_t bound1 = MAX(nF, nG);
+    size_t bound0b = (Fl + Gl) * ks - MIN(nF, nG);
+
+    for(k = 1; !((
+                    (1UL << k) >= bound0a &&  /* no wraparound */
+                    (1UL << k) * ks >= bound1 /* room for both ops */
+                ) ||
+                    ((1UL << k) - (1UL << fk[k])) * ks >= bound0b  /* controlled wraparound */
+                    ) ; k++) if (k >= 63) abort();
+    /* We used to refuse k < 2 here. Now we've got sufficient provision
+     * in here to accomodate for the case where k==1, so a safe fallback
+     * works. */
+    p->k = k;
+    /* We don't know how to deal with truncation in the middle product
+     * case. If the partial multi-evaluation leads us to a reconstructed
+     * polynomial that is the non-trivial reduction of the full product
+     * modulo a polynomial that has undesired trailing bits, then our
+     * output will be garbled.
+     *
+     * Some reduction polynomials are sparse enough, so that we can live
+     * with that reduction. Let n1 be the degree of the second largest
+     * bit of the polynomial with n roots in the evaluation tree.
+     * In particular, n1=1 if n is a power of two. If the following
+     * condition holds:
+     *          (1UL << k) * ks >= bound + n1 - 1,
+     * then we're good: following the same argument as we have developed
+     * above, wraparound bits will not bother us.
+     *
+     * Hence in theory, it should be sufficient to pick a truncation
+     * order that satisfies
+     *          MAX(Fl, Gl) <= n <= (1UL << k)
+     *          n1 <= (1UL << k) * ks + 1 - bound
+     * We know that the latter upper bound is at least 1, so that n =
+     * (1UL << k) is a solution.
+     *
+     * Alas, it doesn't seem very practical to search for a truncation
+     * order that meets these conditions. Most probably there isn't one,
+     * since the corresponding polynomials tend to be dense.  Let's stick
+     * to 2^k for the time being. (or Fl+Gl-1, which also means that we
+     * have no truncation).
+     */
+    p->n = MIN(Fl + Gl - 1, 1UL << k);
+    p->mp_shift = MIN(nF, nG) - 1;
 }
 
 extern void GF2X_EXPORTED gf2x_cantor_fft_info_get_alloc_sizes(
@@ -1358,14 +1441,14 @@ extern void GF2X_EXPORTED gf2x_cantor_fft_info_get_alloc_sizes(
 /* nF is a number of coefficients */
 void gf2x_cantor_fft_dft(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x, const unsigned long * F, size_t nF, gf2x_cantor_fft_ptr temp1 GF2X_MAYBE_UNUSED)
 {
-    size_t Fl = (nF + GF2X_WORDSIZE - 1) / GF2X_WORDSIZE;
-    if (nF % GF2X_WORDSIZE) {
+    size_t Fl = W(nF);
+    if (R(nF)) {
         /* Just as we are computing this assertion, we could easily mask out
          * the bits ourselves. However, our interface mandates that the high
          * bits be cleared in any case. So make sure we properly enforce this
          * constraint.
          */
-        assert((F[Fl-1] & ~((1UL << (nF % GF2X_WORDSIZE)) - 1)) == 0);
+        assert((F[I(nF)] & ~MASK(R(nF))) == 0);
     }
 #ifdef WITHOUT_CANTOR_TRUNCATION
     memset(x, 0, sizeof(Kelt) << p->k);
@@ -1495,7 +1578,7 @@ void gf2x_cantor_fft_ift(
         size_t nH,
         gf2x_cantor_fft_ptr h, gf2x_cantor_fft_ptr temp1 GF2X_MAYBE_UNUSED)
 {
-    size_t Hl = (nH + GF2X_WORDSIZE - 1) / GF2X_WORDSIZE;
+    size_t Hl = W(nH);
 
 #ifdef WITHOUT_CANTOR_TRUNCATION
     interpolateK(h, p->k);
@@ -1509,7 +1592,25 @@ void gf2x_cantor_fft_ift(
         interpolateK(h, p->k);
     }
 #endif
-    recomposeK(H, h, Hl, p->k);
+    if (p->mp_shift == 0) {
+        recomposeK(H, h, Hl, p->k);
+    } else {
+        size_t words_full = W(nH + p->mp_shift);
+        size_t ks = CANTOR_BASE_FIELD_SIZE / 2;
+        size_t pick = p->mp_shift / ks;
+        assert(pick + Hl <= (1UL << p->k));
+        H[0] = h[pick][0];
+        if (pick) H[0] ^= h[pick-1][1];
+        for (size_t i = 1; i < Hl ; ++i)
+            H[i] = h[pick + i][0] ^ h[pick + i - 1][1];
+        size_t cnt = R(p->mp_shift);
+        size_t tnc = WLEN - cnt;
+        Rsh(H, H, Hl, cnt);
+        if (words_full - pick == Hl + 1)
+            H[Hl - 1] |= (h[pick + Hl][0] ^ h[pick + Hl - 1][1]) << tnc;
+        if (R(nH))
+            H[I(nH)] &= MASK(R(nH));
+    }
 }
 
 

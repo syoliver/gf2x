@@ -40,6 +40,7 @@
 #include "gf2x.h"
 #include "gf2x/gf2x-impl.h"
 #include "gf2x-ternary-fft.h"
+#include "gf2x-fft-impl-utils.h"
 
 // #define DEBUG
 // #define DEBUG_LSHIFT
@@ -58,207 +59,6 @@
 #if (MUL_FFT_THRESHOLD < 28)
 #error "MUL_FFT_THRESHOLD too small, should be at least 28"
 #endif
-
-/* Assume wordlength  WLEN is 32 or 64 */
-
-# define WLEN GF2X_WORDSIZE
-
-/** Some support functions. **/
-
-/* CEIL(a,b) = ceiling(a/b) */
-static inline size_t CEIL(size_t a, size_t b)
-{
-    return ((a)+(b)-1)/(b);
-}
-
-/* W(b) is the number of words needed to store b bits */
-static inline size_t W(size_t b)
-{
-    return CEIL(b, WLEN);
-}
-
-/* I(b) is the index word of bit b, assuming bits 0..WLEN-1
-   have index 0 */
-static inline size_t I(size_t b)
-{
-    return b / WLEN;
-}
-
-static inline size_t R(size_t b)
-{
-    return b % WLEN;
-}
-
-static inline size_t R2(size_t b)       /* remaining bits */
-{
-    return (-b) % WLEN;
-}
-
-static inline unsigned long MASK(size_t x)
-{
-    ASSERT(x < WLEN);
-    return ((1UL << (x)) - 1UL);
-}
-
-/* GETBIT(a,i)   gets the i-th bit of the bit-array starting at a[0],
-   XORBIT(a,i,x) xors this bit with the bit x, where x = 0 or 1.   */
-static inline unsigned long GETBIT(unsigned long *a, size_t i)
-{
-    return (a[I(i)] >> R(i)) & 1UL;
-}
-
-static inline void XORBIT(unsigned long *a, size_t i, unsigned long x)
-{
-    ASSERT((x & ~1UL) == 0);
-    a[I(i)] ^= x << R(i);
-}
-
-/* Don't define MIN, MAX, ABS as inlines, as they're already quite
- * customarily defined as macros */
-#ifndef MAX
-#define MAX(h,i) ((h) > (i) ? (h) : (i))
-#endif
-#ifndef MIN
-#define MIN(h,i) ((h) < (i) ? (h) : (i))
-#endif
-#ifndef ABS
-#define ABS(h) ((h) < 0 ? -(h) : (h))
-#endif
-
-static void *malloc_or_die(size_t size)
-{
-    void *res = malloc(size);
-    if (res == NULL)
-	abort();
-    return res;
-}
-
-static inline void Copy(unsigned long *a, const unsigned long *b, size_t n)
-{
-    memcpy(a, b, n * sizeof(unsigned long));
-}
-
-static inline void Zero(unsigned long *a, size_t n)
-{
-    memset(a, 0, n * sizeof(unsigned long));
-}
-
-static inline void Clear(unsigned long *a, size_t low, size_t high)
-{
-    if (high > low)
-       memset (a + low, 0, (high - low) * sizeof(unsigned long));
-}
-
-/** Now the specific things */
-
-/* a <- b + c */
-
-static void AddMod(unsigned long *a, unsigned long *b, unsigned long *c,
-		   size_t n)
-{
-    for (size_t i = 0; i < n; i++)
-       a[i] = b[i] ^ c[i];
-}
-
-/* a <- b + c + d */
-static void
-AddMod3 (unsigned long *a, unsigned long *b, unsigned long *c,
-         unsigned long *d, size_t n)
-{
-  for (size_t i = 0; i < n; i++)
-    a[i] = b[i] ^ c[i] ^ d[i];
-}
-
-/* c <- a * x^k, return carry out, 0 <= k < WLEN */
-static unsigned long
-Lsh (unsigned long *c, unsigned long *a, size_t n, size_t k)
-{
-    if (k == 0) {
-	if (c != a)
-	    Copy(c, a, n);
-	return 0;
-    }
-
-    /* {c, n} and {a, n} should not overlap */
-    ASSERT(c <= a || a + n <= c);
-    ASSERT(k > 0);
-
-    unsigned long t, cy = 0;
-    for (size_t i = 0; i < n; i++) {
-	t = (a[i] << k) | cy;
-	cy = a[i] >> (WLEN - k);
-	c[i] = t;
-    }
-    return cy;
-}
-
-/* c <- c + a * x^k, return carry out, 0 <= k < WLEN */
-
-static unsigned long AddLsh(unsigned long *c, unsigned long *a, size_t n,
-			    size_t k)
-{
-    unsigned long t, cy = 0;
-
-    if (k == 0) {
-	AddMod(c, c, a, n);
-	return 0;
-    }
-
-    /* {c, n} and {a, n} should not overlap */
-    ASSERT(c <= a || a + n <= c);
-
-    ASSERT(k > 0);
-
-    for (size_t i = 0; i < n; i++) {
-	t = (a[i] << k) | cy;
-	cy = a[i] >> (WLEN - k);
-	c[i] ^= t;
-    }
-    return cy;
-}
-
-/* c <- a / x^k, return carry out, 0 <= k < WLEN */
-static unsigned long
-Rsh (unsigned long *c, const unsigned long *a, size_t n, size_t k)
-{
-    if (k == 0) {
-	if (c != a)
-	    Copy(c, a, n);
-	return 0;
-    }
-
-    ASSERT(k > 0);
-
-    unsigned long t, cy = 0;
-    for (size_t i = n; i-- ; ) {
-	t = (a[i] >> k) | cy;
-	cy = a[i] << (WLEN - k);
-	c[i] = t;
-    }
-    return cy;
-}
-
-/* c <- c + a / x^k, return carry out, 0 <= k < WLEN */
-
-static unsigned long AddRsh(unsigned long *c, unsigned long *a, size_t n,
-			    size_t k)
-{
-    unsigned long t, cy = 0;
-
-    if (k == 0) {
-	AddMod(c, c, a, n);
-	return 0;
-    }
-
-    ASSERT(k > 0);
-
-    for (size_t i = n ; i-- ; ) {
-	t = (a[i] >> k) | cy;
-	cy = a[i] << (WLEN - k);
-	c[i] ^= t;
-    }
-    return cy;
-}
 
 #if (defined(DEBUG) || defined(DEBUG_LSHIFT) || defined(DEBUG_MULMOD))
 
@@ -437,11 +237,11 @@ static void Lshift(unsigned long *a, unsigned long *b, uint64_t k, size_t N)
 }
 
 /* a <- b * c mod x^(2*N)+x^(N)+1.
-   Assumes t has space for 2n words, and u for gf2x_toomspace(n) words,
-   where n = ceil(2N/WLEN).
-   a and b may be equal.
-   a must have space for n words.
-*/
+ * Assumes t has space for 2n words, and u for gf2x_toomspace(n) words,
+ * where n = ceil(2N/WLEN).
+ * a and b may be equal.
+ * a, b, c must have space for n words.
+ */
 
 static void MulMod(unsigned long *a, const unsigned long *b, const unsigned long *c,
 		   size_t N, unsigned long *t, unsigned long *u)
@@ -595,16 +395,19 @@ static void recompose(unsigned long * c, size_t cn, unsigned long **C, size_t K,
 {
     // size_t np = W(Np);	       	// Words to store Np bits
 
-    /* reconstruct C = sum(C[i]*X^(M*i) mod x^N+1.
+    /* reconstruct C = sum(C[i]*X^(M*i) mod x^N+1. (N = K * M)
        We first compute sum(C[i]*X^(M*i), then reduce it using the wrap function.
        Since we know the result has at most cn words, any value exceeding cn
        words is necessarily zero.
        Each C[i] has 2*Np bits, thus the full C has (K-1)*M+2*Np
        = N - M + 2*Np >= N + Np >= 2*n*WLEN + Np bits.
        Thus exactly 2*Np-M bits wrap around mod x^N+1.
+     *
+     * (and in full generality, for any i, we have 2*Np-M bits of C[i]
+     * that overlap with low bits from C[i+1])
      */
 
-    size_t l = 2 * Np - M;/* number of overlapping bits with previous C[i] */
+    size_t l = 2 * Np - M;/* number of overlapping bits from one C[i] to the next */
     size_t i, j, k;
     size_t j1, k1;
     size_t z;
@@ -658,6 +461,56 @@ static void recompose(unsigned long * c, size_t cn, unsigned long **C, size_t K,
     }
 }
 
+static void recompose_simpler(unsigned long * c, size_t cn, size_t shift, unsigned long **C, size_t K, size_t M, size_t Np)
+{
+    // size_t np = W(Np);	       	// Words to store Np bits
+
+    /* reconstruct C = sum(C[i]*X^(M*i)) div X^shift to {c, cn}.
+     * This is more general than the function above (which I don't
+     * understand), with the following differences:
+     *  - flow is simpler
+     *  - We intentionally don't create the artificial wrap of the high
+     *  bits of the high coefficient, so that we really compute a
+     *  polynomial of length (K-1)*M+2*Np-shift, which may be more than
+     *  N-shift.
+     */
+
+    memset(c, 0, cn * sizeof(unsigned long));
+    for(size_t i = 0 ; i < K ; i++) {
+        /* C[i] has bits [i*M .. i*M + 2*Np[ */
+        for(size_t l = 0 ; l < W(2*Np) ; l++) {
+            /* word l of C[i] has bits [i*M+l*WLEN..i*M+MAX((l+1)*WLEN,2*Np)[
+             */
+            size_t b0 = i * M + l * WLEN;
+            size_t b1 = i * M + MIN((l+1) * WLEN, 2 * Np);
+            /* w has no extraneous high bits */
+            unsigned long w = C[i][l];
+            if (b1 <= shift)
+                continue;
+            else {
+                if (b0 < shift) {
+                    /* first useful word. We artificially shift it so
+                     * that we can use the general code afterwards.
+                     */
+                    w >>= shift - b0;
+                    b0 = shift;
+                }
+                if (I(b0 - shift) >= cn)
+                    continue;
+                size_t cnt = R(b0 - shift);
+                if (cnt) {
+                    size_t tnc = WLEN - cnt;
+                    c[I(b0-shift)] ^= w << cnt;
+                    if (I(b0 - shift) + 1 < cn)
+                        c[I(b0-shift) + 1] ^= w >> tnc;
+                } else {
+                    c[I(b0-shift)] ^= w;
+                }
+            }
+        }
+    }
+}
+
 static inline size_t compute_Np(size_t M, size_t K)
 {
     size_t Mp = CEIL(M, K / 3);	// ceil(M/(K/3))
@@ -706,7 +559,7 @@ static void wrap(unsigned long *c, size_t bits_c, size_t N)
     Clear(c, Nw + 1, cn);
 }
 
-static void split_reconstruct(unsigned long * c, unsigned long * c1, unsigned long * c2, size_t cn, size_t K, size_t m1)
+static void split_reconstruct(unsigned long * c, size_t bits_c, unsigned long * c1, unsigned long * c2, size_t cn, size_t K, size_t m1)
 {
     size_t n = WLEN * cn;	// Max bit-size of full product
     size_t delta = K;		// delta = n1 - n2;
@@ -780,7 +633,11 @@ static void split_reconstruct(unsigned long * c, unsigned long * c1, unsigned lo
     }
 #endif
 
-    Copy(c, c1, cn);	// Copy result
+    // Copy result
+    Copy(c, c1, W(bits_c));
+    if (R(bits_c))
+        c[I(bits_c)] &= MASK(R(bits_c));
+
 }
 
 
@@ -970,8 +827,16 @@ void gf2x_ternary_fft_compose(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_p
     if (o->K == 0) {
         gf2x_mul(tc, ta, W(o->bits_a), tb, W(o->bits_b));
     } else if (!o->split){
+        /* We're expected to overwrite our result, However when 2*np >
+         * W(2*Np), the high word is left untouched by MulMod. For this
+         * reason, we need to clear the output area first.
+         */
+        gf2x_ternary_fft_zero(o, tc, 1);
         gf2x_ternary_fft_compose_inner(o, tc, ta, tb, o->M, temp2);
     } else {
+        // see above
+        gf2x_ternary_fft_zero(o, tc, 1);
+
         size_t m1 = o->M;
         size_t m2 = o->M - 1;
         size_t K = o->K;
@@ -993,6 +858,9 @@ void gf2x_ternary_fft_add(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr t
 
 void gf2x_ternary_fft_addcompose_n(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr tc, gf2x_ternary_fft_srcptr * ta, gf2x_ternary_fft_srcptr * tb, size_t n, gf2x_ternary_fft_ptr temp2, gf2x_ternary_fft_ptr temp1 GF2X_MAYBE_UNUSED)
 {
+    /* TODO: Write an AddMulMod, which is the only missing bit that
+     * prevents us from avoiding this temp allocation.
+     */
     gf2x_ternary_fft_ptr t = gf2x_ternary_fft_alloc(o, 1);
     for(size_t k = 0 ; k < n ; k++) {
         gf2x_ternary_fft_compose(o, t, ta[k], tb[k], temp2);
@@ -1029,17 +897,42 @@ void gf2x_ternary_fft_ift_inner(gf2x_ternary_fft_info_srcptr o, unsigned long * 
     for (i = 0; i < K; i++) ASSERT(A[i] == Ap[o->perm[i]]);
 
     free(Ap);
-    recompose(a, W(bits_a), A, K, M, Np);
+    if (o->mp_shift && !o->split) {
+        /* we sidestep the recompose() call in order to embed the shift
+         * operation.
+         */
+        recompose_simpler(a, W(bits_a), o->mp_shift, A, K, M, Np);
+        if (R(bits_a))
+            a[I(bits_a)] &= MASK(R(bits_a));
+    } else {
+        recompose(a, W(bits_a), A, K, M, Np);
+    }
     free(A);
 }
 
 void gf2x_ternary_fft_ift(gf2x_ternary_fft_info_srcptr o, unsigned long * c, size_t bits_c, gf2x_ternary_fft_ptr tr, gf2x_ternary_fft_ptr temp1)
 {
     if (o->K == 0) {
-        Copy(c, tr, W(bits_c));
+        if (o->mp_shift == 0) {
+            Copy(c, tr, W(bits_c));
+        } else {
+            size_t t = W(bits_c);
+            size_t words_full = W(bits_c + o->mp_shift);
+            size_t pick = I(o->mp_shift);
+            size_t cnt = R(o->mp_shift);
+            size_t tnc = WLEN - cnt;
+            Rsh(c, tr + pick, t, cnt);
+            /* words_full - pick - t is either 0 or 1 */
+            if (words_full - pick == t + 1)
+                c[t - 1] |= tr[pick + t] << tnc;
+            if (R(bits_c))
+                c[I(bits_c)] &= MASK(R(bits_c));
+        }
     } else if (!o->split) {
         gf2x_ternary_fft_ift_inner(o, c, bits_c, tr, o->M, temp1);
     } else {
+        if (o->mp_shift) abort();
+        
         size_t K = o->K;
         size_t m1 = o->M;
         size_t m2 = m1 - 1;
@@ -1061,7 +954,7 @@ void gf2x_ternary_fft_ift(gf2x_ternary_fft_info_srcptr o, unsigned long * c, siz
         gf2x_ternary_fft_ift_inner(o, c2, cn * WLEN, tr, m2, temp1);
         wrap(c2, cn2 * WLEN, K * m2);
 
-        split_reconstruct(c, c1, c2, cn0, K, m1);
+        split_reconstruct(c, bits_c, c1, c2, cn0, K, m1);
         free(c1);
         free(c2);
     }
@@ -1100,6 +993,8 @@ void gf2x_ternary_fft_info_init(gf2x_ternary_fft_info_ptr o, size_t bits_a, size
         }
     }
 
+    o->mp_shift = 0;
+
     size_t M;
     if (K > 0) {
         M = CEIL((nwa + nwb) * WLEN, K);	// ceil(bits(product)/K)
@@ -1110,7 +1005,7 @@ void gf2x_ternary_fft_info_init(gf2x_ternary_fft_info_ptr o, size_t bits_a, size
         ASSERT(-K >= WLEN);
         size_t cn2 = CEIL(nwa + nwb, 2);	// Space for half product
         size_t m2 = CEIL(cn2 * WLEN, -K);	// m2 = ceil(cn2*WLEN/K)
-        size_t m1 = m2 + 1;		// next possible M
+        size_t m1 = m2 + 1;		        // next possible M
         M = m1;
         o->K = -K;
         o->M = M;
@@ -1131,6 +1026,79 @@ void gf2x_ternary_fft_info_init(gf2x_ternary_fft_info_ptr o, size_t bits_a, size
     bitrev(0, 0, o->K, 1, o->perm);
     va_end(ap);
 }
+
+void gf2x_ternary_fft_info_init_mp(gf2x_ternary_fft_info_ptr o, size_t bits_a, size_t bits_b, ...)
+{
+    o->bits_a = bits_a;
+    o->bits_b = bits_b;
+
+    size_t nwa = W(bits_a);
+    size_t nwb = W(bits_b);
+
+    va_list ap;
+    va_start(ap, bits_b);
+    long K = va_arg(ap, long);
+
+    /* Since we have a dangerous interface with a variable argument which
+     * is a possibly _signed_ long, better try to catch the expected
+     * mistakes */
+    for(int i = 2*(K>0)-1 ; K/i > 1 ; i*=3) {
+        if ((K/i)%3) {
+            fprintf(stderr, "extra argument to gf2x_ternary_fft_init (of type long) must be a power of 3 (got %ld)\n", K);
+            abort();
+        }
+    }
+
+    o->mp_shift = MIN(bits_a, bits_b) - 1;
+
+    /* We don't know how we can split the fft in the middle product case.
+     * At least not the way we do it for the full product.
+     */
+    if (K < 0) K = -K;
+
+    size_t M;
+    if (K > 0) {
+        /* For the middle product, we only need the operands to fit.
+         * Since the polynomial product is computed mod X^K-1, having K*M
+         * >= max(bits_a, bits_b) is sufficient to ensure that the
+         * wraparound works precisely as we want it to.
+         */
+        M = CEIL(MAX(nwa, nwb) * WLEN, K);
+        o->K = K;
+        o->M = M;
+        o->split = 0;
+    } else {
+        abort();
+        ASSERT(-K >= WLEN);
+        size_t cn2 = CEIL(nwa + nwb, 2);	// Space for half product
+        size_t m2 = CEIL(cn2 * WLEN, -K);	// m2 = ceil(cn2*WLEN/K)
+        size_t m1 = m2 + 1;		        // next possible M
+        M = m1;
+        o->K = -K;
+        o->M = M;
+        o->split = 1;
+    }
+
+    if (nwa + nwb < MUL_FFT_THRESHOLD) {
+        // make this special.
+        o->K = 0;
+        o->M = 0;
+        o->perm = NULL;
+        return;
+    }
+
+    /* the temporary space used by this FFT is computed in
+     * gf2x_ternary_fft_info_get_alloc_sizes */
+    o->perm = (size_t *) malloc_or_die(o->K * sizeof(size_t));
+    bitrev(0, 0, o->K, 1, o->perm);
+    va_end(ap);
+}
+
+void gf2x_ternary_fft_info_empty(gf2x_ternary_fft_info_ptr o)
+{
+    memset(o, 0, sizeof(struct gf2x_ternary_fft_info));
+}
+
 void gf2x_ternary_fft_info_copy(
         gf2x_ternary_fft_info_ptr o,
         gf2x_ternary_fft_info_srcptr other)

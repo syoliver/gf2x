@@ -67,7 +67,7 @@
 #endif
 
 /* The section below is automatically generated */
-/* inline: clear order copy */
+/* inline: init_empty clear order copy */
 
 struct gf2x_cantor_fft_info;
 // gf2x_cantor_fft_info_t is defined after the struct fields.
@@ -105,6 +105,25 @@ extern void GF2X_EXPORTED gf2x_cantor_fft_info_init(
 /* Basic constructor. Used to multiply polynomials with the given number
  * of bits. Extra (stdarg) arguments may be passed for implementations
  * that have a use for it.  */
+
+extern void GF2X_EXPORTED gf2x_cantor_fft_info_init_mp(
+        gf2x_cantor_fft_info_ptr p,
+        size_t bits_a,
+        size_t bits_b,
+        ...); 
+/* Used to compute middle products of polynomials with the given number
+ * of bits. That is, the result MP(a, b) consists of coefficients of
+ * degrees MIN(bits_a, bits_b)-1 to MAX(bits_a, bits_b)-1 (inclusive),
+ * forming a result with MAX(bits_a, bits_b)-MIN(bits_a, bits_b)+1
+ * coefficients.  Extra (stdarg) arguments may be passed for
+ * implementations that have a use for it.  */
+
+static inline void gf2x_cantor_fft_info_init_empty(
+        gf2x_cantor_fft_info_ptr p);
+/* This is not really a constructor. Most often we expect this function
+ * to be a noop, or at most an inline. It is just meant to provide some
+ * default-initialization, so that info_clear does not choke.
+ */
 
 static inline void gf2x_cantor_fft_info_clear(
         gf2x_cantor_fft_info_ptr p);
@@ -343,6 +362,7 @@ extern void GF2X_EXPORTED gf2x_cantor_fft_addcompose(
 struct gf2x_cantor_fft_info {
     unsigned int k;
     size_t n;
+    size_t mp_shift;
     /* The section below is automatically generated */
     /* pod: yes */
 #ifdef __cplusplus
@@ -350,16 +370,28 @@ struct gf2x_cantor_fft_info {
     typedef gf2x_cantor_fft_ptr ptr;
     typedef gf2x_cantor_fft_srcptr srcptr;
 
+    inline gf2x_cantor_fft_info() = default;
     inline gf2x_cantor_fft_info(size_t nF, size_t nG)
     {
         gf2x_cantor_fft_info_init(this, nF, nG);
     }
-    ~gf2x_cantor_fft_info() = default;
-    gf2x_cantor_fft_info(gf2x_cantor_fft_info const &) = default;
-    gf2x_cantor_fft_info& operator=(gf2x_cantor_fft_info const &) = default;
+    inline ~gf2x_cantor_fft_info() = default;
+    inline gf2x_cantor_fft_info(gf2x_cantor_fft_info const &) = default;
+    inline gf2x_cantor_fft_info& operator=(gf2x_cantor_fft_info const &) = default;
     inline gf2x_cantor_fft_info(gf2x_cantor_fft_info const & other, size_t nF, size_t nG)
     {
         gf2x_cantor_fft_info_init_similar(this, &other, nF, nG);
+    }
+    /* Use named constructor idiom for the variants */
+    inline static gf2x_cantor_fft_info mul_info(size_t nF, size_t nG) {
+        gf2x_cantor_fft_info a;
+        gf2x_cantor_fft_info_init(&a, nF, nG);
+        return a;
+    }
+    inline static gf2x_cantor_fft_info mp_info(size_t nF, size_t nG) {
+        gf2x_cantor_fft_info a;
+        gf2x_cantor_fft_info_init_mp(&a, nF, nG);
+        return a;
     }
     inline bool compatible(gf2x_cantor_fft_info const & other) const {
         return gf2x_cantor_fft_info_compatible(this, &other);
@@ -432,6 +464,9 @@ extern "C" {
 #endif
 
 static inline void gf2x_cantor_fft_info_clear(gf2x_cantor_fft_info_t t GF2X_MAYBE_UNUSED) { }
+static inline void gf2x_cantor_fft_info_init_empty(gf2x_cantor_fft_info_t t) { 
+    t->k = t->n = t->mp_shift = 0;
+}
 
 static inline void gf2x_cantor_fft_info_copy(
         gf2x_cantor_fft_info_ptr o,

@@ -69,6 +69,25 @@ extern void GF2X_EXPORTED gf2x_ternary_fft_info_init(
  * of bits. Extra (stdarg) arguments may be passed for implementations
  * that have a use for it.  */
 
+extern void GF2X_EXPORTED gf2x_ternary_fft_info_init_mp(
+        gf2x_ternary_fft_info_ptr p,
+        size_t bits_a,
+        size_t bits_b,
+        ...); 
+/* Used to compute middle products of polynomials with the given number
+ * of bits. That is, the result MP(a, b) consists of coefficients of
+ * degrees MIN(bits_a, bits_b)-1 to MAX(bits_a, bits_b)-1 (inclusive),
+ * forming a result with MAX(bits_a, bits_b)-MIN(bits_a, bits_b)+1
+ * coefficients.  Extra (stdarg) arguments may be passed for
+ * implementations that have a use for it.  */
+
+extern void GF2X_EXPORTED gf2x_ternary_fft_info_init_empty(
+        gf2x_ternary_fft_info_ptr p);
+/* This is not really a constructor. Most often we expect this function
+ * to be a noop, or at most an inline. It is just meant to provide some
+ * default-initialization, so that info_clear does not choke.
+ */
+
 extern void GF2X_EXPORTED gf2x_ternary_fft_info_clear(
         gf2x_ternary_fft_info_ptr p);
 /* Destructor for the info type. */
@@ -291,6 +310,7 @@ struct gf2x_ternary_fft_info {
     size_t K;       // 0 indicates fallback.
     size_t M;
     size_t * perm;
+    size_t mp_shift;
     int split;  // boolean
     /* The section below is automatically generated */
     /* pod: no */
@@ -299,17 +319,21 @@ struct gf2x_ternary_fft_info {
     typedef gf2x_ternary_fft_ptr ptr;
     typedef gf2x_ternary_fft_srcptr srcptr;
 
+    inline gf2x_ternary_fft_info()
+    {
+        gf2x_ternary_fft_info_init_empty(this);
+    }
     inline gf2x_ternary_fft_info(size_t nF, size_t nG)
     {
         gf2x_ternary_fft_info_init(this, nF, nG);
     }
-    ~gf2x_ternary_fft_info() {
+    inline ~gf2x_ternary_fft_info() {
         gf2x_ternary_fft_info_clear(this);
     }
-    gf2x_ternary_fft_info(gf2x_ternary_fft_info const & o) {
+    inline gf2x_ternary_fft_info(gf2x_ternary_fft_info const & o) {
         gf2x_ternary_fft_info_copy(this, &o);
     }
-    gf2x_ternary_fft_info& operator=(gf2x_ternary_fft_info const & o) {
+    inline gf2x_ternary_fft_info& operator=(gf2x_ternary_fft_info const & o) {
         gf2x_ternary_fft_info_clear(this);
         gf2x_ternary_fft_info_copy(this, &o);
         return *this;
@@ -317,6 +341,17 @@ struct gf2x_ternary_fft_info {
     inline gf2x_ternary_fft_info(gf2x_ternary_fft_info const & other, size_t nF, size_t nG)
     {
         gf2x_ternary_fft_info_init_similar(this, &other, nF, nG);
+    }
+    /* Use named constructor idiom for the variants */
+    inline static gf2x_ternary_fft_info mul_info(size_t nF, size_t nG) {
+        gf2x_ternary_fft_info a;
+        gf2x_ternary_fft_info_init(&a, nF, nG);
+        return a;
+    }
+    inline static gf2x_ternary_fft_info mp_info(size_t nF, size_t nG) {
+        gf2x_ternary_fft_info a;
+        gf2x_ternary_fft_info_init_mp(&a, nF, nG);
+        return a;
     }
     inline bool compatible(gf2x_ternary_fft_info const & other) const {
         return gf2x_ternary_fft_info_compatible(this, &other);
