@@ -277,11 +277,11 @@ unsigned long rand2_ulong()
                 "L_interpolate(saved_T"#P ", "                          \
                 "transform_length(T"#P"));\n");              		\
         printf("assert interpolated_" #P " eq "				\
-                "LP_canonical(LP_add(LP_mul(Lf1, Lg1),\n"		\
+                "LP_canonical(LP_add(LP_mul(Lf1, Lg1),"		\
                 " LP_mul(Lf2, Lg2)));\n");     				\
         /* When doing MP, we tolerate modular equality here */          \
         if (doing_mp) {                                                 \
-            printf("if assigned Lwrap and assigned Kwrap then\n"	\
+            printf("if assigned Kwrap then\n"	\
                         "\tassert (LP_to_KP(interpolated_" #P ") - "    \
                         "(Kf1*Kg1+Kf2*Kg2)) mod Kwrap eq 0;\n"		\
                     "else\n"						\
@@ -587,7 +587,6 @@ void print_context_gf2x_ternary_fft(gf2x_ternary_fft_info_srcptr p GF2X_MAYBE_UN
             printf("LP_canonical:=func<x|x mod Lwrap>;\n");
         }
     } else {
-        if (doing_mp) abort();
         printf("fft_M1:=%zu; fft_M2:=%zu; fft_K:=%zu; fft_split:=%d;\n",
                 p->M, p->M-1, p->K, p->split);
 
@@ -634,7 +633,7 @@ void print_context_gf2x_ternary_fft(gf2x_ternary_fft_info_srcptr p GF2X_MAYBE_UN
                 "                Polynomial(Eltseq(L2!c))\n"
                 "                :c in Coefficients(P[2])]), KP.1^ks2)"
                 "                mod (1+x^(fft_M2*fft_K)),\n"
-                "        fft_M2 * fft_K)\n"
+                "        fft_M2 * fft_K)"
                 "        >;\n"
                 "tritrev:=func<x|Seqint(Reverse(Intseq(x,3,Ilog(3,fft_K))),3)>;\n"
                 "evalpoint1:=func<i|zeta1^tritrev(i)> where zeta1 is L1.1^(fft_Np1 div (fft_K div 3));\n"
@@ -642,11 +641,11 @@ void print_context_gf2x_ternary_fft(gf2x_ternary_fft_info_srcptr p GF2X_MAYBE_UN
                 "transform_length:=func<x|#x[1]>;\n"
                 "transform_add:=func<a,b|<\n"
                     "[a[1][i]+b[1][i]:i in [1..#a[1]]],\n"
-                    "[a[2][i]+b[2][i]:i in [1..#a[2]]]\n"
+                    "[a[2][i]+b[2][i]:i in [1..#a[2]]]"
                 ">>;\n"
                 "transform_pointwise:=func<a,b|<\n"
                     "[a[1][i]*b[1][i]:i in [1..#a[1]]],\n"
-                    "[a[2][i]*b[2][i]:i in [1..#a[2]]]\n"
+                    "[a[2][i]*b[2][i]:i in [1..#a[2]]]"
                 ">>;\n"
                 "Lseq_as_LP:=func<x|<Polynomial(x[1]),Polynomial(x[2])>>;\n"
                 "LP_canonical:=func<x|<\n"
@@ -659,7 +658,7 @@ void print_context_gf2x_ternary_fft(gf2x_ternary_fft_info_srcptr p GF2X_MAYBE_UN
                 "[Evaluate(P[2],evalpoint2(i)) : i in [0..n-1]]>>;\n"
                 "Zseq_to_Lseq:=func<X|<\n"
 "                    [Evaluate(Zseq_to_KP(X[i..i+fft_2np1-1]),L1.1):i in [1..fft_K*fft_2np1 by fft_2np1]],\n"
-"                    [Evaluate(Zseq_to_KP(X[i..i+fft_2np2-1]),L2.1):i in [fft_K*fft_2np1 + 1..#X by fft_2np2]]>\n"
+"                    [Evaluate(Zseq_to_KP(X[i..i+fft_2np2-1]),L2.1):i in [fft_K*fft_2np1 + 1..#X by fft_2np2]]>"
                 ">;\n"
                 "Lseq_to_Zseq:=func<XX|&cat [ &cat [KP_to_Zseq(Polynomial(Eltseq(c)),Degree(Universe(X))):c in X] : X in XX]>;\n"
                 , stdout);
@@ -669,6 +668,9 @@ void print_context_gf2x_ternary_fft(gf2x_ternary_fft_info_srcptr p GF2X_MAYBE_UN
                 "interpolate_generic(T[1],[evalpoint1(i): i in [0..n-1]]),\n"
                 "interpolate_generic(T[2],[evalpoint2(i): i in [0..n-1]])>>;\n"
                 , stdout);
+        if (doing_mp) {
+            printf("Kwrap:=x^((ks1+ks2-1) * fft_K)-1;\n");
+        }
     }
 }
 

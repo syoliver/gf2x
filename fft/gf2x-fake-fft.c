@@ -97,21 +97,7 @@ void gf2x_fake_fft_dft(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_
  */
 void gf2x_fake_fft_ift(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, unsigned long * dst, size_t n, gf2x_fake_fft_ptr src, gf2x_fake_fft_ptr temp1 GF2X_MAYBE_UNUSED) {
     ASSERT(n + p->mp_shift <= p->n1 + p->n2 - 1);
-    size_t t = W(n);
-    if (p->mp_shift == 0) {
-        memcpy(dst, src, t * sizeof(unsigned long));
-    } else {
-        size_t words_full = W(n + p->mp_shift);
-        size_t pick = I(p->mp_shift);
-        size_t cnt = R(p->mp_shift);
-        size_t tnc = WLEN - cnt;
-        Rsh(dst, src + pick, t, cnt);
-        /* words_full - pick - t is either 0 or 1 */
-        if (words_full - pick == t + 1)
-            dst[t - 1] |= src[pick + t] << tnc;
-        if (R(n))
-            dst[I(n)] &= MASK(R(n));
-    }
+    CopyBitsRsh(dst, src, n, p->mp_shift);
 }
 
 void gf2x_fake_fft_compose(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s1, gf2x_fake_fft_srcptr s2, gf2x_fake_fft_ptr temp2 GF2X_MAYBE_UNUSED) {

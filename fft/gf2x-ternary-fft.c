@@ -559,7 +559,7 @@ static void wrap(unsigned long *c, size_t bits_c, size_t N)
     Clear(c, Nw + 1, cn);
 }
 
-static void split_reconstruct(unsigned long * c, size_t bits_c, unsigned long * c1, unsigned long * c2, size_t cn, size_t K, size_t m1)
+static void split_reconstruct(unsigned long * c, size_t bits_c, size_t shift, unsigned long * c1, unsigned long * c2, size_t cn, size_t K, size_t m1)
 {
     size_t n = WLEN * cn;	// Max bit-size of full product
     size_t delta = K;		// delta = n1 - n2;
@@ -633,11 +633,8 @@ static void split_reconstruct(unsigned long * c, size_t bits_c, unsigned long * 
     }
 #endif
 
-    // Copy result
-    Copy(c, c1, W(bits_c));
-    if (R(bits_c))
-        c[I(bits_c)] &= MASK(R(bits_c));
-
+    // Copy result c1 to c, possibly shifting some bits.
+    CopyBitsRsh(c, c1, bits_c, shift);
 }
 
 
@@ -913,26 +910,10 @@ void gf2x_ternary_fft_ift_inner(gf2x_ternary_fft_info_srcptr o, unsigned long * 
 void gf2x_ternary_fft_ift(gf2x_ternary_fft_info_srcptr o, unsigned long * c, size_t bits_c, gf2x_ternary_fft_ptr tr, gf2x_ternary_fft_ptr temp1)
 {
     if (o->K == 0) {
-        if (o->mp_shift == 0) {
-            Copy(c, tr, W(bits_c));
-        } else {
-            size_t t = W(bits_c);
-            size_t words_full = W(bits_c + o->mp_shift);
-            size_t pick = I(o->mp_shift);
-            size_t cnt = R(o->mp_shift);
-            size_t tnc = WLEN - cnt;
-            Rsh(c, tr + pick, t, cnt);
-            /* words_full - pick - t is either 0 or 1 */
-            if (words_full - pick == t + 1)
-                c[t - 1] |= tr[pick + t] << tnc;
-            if (R(bits_c))
-                c[I(bits_c)] &= MASK(R(bits_c));
-        }
+        CopyBitsRsh(c, tr, bits_c, o->mp_shift);
     } else if (!o->split) {
         gf2x_ternary_fft_ift_inner(o, c, bits_c, tr, o->M, temp1);
     } else {
-        if (o->mp_shift) abort();
-        
         size_t K = o->K;
         size_t m1 = o->M;
         size_t m2 = m1 - 1;
@@ -954,7 +935,7 @@ void gf2x_ternary_fft_ift(gf2x_ternary_fft_info_srcptr o, unsigned long * c, siz
         gf2x_ternary_fft_ift_inner(o, c2, cn * WLEN, tr, m2, temp1);
         wrap(c2, cn2 * WLEN, K * m2);
 
-        split_reconstruct(c, bits_c, c1, c2, cn0, K, m1);
+        split_reconstruct(c, bits_c, o->mp_shift, c1, c2, cn0, K, m1);
         free(c1);
         free(c2);
     }
@@ -1051,11 +1032,6 @@ void gf2x_ternary_fft_info_init_mp(gf2x_ternary_fft_info_ptr o, size_t bits_a, s
 
     o->mp_shift = MIN(bits_a, bits_b) - 1;
 
-    /* We don't know how we can split the fft in the middle product case.
-     * At least not the way we do it for the full product.
-     */
-    if (K < 0) K = -K;
-
     size_t M;
     if (K > 0) {
         /* For the middle product, we only need the operands to fit.
@@ -1068,7 +1044,6 @@ void gf2x_ternary_fft_info_init_mp(gf2x_ternary_fft_info_ptr o, size_t bits_a, s
         o->M = M;
         o->split = 0;
     } else {
-        abort();
         ASSERT(-K >= WLEN);
         size_t cn2 = CEIL(nwa + nwb, 2);	// Space for half product
         size_t m2 = CEIL(cn2 * WLEN, -K);	// m2 = ceil(cn2*WLEN/K)

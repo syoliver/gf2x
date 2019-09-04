@@ -205,5 +205,26 @@ static inline unsigned long AddRsh(unsigned long *c, unsigned long *a, size_t n,
     return cy;
 }
 
+/* Copy bits_c bit from c1, starting from position shift. High bits of
+ * the last word of c are cleared.
+ */
+static inline void CopyBitsRsh(unsigned long * c, const unsigned long * c1, size_t bits_c, size_t shift)
+{
+    if (shift == 0) {
+        Copy(c, c1, W(bits_c));
+    } else {
+        size_t t = W(bits_c);
+        size_t words_full = W(bits_c + shift);
+        size_t pick = I(shift);
+        size_t cnt = R(shift);
+        size_t tnc = WLEN - cnt;
+        Rsh(c, c1 + pick, t, cnt);
+        /* words_full - pick - t is either 0 or 1 */
+        if (words_full - pick == t + 1)
+            c[t - 1] |= c1[pick + t] << tnc;
+    }
+    if (R(bits_c))
+        c[I(bits_c)] &= MASK(R(bits_c));
+}
 
 #endif	/* GF2X_FFT_IMPL_UTILS_H_ */
