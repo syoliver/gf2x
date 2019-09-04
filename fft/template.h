@@ -34,16 +34,21 @@ typedef const struct XXX_info * XXX_info_srcptr;
 extern "C" {
 #endif
 
-void XXX_info_init(
+int XXX_info_init(
         XXX_info_ptr p,
         size_t bits_a,
         size_t bits_b,
         ...); 
 /* Basic constructor. Used to multiply polynomials with the given number
  * of bits. Extra (stdarg) arguments may be passed for implementations
- * that have a use for it.  */
+ * that have a use for it.
+ *
+ * Returns 0 if everything went well, and a negative number on error
+ * (maybe if the extra arguments were incorrect)
+ *
+ */
 
-void XXX_info_init_mp(
+int XXX_info_init_mp(
         XXX_info_ptr p,
         size_t bits_a,
         size_t bits_b,
@@ -53,7 +58,12 @@ void XXX_info_init_mp(
  * degrees MIN(bits_a, bits_b)-1 to MAX(bits_a, bits_b)-1 (inclusive),
  * forming a result with MAX(bits_a, bits_b)-MIN(bits_a, bits_b)+1
  * coefficients.  Extra (stdarg) arguments may be passed for
- * implementations that have a use for it.  */
+ * implementations that have a use for it.
+ *
+ * Returns 0 if everything went well, and a negative number on error
+ * (maybe if the extra arguments were incorrect)
+ *
+ */
 
 void XXX_info_init_empty(
         XXX_info_ptr p);
@@ -66,12 +76,12 @@ void XXX_info_clear(
         XXX_info_ptr p);
 /* Destructor for the info type. */
 
-void XXX_info_copy(
+int XXX_info_copy(
         XXX_info_ptr p,
         XXX_info_srcptr other);
-/* Copy constructor. */
+/* Copy constructor. Returns 0 on success or GF2X_ERROR_OUT_OF_MEMORY.*/
 
-void XXX_info_init_similar(
+int XXX_info_init_similar(
         XXX_info_ptr p,
         XXX_info_srcptr other,
         size_t bits_a,
@@ -82,7 +92,8 @@ void XXX_info_init_similar(
  * the other transform info type, in the sense that with appropriate
  * truncation, transforms can meaningfully be composed together.
  * Unfortunately, the API to deal with these is truncation (decimation)
- * operations not complete. */
+ * operations not complete.
+ * Returns 0 on success or GF2X_ERROR_OUT_OF_MEMORY.*/
 
 int XXX_info_compatible(
         XXX_info_srcptr p,
@@ -218,7 +229,7 @@ void XXX_add(
         XXX_srcptr tb);
 /* Add two transforms to tc. tc==ta or tc==tb are allowed. */
 
-void XXX_dft(
+int XXX_dft(
         XXX_info_srcptr o,
         XXX_ptr tr,
         const unsigned long * a,
@@ -227,9 +238,13 @@ void XXX_dft(
 /* Compute the dft of the polynomial pointed to by a. Attention: the size
  * is given in number of *bits*, not in number of unsigned longs.  temp1
  * must point to storage of size sizes[1], with sizes[] filled as in the
- * XXX_info_get_alloc_sizes call. */
+ * XXX_info_get_alloc_sizes call.
+ *
+ * Returns 0 on success or GF2X_ERROR_OUT_OF_MEMORY (only minor extra
+ * allocation is needed by some implementations).
+ */
 
-void XXX_ift(
+int XXX_ift(
         XXX_info_srcptr o,
         unsigned long * c,
         size_t bits_c,
@@ -238,18 +253,26 @@ void XXX_ift(
 /* Compute the ift of the transform tr, to polynomial pointed to by c.
  * Attention: the size is given in number of *bits*, not in number of
  * unsigned longs.  temp1 must point to storage of size sizes[1], with
- * sizes[] filled as in the XXX_info_get_alloc_sizes call. */
+ * sizes[] filled as in the XXX_info_get_alloc_sizes call.
+ *
+ * Returns 0 on success or GF2X_ERROR_OUT_OF_MEMORY (only minor extra
+ * allocation is needed by some implementations).
+ */
 
-void XXX_compose(
+int XXX_compose(
         XXX_info_srcptr o,
         XXX_ptr tc,
         XXX_srcptr ta,
         XXX_srcptr tb,
         XXX_ptr temp2);
 /* Compose two DFTs.  temp2 must point to storage of size sizes[2], with
- * sizes[] filled as in the XXX_info_get_alloc_sizes call. */
+ * sizes[] filled as in the XXX_info_get_alloc_sizes call.
+ *
+ * Returns 0 on success or GF2X_ERROR_OUT_OF_MEMORY (only minor extra
+ * allocation is needed by some implementations).
+ */
 
-void XXX_addcompose_n(
+int XXX_addcompose_n(
         XXX_info_srcptr o,
         XXX_ptr tc,
         XXX_srcptr * ta,
@@ -259,9 +282,13 @@ void XXX_addcompose_n(
         XXX_ptr temp1);
 /* Compose 2n DFTs, and add the result to tc. temp1 and temp2 must point to
  * storage of size sizes[1] and sizes[2], respectively, with sizes[]
- * filled as in the XXX_info_get_alloc_sizes call. */
+ * filled as in the XXX_info_get_alloc_sizes call.
+ *
+ * Returns 0 on success or GF2X_ERROR_OUT_OF_MEMORY (only minor extra
+ * allocation is needed by some implementations).
+ */
 
-void XXX_addcompose(
+int XXX_addcompose(
         XXX_info_srcptr o,
         XXX_ptr tc,
         XXX_srcptr ta,
@@ -270,10 +297,18 @@ void XXX_addcompose(
         XXX_ptr temp1);
 /* Compose 2 DFTs, and add the result to tc. temp1 and temp2 must point to
  * storage of size sizes[1] and sizes[2], respectively, with sizes[]
- * filled as in the XXX_info_get_alloc_sizes call. */
+ * filled as in the XXX_info_get_alloc_sizes call.
+ *
+ * Returns 0 on success or GF2X_ERROR_OUT_OF_MEMORY (only minor extra
+ * allocation is needed by some implementations).
+ */
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef __cplusplus
+#include <exception>
 #endif
 
 /* END SECTION 2 */
@@ -284,6 +319,13 @@ struct XXX_info {
     /* BEGIN SECTION 3: member function proxies for the XXX_info type */
 #ifdef __cplusplus
 
+    class ctor_fails: public exception
+    {
+      virtual const char* what() const throw() {
+        return "contructor failed for XXX";
+      }
+    };
+
     typedef XXX_ptr ptr;
     typedef XXX_srcptr srcptr;
 
@@ -293,7 +335,8 @@ struct XXX_info {
     }
     inline XXX_info(size_t nF, size_t nG)
     {
-        XXX_info_init(this, nF, nG);
+        if (XXX_info_init(this, nF, nG) < 0)
+            throw ctor_fails();
     }
     inline ~XXX_info() {
         XXX_info_clear(this);
@@ -308,17 +351,20 @@ struct XXX_info {
     }
     inline XXX_info(XXX_info const & other, size_t nF, size_t nG)
     {
-        XXX_info_init_similar(this, &other, nF, nG);
+        if (XXX_info_init_similar(this, &other, nF, nG) < 0)
+            throw ctor_fails();
     }
     /* Use named constructor idiom for the variants */
     inline static XXX_info mul_info(size_t nF, size_t nG) {
         XXX_info a;
-        XXX_info_init(&a, nF, nG);
+        if (XXX_info_init(&a, nF, nG) < 0)
+            throw ctor_fails();
         return a;
     }
     inline static XXX_info mp_info(size_t nF, size_t nG) {
         XXX_info a;
-        XXX_info_init_mp(&a, nF, nG);
+        if (XXX_info_init_mp(&a, nF, nG) < 0)
+            throw ctor_fails();
         return a;
     }
     inline bool compatible(XXX_info const & other) const {
@@ -350,20 +396,20 @@ struct XXX_info {
     }
 #endif
 
-    inline void dft(ptr x, const unsigned long * F, size_t nF, ptr temp1) const {
-        XXX_dft(this, x, F, nF, temp1);
+    inline int dft(ptr x, const unsigned long * F, size_t nF, ptr temp1) const {
+        return XXX_dft(this, x, F, nF, temp1);
     }
-    inline void compose(ptr y, srcptr x1, srcptr x2, ptr temp2) const
+    inline int compose(ptr y, srcptr x1, srcptr x2, ptr temp2) const
     {
-        XXX_compose(this, y, x1, x2, temp2);
+        return XXX_compose(this, y, x1, x2, temp2);
     }
-    inline void addcompose(ptr y, srcptr x1, srcptr x2, ptr temp2, ptr temp1) const
+    inline int addcompose(ptr y, srcptr x1, srcptr x2, ptr temp2, ptr temp1) const
     {
-        XXX_addcompose(this, y, x1, x2, temp2, temp1);
+        return XXX_addcompose(this, y, x1, x2, temp2, temp1);
     }
-    inline void addcompose_n(ptr y, srcptr * x1, srcptr * x2, size_t n, ptr temp2, ptr temp1) const
+    inline int addcompose_n(ptr y, srcptr * x1, srcptr * x2, size_t n, ptr temp2, ptr temp1) const
     {
-        XXX_addcompose_n(this, y, x1, x2, n, temp2, temp1);
+        return XXX_addcompose_n(this, y, x1, x2, n, temp2, temp1);
     }
     inline void add(ptr y, srcptr x1, srcptr x2) const
     {
@@ -373,9 +419,9 @@ struct XXX_info {
     {
         XXX_cpy(this, y, x, n);
     }
-    inline void ift(unsigned long * H, size_t Hl, ptr h, ptr temp1) const
+    inline int ift(unsigned long * H, size_t Hl, ptr h, ptr temp1) const
     {
-        XXX_ift(this, H, Hl, h, temp1);
+        return XXX_ift(this, H, Hl, h, temp1);
     }
 #endif
 

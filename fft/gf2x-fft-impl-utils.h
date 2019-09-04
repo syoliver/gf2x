@@ -70,14 +70,6 @@ static inline void XORBIT(unsigned long *a, size_t i, unsigned long x)
     a[I(i)] ^= x << R(i);
 }
 
-static inline void * malloc_or_die(size_t size)
-{
-    void *res = malloc(size);
-    if (res == NULL)
-	abort();
-    return res;
-}
-
 static inline void Copy(unsigned long *a, const unsigned long *b, size_t n)
 {
     memcpy(a, b, n * sizeof(unsigned long));

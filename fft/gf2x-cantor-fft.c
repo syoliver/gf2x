@@ -925,7 +925,8 @@ void multievaluateKrec(Kelt * f, unsigned int i, size_t rep_beta)
 
 #ifdef  CANTOR_GM
 // f must have 2^k coeffs exactly
-void multievaluateGM(Kelt * f, unsigned int k, size_t length GF2X_MAYBE_UNUSED)
+static int multievaluateGM(Kelt * f, unsigned int k, size_t length GF2X_MAYBE_UNUSED) GF2X_ATTRIBUTE_WARN_UNUSED_RESULT;
+static int multievaluateGM(Kelt * f, unsigned int k, size_t length GF2X_MAYBE_UNUSED)
 {
     unsigned int t = 1;
     unsigned int two_t;
@@ -933,6 +934,8 @@ void multievaluateGM(Kelt * f, unsigned int k, size_t length GF2X_MAYBE_UNUSED)
     assert(t < k && k <= two_t);
 #ifdef CANTOR_GM_TRUNCATE
     Kelt * buf = malloc(sizeof(Kelt) << k);
+    if (buf == NULL)
+        return GF2X_ERROR_OUT_OF_MEMORY;
     gm_trick_trunc(two_t,f,buf,0,k,length);
     free(buf);
 #else
@@ -1323,7 +1326,7 @@ void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
 #endif
 
 /* nF is a number of coefficients == number of bits ; a.k.a. degree + 1 */
-void gf2x_cantor_fft_info_init(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, ...)
+int gf2x_cantor_fft_info_init(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, ...)
 {
     unsigned int k;
     size_t Hl;
@@ -1342,9 +1345,11 @@ void gf2x_cantor_fft_info_init(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, .
     p->k = k;
     p->n = n;
     p->mp_shift = 0;
+
+    return 0;
 }
 
-void gf2x_cantor_fft_info_init_mp(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, ...)
+int gf2x_cantor_fft_info_init_mp(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, ...)
 {
     unsigned int k;
 
@@ -1392,7 +1397,7 @@ void gf2x_cantor_fft_info_init_mp(gf2x_cantor_fft_info_t p, size_t nF, size_t nG
                     (1UL << k) * ks >= bound1 /* room for both ops */
                 ) ||
                     ((1UL << k) - (1UL << fk[k])) * ks >= bound0b  /* controlled wraparound */
-                    ) ; k++) if (k >= 63) abort();
+                    ) ; k++) if (k >= 63) return GF2X_ERROR_INVALID_ARGUMENTS;
     /* We used to refuse k < 2 here. Now we've got sufficient provision
      * in here to accomodate for the case where k==1, so a safe fallback
      * works. */
@@ -1427,6 +1432,8 @@ void gf2x_cantor_fft_info_init_mp(gf2x_cantor_fft_info_t p, size_t nF, size_t nG
      */
     p->n = MIN(Fl + Gl - 1, 1UL << k);
     p->mp_shift = MIN(nF, nG) - 1;
+
+    return 0;
 }
 
 extern void GF2X_EXPORTED gf2x_cantor_fft_info_get_alloc_sizes(
@@ -1439,7 +1446,7 @@ extern void GF2X_EXPORTED gf2x_cantor_fft_info_get_alloc_sizes(
 }
 
 /* nF is a number of coefficients */
-void gf2x_cantor_fft_dft(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x, const unsigned long * F, size_t nF, gf2x_cantor_fft_ptr temp1 GF2X_MAYBE_UNUSED)
+int gf2x_cantor_fft_dft(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x, const unsigned long * F, size_t nF, gf2x_cantor_fft_ptr temp1 GF2X_MAYBE_UNUSED)
 {
     size_t Fl = W(nF);
     if (R(nF)) {
@@ -1455,7 +1462,8 @@ void gf2x_cantor_fft_dft(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x, 
 #endif
     decomposeK(x,F,Fl,p->k);
 #ifdef  CANTOR_GM
-    multievaluateGM(x, p->k, p->n);
+    int rc = multievaluateGM(x, p->k, p->n);
+    if (rc < 0) return rc;
 #else
 #ifdef WITHOUT_CANTOR_TRUNCATION
     multievaluateKrec(x, p->k, 0);
@@ -1463,17 +1471,19 @@ void gf2x_cantor_fft_dft(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x, 
     multievaluateKnew_trunc(x, p->k, p->n);
 #endif
 #endif
+    return 0;
 }
 
 
-void gf2x_cantor_fft_compose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2, gf2x_cantor_fft_ptr temp2 GF2X_MAYBE_UNUSED)
+int gf2x_cantor_fft_compose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2, gf2x_cantor_fft_ptr temp2 GF2X_MAYBE_UNUSED)
 {
     for (size_t j = 0; j < transform_datasize(p) ; j++) {
         Kmul(y[j], x1[j], x2[j]);
     }
+    return 0;
 }
 
-void gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr * x1, gf2x_cantor_fft_srcptr * x2, size_t n, gf2x_cantor_fft_ptr temp2 GF2X_MAYBE_UNUSED, gf2x_cantor_fft_ptr temp1 GF2X_MAYBE_UNUSED)
+int gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr * x1, gf2x_cantor_fft_srcptr * x2, size_t n, gf2x_cantor_fft_ptr temp2 GF2X_MAYBE_UNUSED, gf2x_cantor_fft_ptr temp1 GF2X_MAYBE_UNUSED)
 {
     Kelt er;
 #if 0
@@ -1544,11 +1554,13 @@ void gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_ff
         x2 ++;
     }
 #endif
+    return 0;
 }
 
-void gf2x_cantor_fft_addcompose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2, gf2x_cantor_fft_ptr temp2, gf2x_cantor_fft_ptr temp1)
+int gf2x_cantor_fft_addcompose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2, gf2x_cantor_fft_ptr temp2, gf2x_cantor_fft_ptr temp1)
 {
     gf2x_cantor_fft_addcompose_n(p, y, &x1, &x2, 1, temp2, temp1);
+    return 0;
 }
 
 void gf2x_cantor_fft_add(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2)
@@ -1572,7 +1584,7 @@ size_t gf2x_cantor_fft_transform_size(const gf2x_cantor_fft_info_t p)
 
 /* nH is a number of coefficients */
 /* this destroys the input */
-void gf2x_cantor_fft_ift(
+int gf2x_cantor_fft_ift(
         const gf2x_cantor_fft_info_t p,
         unsigned long * H,
         size_t nH,
@@ -1611,6 +1623,7 @@ void gf2x_cantor_fft_ift(
         if (R(nH))
             H[I(nH)] &= MASK(R(nH));
     }
+    return 0;
 }
 
 
@@ -1637,9 +1650,9 @@ void gf2x_cantor_fft_zero(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x,
 {
     memset(x, 0, ((n << p->k) + n) * sizeof(Kelt));
 }
-void gf2x_cantor_fft_info_init_similar(gf2x_cantor_fft_info_ptr o, gf2x_cantor_fft_info_srcptr other GF2X_MAYBE_UNUSED, size_t bits_a, size_t bits_b)
+int gf2x_cantor_fft_info_init_similar(gf2x_cantor_fft_info_ptr o, gf2x_cantor_fft_info_srcptr other GF2X_MAYBE_UNUSED, size_t bits_a, size_t bits_b)
 {
-    gf2x_cantor_fft_info_init(o, bits_a, bits_b);
+    return gf2x_cantor_fft_info_init(o, bits_a, bits_b);
 }
 int gf2x_cantor_fft_info_compatible(gf2x_cantor_fft_info_srcptr o1, gf2x_cantor_fft_info_srcptr o2)
 {

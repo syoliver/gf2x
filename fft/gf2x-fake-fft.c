@@ -34,7 +34,7 @@
 #include "gf2x-fft-impl-utils.h"
 
 /* nF, nG : number of coefficients */
-void gf2x_fake_fft_info_init(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, ...)
+int gf2x_fake_fft_info_init(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, ...)
 {
     p->n1 = nF;
     p->n2 = nG;
@@ -43,9 +43,10 @@ void gf2x_fake_fft_info_init(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, ...
     if (p->n1 > nc) nc = p->n1;
     if (p->n2 > nc) nc = p->n2;
     p->size = 2 * W(nc);
+    return 0;
 }
 
-void gf2x_fake_fft_info_init_mp(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, ...)
+int gf2x_fake_fft_info_init_mp(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, ...)
 {
     p->n1 = nF;
     p->n2 = nG;
@@ -54,11 +55,12 @@ void gf2x_fake_fft_info_init_mp(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, 
     if (p->n1 > nc) nc = p->n1;
     if (p->n2 > nc) nc = p->n2;
     p->size = 2 * W(nc);
+    return 0;
 }
 
-void gf2x_fake_fft_info_init_similar(gf2x_fake_fft_info_ptr o, gf2x_fake_fft_info_srcptr other GF2X_MAYBE_UNUSED, size_t bits_a, size_t bits_b)
+int gf2x_fake_fft_info_init_similar(gf2x_fake_fft_info_ptr o, gf2x_fake_fft_info_srcptr other GF2X_MAYBE_UNUSED, size_t bits_a, size_t bits_b)
 {
-    gf2x_fake_fft_info_init(o, bits_a, bits_b);
+    return gf2x_fake_fft_info_init(o, bits_a, bits_b);
 }
 
 int gf2x_fake_fft_compatible(gf2x_fake_fft_info_srcptr o1 GF2X_MAYBE_UNUSED, gf2x_fake_fft_info_srcptr o2 GF2X_MAYBE_UNUSED)
@@ -76,7 +78,7 @@ void gf2x_fake_fft_info_get_alloc_sizes(
 }
 
 /* n is a number of coefficients ! */
-void gf2x_fake_fft_dft(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, const unsigned long * src, size_t n, gf2x_fake_fft_ptr temp1 GF2X_MAYBE_UNUSED) {
+int gf2x_fake_fft_dft(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, const unsigned long * src, size_t n, gf2x_fake_fft_ptr temp1 GF2X_MAYBE_UNUSED) {
     ASSERT(n <= p->n1 || n <= p->n2);
     size_t s = W(n);
     memcpy(dst, src, s * sizeof(unsigned long));
@@ -89,38 +91,45 @@ void gf2x_fake_fft_dft(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_
         ASSERT((src[s-1] & ~MASK(R(n))) == 0);
     }
     memset(dst + s, 0, (p->size - s) * sizeof(unsigned long));
+    return 0;
 }
 
 /* n is a number of coefficients ! -- requiring less than the compute size is
  * okay, as long as it's understood as a means for truncating the data. So we
  * don't do checking for zero high bits.
  */
-void gf2x_fake_fft_ift(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, unsigned long * dst, size_t n, gf2x_fake_fft_ptr src, gf2x_fake_fft_ptr temp1 GF2X_MAYBE_UNUSED) {
+int gf2x_fake_fft_ift(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, unsigned long * dst, size_t n, gf2x_fake_fft_ptr src, gf2x_fake_fft_ptr temp1 GF2X_MAYBE_UNUSED) {
     ASSERT(n + p->mp_shift <= p->n1 + p->n2 - 1);
     CopyBitsRsh(dst, src, n, p->mp_shift);
+    return 0;
 }
 
-void gf2x_fake_fft_compose(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s1, gf2x_fake_fft_srcptr s2, gf2x_fake_fft_ptr temp2 GF2X_MAYBE_UNUSED) {
+int gf2x_fake_fft_compose(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s1, gf2x_fake_fft_srcptr s2, gf2x_fake_fft_ptr temp2 GF2X_MAYBE_UNUSED) {
     size_t n1 = W(p->n1);
     size_t n2 = W(p->n2);
-    gf2x_mul(dst, s1, n1, s2, n2);
+    return gf2x_mul(dst, s1, n1, s2, n2);
 }
-void gf2x_fake_fft_addcompose_n(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr * s1, gf2x_fake_fft_srcptr * s2, size_t n, gf2x_fake_fft_ptr temp2 GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr temp1 GF2X_MAYBE_UNUSED) {
+int gf2x_fake_fft_addcompose_n(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr * s1, gf2x_fake_fft_srcptr * s2, size_t n, gf2x_fake_fft_ptr temp2 GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr temp1 GF2X_MAYBE_UNUSED) {
     size_t n1 = W(p->n1);
     size_t n2 = W(p->n2);
     unsigned long * h = malloc(p->size * sizeof(unsigned long));
+    if (h == NULL)
+        return GF2X_ERROR_OUT_OF_MEMORY;
     /* lacking addmul in gf2x, we do some extra allocation */
     memset(h, 0, p->size * sizeof(unsigned long));
+    int rc = 0;
     for(size_t k = 0 ; k < n ; k++) {
-        gf2x_mul(h, s1[k], n1, s2[k], n2);
+        rc = gf2x_mul(h, s1[k], n1, s2[k], n2);
+        if (rc < 0) break;
         for(unsigned int i = 0 ; i < p->size ; i++) {
             dst[i] ^= h[i];
         }
     }
     free(h);
+    return rc;
 }
-void gf2x_fake_fft_addcompose(gf2x_fake_fft_info_srcptr p, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s1, gf2x_fake_fft_srcptr s2, gf2x_fake_fft_ptr temp2, gf2x_fake_fft_ptr temp1) {
-    gf2x_fake_fft_addcompose_n(p, dst, &s1, &s2, 1, temp2, temp1);
+int gf2x_fake_fft_addcompose(gf2x_fake_fft_info_srcptr p, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s1, gf2x_fake_fft_srcptr s2, gf2x_fake_fft_ptr temp2, gf2x_fake_fft_ptr temp1) {
+    return gf2x_fake_fft_addcompose_n(p, dst, &s1, &s2, 1, temp2, temp1);
 }
 void gf2x_fake_fft_add(gf2x_fake_fft_info_srcptr p GF2X_MAYBE_UNUSED, gf2x_fake_fft_ptr dst, gf2x_fake_fft_srcptr s1, gf2x_fake_fft_srcptr s2) {
     size_t i;

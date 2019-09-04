@@ -458,6 +458,7 @@ void gf2x_mul_tc3(unsigned long *c, const unsigned long *a,
        {c+4k, k+1}: b0+x*b1+x^2*b2, {stk, 2k}: C(1), {stk+2k,2k+2}: C(1+x) */
 
     gf2x_mul_toom(W2, W0, W4 + 2, k + 1, stk + 4 * k + 3);
+
     cy = W4[0];			/* contains at most 3 bits */
     ASSERT(cy <= 7);
 
@@ -1534,16 +1535,16 @@ gf2x_mul_tc3x_internal (__m128i *c, const __m128i *a, const __m128i *b,
     }
 
   gf2x_mul_toom ((unsigned long*) W3, (unsigned long*) W2,
-                 (unsigned long*) W5, 2 * (kd + 2), (unsigned long*) stk);
+          (unsigned long*) W5, 2 * (kd + 2), (unsigned long*) stk);
 
   gf2x_mul_toom ((unsigned long*) W2, (unsigned long*) W0,
-                 (unsigned long*) W4, 2 * (kd + 2), (unsigned long*) stk);
+          (unsigned long*) W4, 2 * (kd + 2), (unsigned long*) stk);
 
   gf2x_mul_toom ((unsigned long*) W0, (unsigned long*) a0,
-                 (unsigned long*) b0, 2 * k, (unsigned long*) stk);
+          (unsigned long*) b0, 2 * k, (unsigned long*) stk);
 
   gf2x_mul_toom ((unsigned long*) W4, (unsigned long*) a2,
-                 (unsigned long*) b2, 2 * r, (unsigned long*) stk);
+          (unsigned long*) b2, 2 * r, (unsigned long*) stk);
 
   for (j = 0; j < 2*k; j++)
     {						// First 2*k iterations
