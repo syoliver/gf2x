@@ -61,7 +61,9 @@ void gf2x_mul_basecase_inner(unsigned long * c, const unsigned long * a,
 	case 8: gf2x_mul8(c, a, b); return;
 	case 9: gf2x_mul9(c, a, b); return;
 	default:
+#if GF2X_GNUC_VERSION_ATLEAST(4,5,0)
             __builtin_unreachable();
+#endif
             return;
 	}
     } else if (na < nb) {
