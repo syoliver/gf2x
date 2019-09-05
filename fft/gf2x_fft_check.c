@@ -65,7 +65,7 @@
 #endif
 
 #ifndef ULONG_BITS
-#define	ULONG_BITS	((int) (sizeof(unsigned long) * CHAR_BIT))
+#define ULONG_BITS      ((int) (sizeof(unsigned long) * CHAR_BIT))
 #endif
 
 /* Checks the different FFT codes, and see whether they give any
@@ -150,72 +150,72 @@ unsigned long rand2_ulong()
  * don't feel like adding one. Anyway, bugs reside more often in the code
  * being tested (the library) than in the test code itself.
  */
-#define CHOP_HEAD(P) do {						\
-        for(size_t i = 0 ; i < nw ## P ; i++)				\
-            P[i] = rand2_ulong();					\
-        if (n ## P % ULONG_BITS)					\
-            P[nw ## P-1] &= (1UL << (n ## P % ULONG_BITS)) - 1;	\
+#define CHOP_HEAD(P) do {                                               \
+        for(size_t i = 0 ; i < nw ## P ; i++)                           \
+            P[i] = rand2_ulong();                                       \
+        if (n ## P % ULONG_BITS)                                        \
+            P[nw ## P-1] &= (1UL << (n ## P % ULONG_BITS)) - 1; \
 } while (0)
 
-#define ALLOC1(E,x) E ## _t * E ## _ ## x = E ## _alloc(E, 1)
+#define ALLOC1(E,x) E ## _ptr E ## _ ## x = E ## _alloc(E, 1)
 
 #define SETUP_COMMON(E)                                         \
     unsigned long * E ## _h = malloc(nwh * sizeof(unsigned long));      \
     unsigned long * E ## _hx = malloc(nwhx * sizeof(unsigned long));    \
     E ## _info_copy(E ## _copy, E);                             \
-    assert(E ## _info_compatible(E, E ## _copy));         \
-    size_t E ## _fft_sizes[3];					\
-    E ## _info_get_alloc_sizes(E, E ## _fft_sizes);		\
-    E ## _t * E ## _temp1 = malloc(E ## _fft_sizes[1]);		\
-    E ## _t * E ## _temp2 = malloc(E ## _fft_sizes[2]);		\
-    ALLOC1(E, tf1); ALLOC1(E, tg1);				\
-    ALLOC1(E, tf2); ALLOC1(E, tg2);				\
+    assert(E ## _info_compatible(E, E ## _copy));               \
+    size_t E ## _fft_sizes[3];                                  \
+    E ## _info_get_alloc_sizes(E, E ## _fft_sizes);             \
+    E ## _ptr E ## _temp1 = malloc(E ## _fft_sizes[1]);         \
+    E ## _ptr E ## _temp2 = malloc(E ## _fft_sizes[2]);         \
+    ALLOC1(E, tf1); ALLOC1(E, tg1);                             \
+    ALLOC1(E, tf2); ALLOC1(E, tg2);                             \
     E ## _ptr E ## _tfs[2] = { E ## _tf1, E ## _tf2, };         \
     E ## _ptr E ## _tgs[2] = { E ## _tg1, E ## _tg2, };         \
     ALLOC1(E, th);                                              \
     ALLOC1(E, thx);                                             \
     do { } while (0)
 
-#define SETUP(E, OP, nf, ng)               			\
-    E ## _info_t E, E ## _copy;					\
-    E ## _ ## OP (E, nf, ng);					\
+#define SETUP(E, OP, nf, ng)                                    \
+    E ## _info_t E, E ## _copy;                                 \
+    E ## _ ## OP (E, nf, ng);                                   \
     SETUP_COMMON(E);
 
-#define SETUP3(E, OP, nf, ng, K)           			\
-    E ## _info_t E, E ## _copy;					\
-    E ## _ ## OP (E, nf, ng, K);				\
+#define SETUP3(E, OP, nf, ng, K)                                \
+    E ## _info_t E, E ## _copy;                                 \
+    E ## _ ## OP (E, nf, ng, K);                                \
     SETUP_COMMON(E)
 
 #define DO_zero_th(E) E ## _zero(E, E ## _th, 1)
 #define DO_zero_thx(E) E ## _zero(E, E ## _thx, 1)
 
-#define display_full_poly_and_lift(E, P) do {				\
-        display(#P,P,nw ## P);						\
-        printf("K" #P ":=Zseq_to_KP(" #P ");\n");					\
-        printf("L" #P ":=KP_to_LP(K" #P ");\n");			\
+#define display_full_poly_and_lift(E, P) do {                           \
+        display(#P,P,nw ## P);                                          \
+        printf("K" #P ":=Zseq_to_KP(" #P ");\n");                       \
+        printf("L" #P ":=KP_to_LP(K" #P ");\n");                        \
 } while (0)
 
-#define display_projected_result(E, P) do {			        \
-        display(#E "_" #P,E ## _ ## P,nw ## P);				\
-        printf("K" #P ":=Zseq_to_KP(" #E "_" #P ");\n");		\
+#define display_projected_result(E, P) do {                             \
+        display(#E "_" #P,E ## _ ## P,nw ## P);                         \
+        printf("K" #P ":=Zseq_to_KP(" #E "_" #P ");\n");                \
 } while (0)
 
-#define display_full_transform(E, P) do {				\
-        display(#E "_t" #P,					        \
-            (unsigned long *) E ## _t ## P,				\
+#define display_full_transform(E, P) do {                               \
+        display(#E "_t" #P,                                             \
+            (unsigned long *) E ## _t ## P,                             \
             E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));   \
-        printf("T" #P ":=Zseq_to_Lseq(" #E "_t" #P ");\n");     \
+        printf("T" #P ":=Zseq_to_Lseq(" #E "_t" #P ");\n");             \
 } while (0)
 
-#define DO_dft(E, P) do {						\
-    if (magma) {							\
+#define DO_dft(E, P) do {                                               \
+    if (magma) {                                                        \
         display_full_poly_and_lift(E, P);                               \
-    }									\
-    E ## _dft(E, E ## _t ## P, P, n ## P, E ## _temp1);			\
+    }                                                                   \
+    E ## _dft(E, E ## _t ## P, P, n ## P, E ## _temp1);                 \
     if (magma) {                                                        \
         display_full_transform(E, P);                                   \
         printf("assert T" #P " eq L_evaluate(L" #P ", transform_length(T" #P "));\n");    \
-    }									\
+    }                                                                   \
 } while (0)
 
 // &and [T" #P "[i+1] eq Evaluate(L" #P ", evalpoint(i)):i in [0..#T" #P "-1]];\n");                                             
@@ -225,15 +225,16 @@ unsigned long rand2_ulong()
 #define DO_dft_g1(E) DO_dft(E, g1)
 #define DO_dft_g2(E) DO_dft(E, g2)
 
-#define DO_comp(E, k) do {						\
-    if (magma) {							\
+#define DO_comp(E, k) do {                                              \
+    if (magma) {                                                        \
         display_full_transform(E, h);                                   \
-        printf("previous_Th:=Th;\n");   				\
+        printf("previous_Th:=Th;\n");                                   \
     }                                                                   \
-    E ## _addcompose(E, E ## _th,					\
-            E ## _tf ## k, E ## _tg ## k,				\
-            E ## _temp2, E ## _temp1);					\
-    if (magma) {							\
+    E ## _addcompose(E, E ## _th,                                       \
+            (E ## _srcptr) E ## _tf ## k,                               \
+            (E ## _srcptr) E ## _tg ## k,                               \
+            E ## _temp2, E ## _temp1);                                  \
+    if (magma) {                                                        \
         display_full_transform(E, h);                                   \
         printf("assert Th eq transform_add(previous_Th,"                \
                     " transform_pointwise(Tf"#k",Tg"#k"));\n");         \
@@ -243,14 +244,14 @@ unsigned long rand2_ulong()
 #define DO_comp1(E)  DO_comp(E, 1)
 #define DO_comp2(E)  DO_comp(E, 2)
 #define DO_comp_n(E)  do {                                              \
-    E ## _addcompose_n(E, E ## _thx,					\
-            (E ## _srcptr *) E ## _tfs, (E ## _srcptr *) E ## _tgs, 2,	\
-            E ## _temp2, E ## _temp1);					\
-    if (magma) {							\
+    E ## _addcompose_n(E, E ## _thx,                                    \
+            (E ## _srcptr *) E ## _tfs, (E ## _srcptr *) E ## _tgs, 2,  \
+            E ## _temp2, E ## _temp1);                                  \
+    if (magma) {                                                        \
         display_full_transform(E, hx);                                  \
-        printf("assert Thx eq transform_add("				\
-                "transform_pointwise(Tf1,Tg1),"				\
-                "transform_pointwise(Tf2,Tg2));\n");			\
+        printf("assert Thx eq transform_add("                           \
+                "transform_pointwise(Tf1,Tg1),"                         \
+                "transform_pointwise(Tf2,Tg2));\n");                    \
     }                                                                   \
 } while (0)
 
@@ -260,33 +261,33 @@ unsigned long rand2_ulong()
  * largely unsatisfactory at the moment, since we barely truncate in the
  * Cantor case.
  */
-#define DO_ift(E, P)  do {						\
-    if (magma) {							\
-        printf("saved_T" #P ":=T" #P ";\n");				\
-    }									\
-    E ## _ift(E, E ## _ ## P, n ## P, E ## _t ## P, E ## _temp1);	\
-    if (magma) {							\
+#define DO_ift(E, P)  do {                                              \
+    if (magma) {                                                        \
+        printf("saved_T" #P ":=T" #P ";\n");                            \
+    }                                                                   \
+    E ## _ift(E, E ## _ ## P, n ## P, E ## _t ## P, E ## _temp1);       \
+    if (magma) {                                                        \
         printf("/* " #E "_th has has undergone ift now */\n");          \
         display_full_transform(E, P);                                   \
         display_projected_result(E, P);                                 \
-        printf("interpolated_" #P ":=Lseq_as_LP(T" #P ");\n");		\
+        printf("interpolated_" #P ":=Lseq_as_LP(T" #P ");\n");          \
         printf("assert L_evaluate(interpolated_"#P","                   \
                 "transform_length(T"#P")) eq "                          \
                 "saved_T"#P";\n");                                      \
-        printf("assert interpolated_"#P " eq "				\
+        printf("assert interpolated_"#P " eq "                          \
                 "L_interpolate(saved_T"#P ", "                          \
-                "transform_length(T"#P"));\n");              		\
-        printf("assert interpolated_" #P " eq "				\
-                "LP_canonical(LP_add(LP_mul(Lf1, Lg1),"		\
-                " LP_mul(Lf2, Lg2)));\n");     				\
+                "transform_length(T"#P"));\n");                         \
+        printf("assert interpolated_" #P " eq "                         \
+                "LP_canonical(LP_add(LP_mul(Lf1, Lg1),"                 \
+                " LP_mul(Lf2, Lg2)));\n");                              \
         /* When doing MP, we tolerate modular equality here */          \
         if (doing_mp) {                                                 \
-            printf("if assigned Kwrap then\n"	\
+            printf("if assigned Kwrap then\n"   \
                         "\tassert (LP_to_KP(interpolated_" #P ") - "    \
-                        "(Kf1*Kg1+Kf2*Kg2)) mod Kwrap eq 0;\n"		\
-                    "else\n"						\
+                        "(Kf1*Kg1+Kf2*Kg2)) mod Kwrap eq 0;\n"          \
+                    "else\n"                                            \
                         "\tassert LP_to_KP(interpolated_" #P ") eq "    \
-                        "Kf1*Kg1+Kf2*Kg2;\n"				\
+                        "Kf1*Kg1+Kf2*Kg2;\n"                            \
                     "end if;\n");                                       \
             printf("assert LP_to_KP(interpolated_" #P ") "              \
                     "mod x^%zu div x^%zu "                              \
@@ -296,92 +297,92 @@ unsigned long rand2_ulong()
             printf("assert LP_to_KP(interpolated_" #P ") eq "           \
                     "Kf1*Kg1+Kf2*Kg2;\n");                              \
         }                                                               \
-    }									\
+    }                                                                   \
 } while (0)
 
 #define DO_ift_h(E)  DO_ift(E, h)
 #define DO_ift_hx(E) DO_ift(E, hx)
 
-#define EXTRA_DISPLAY(E)  do {       					\
+#define EXTRA_DISPLAY(E)  do {                                          \
     display(#E "_tf1", (unsigned long *) E ## _tf1,                     \
             E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));   \
     display(#E "_tg1", (unsigned long *) E ## _tg1,                     \
-            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
+            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long)); \
     display(#E "_tf2", (unsigned long *) E ## _tf2,                     \
-            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
+            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long)); \
     display(#E "_tg2", (unsigned long *) E ## _tg2,                     \
-            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
+            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long)); \
 } while (0)
 // Either th and thx are different, meaning that addcompose and
 // addcompose_n disagree -- in which case we want to print them both.
 // Or they're equal, and we've proceeded to computing the ift, which
 // invalidates th and thx in most cases. In the latter case, we're of
 // course better off not printing any data.
-#define EXTRA_DISPLAY_TH_THX(E)  do {       					\
+#define EXTRA_DISPLAY_TH_THX(E)  do {                                           \
     display(#E "_th",  (unsigned long *) E ## _th,                      \
-            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));	\
+            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long)); \
     display(#E "_thx",  (unsigned long *) E ## _thx,                    \
             E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));   \
 } while (0)
 
-#define FREE1(E, x) do {						\
-        E ## _free(E, E ## _ ## x, 1);					\
+#define FREE1(E, x) do {                                                \
+        E ## _free(E, E ## _ ## x, 1);                                  \
     } while (0)
 
-#define LEAVE(E) do {       						\
-    FREE1(E, tf1); FREE1(E, tg1);			        	\
-    FREE1(E, tf2); FREE1(E, tg2);		        		\
-    free(E ## _temp1);	    		                        	\
-    free(E ## _temp2);		    				        \
-    FREE1(E, th);							\
-    FREE1(E, thx);							\
+#define LEAVE(E) do {                                                   \
+    FREE1(E, tf1); FREE1(E, tg1);                                       \
+    FREE1(E, tf2); FREE1(E, tg2);                                       \
+    free(E ## _temp1);                                                  \
+    free(E ## _temp2);                                                  \
+    FREE1(E, th);                                                       \
+    FREE1(E, thx);                                                      \
     E ## _info_clear(E);                                                \
     free(E ## _h);                                                      \
     free(E ## _hx);                                                      \
 } while (0)
 
-#define CHECK_SELF_ADDCOMPOSE_N_CONSISTENCY(E) do {			\
-    if (memcmp(E ## _h, E ## _hx, nwh * sizeof(unsigned long)) != 0) {	\
-        fprintf(stderr, #E " != " #E "x "				\
-                "(addcompose_n consistency) for "			\
-                "-%s -a %zu -b %zu -seed %u\n",				\
+#define CHECK_SELF_ADDCOMPOSE_N_CONSISTENCY(E) do {                     \
+    if (memcmp(E ## _h, E ## _hx, nwh * sizeof(unsigned long)) != 0) {  \
+        fprintf(stderr, #E " != " #E "x "                               \
+                "(addcompose_n consistency) for "                       \
+                "-%s -a %zu -b %zu -seed %u\n",                         \
                 __func__ + 8,                                           \
-                nf,ng,seed);						\
-        printf("w:=%d;\n", (int) ULONG_BITS);				\
-        display("f1",f1,nwf1);						\
-        display("g1",g1,nwg1);						\
-        display("f2",f2,nwf2);						\
-        display("g2",g2,nwg2);						\
-        display(#E "_h",E ## _h,nwh);					\
-        display(#E "_hx",E ## _hx,nwh);				\
-        EXTRA_DISPLAY(E);						\
-        EXTRA_DISPLAY_TH_THX(E);					\
-        fflush(stdout);							\
-        fflush(stderr);							\
-        abort();							\
-    }									\
+                nf,ng,seed);                                            \
+        printf("w:=%d;\n", (int) ULONG_BITS);                           \
+        display("f1",f1,nwf1);                                          \
+        display("g1",g1,nwg1);                                          \
+        display("f2",f2,nwf2);                                          \
+        display("g2",g2,nwg2);                                          \
+        display(#E "_h",E ## _h,nwh);                                   \
+        display(#E "_hx",E ## _hx,nwh);                         \
+        EXTRA_DISPLAY(E);                                               \
+        EXTRA_DISPLAY_TH_THX(E);                                        \
+        fflush(stdout);                                                 \
+        fflush(stderr);                                                 \
+        abort();                                                        \
+    }                                                                   \
 } while (0)
 
-#define CHECK_CROSS_CONSISTENCY(E, F) do {				\
-    if (memcmp(F ## _h, E ## _h, nwh * sizeof(unsigned long)) != 0) {	\
-        fprintf(stderr, #F " != " #E " "				\
-                "(cross check) for "					\
-                "-%s -a %zu -b %zu -seed %u\n",				\
+#define CHECK_CROSS_CONSISTENCY(E, F) do {                              \
+    if (memcmp(F ## _h, E ## _h, nwh * sizeof(unsigned long)) != 0) {   \
+        fprintf(stderr, #F " != " #E " "                                \
+                "(cross check) for "                                    \
+                "-%s -a %zu -b %zu -seed %u\n",                         \
                 __func__ + 8,                                           \
-                nf,ng,seed);						\
-        printf("w:=%d;\n", (int) ULONG_BITS);				\
-        display("f1",f1,nwf1);						\
-        display("g1",g1,nwg1);						\
-        display("f2",f2,nwf2);						\
-        display("g2",g2,nwg2);						\
-        display(#F "_h",F ## _h,nwh);					\
-        display(#E "_h",E ## _h,nwh);					\
-        EXTRA_DISPLAY(F);						\
-        EXTRA_DISPLAY(E);						\
-        fflush(stdout);							\
-        fflush(stderr);							\
-        abort();							\
-    }									\
+                nf,ng,seed);                                            \
+        printf("w:=%d;\n", (int) ULONG_BITS);                           \
+        display("f1",f1,nwf1);                                          \
+        display("g1",g1,nwg1);                                          \
+        display("f2",f2,nwf2);                                          \
+        display("g2",g2,nwg2);                                          \
+        display(#F "_h",F ## _h,nwh);                                   \
+        display(#E "_h",E ## _h,nwh);                                   \
+        EXTRA_DISPLAY(F);                                               \
+        EXTRA_DISPLAY(E);                                               \
+        fflush(stdout);                                                 \
+        fflush(stderr);                                                 \
+        abort();                                                        \
+    }                                                                   \
 } while (0)
 
 /* There are four different data types at stake.
@@ -693,21 +694,21 @@ void print_context_gf2x_ternary_fft(gf2x_ternary_fft_info_srcptr p GF2X_MAYBE_UN
 #define CROSS_gf2x_cantor_fft(X) X
 #define CROSS_gf2x_ternary_fft(X) X
 
-#define ONE_TEST(E) do {						\
-        PRINT_CONTEXT(E);						\
-        DO_dft_f1(E);							\
-        DO_dft_g1(E);							\
-        DO_dft_f2(E);							\
-        DO_dft_g2(E);							\
-        DO_zero_th(E);							\
-        DO_comp1(E);							\
-        DO_comp2(E);							\
-        DO_ift_h(E);							\
-        DO_zero_thx(E);							\
-        DO_comp_n(E);							\
-        DO_ift_hx(E);							\
-        CHECK_SELF_ADDCOMPOSE_N_CONSISTENCY(E);				\
-        CROSS_ ## E(CHECK_CROSS_CONSISTENCY(E, gf2x_fake_fft));		\
+#define ONE_TEST(E) do {                                                \
+        PRINT_CONTEXT(E);                                               \
+        DO_dft_f1(E);                                                   \
+        DO_dft_g1(E);                                                   \
+        DO_dft_f2(E);                                                   \
+        DO_dft_g2(E);                                                   \
+        DO_zero_th(E);                                                  \
+        DO_comp1(E);                                                    \
+        DO_comp2(E);                                                    \
+        DO_ift_h(E);                                                    \
+        DO_zero_thx(E);                                                 \
+        DO_comp_n(E);                                                   \
+        DO_ift_hx(E);                                                   \
+        CHECK_SELF_ADDCOMPOSE_N_CONSISTENCY(E);                         \
+        CROSS_ ## E(CHECK_CROSS_CONSISTENCY(E, gf2x_fake_fft));         \
 } while (0)
 
 long randomly_pick_order_for_ternary(size_t N)
@@ -855,49 +856,49 @@ int main(int argc, char *argv[])
     int mp = 1, mul = 1;
     argc--, argv++;
     for (; argc; argc--, argv++) {
-	if (strcmp(argv[0], "-a") == 0) {
-	    argc--, argv++;
-	    max_nbits_a = atol(argv[0]);
-	} else if (strcmp(argv[0], "-b") == 0) {
-	    argc--, argv++;
-	    max_nbits_b = atol(argv[0]);
-	} else if (strcmp(argv[0], "-seed") == 0) {
-	    argc--, argv++;
-	    seed = atol(argv[0]);
-	} else if (strcmp(argv[0], "-nr") == 0) {
-	    argc--, argv++;
-	    nrep = atol(argv[0]);
-	} else if (strcmp(argv[0], "-m") == 0) {
+        if (strcmp(argv[0], "-a") == 0) {
+            argc--, argv++;
+            max_nbits_a = atol(argv[0]);
+        } else if (strcmp(argv[0], "-b") == 0) {
+            argc--, argv++;
+            max_nbits_b = atol(argv[0]);
+        } else if (strcmp(argv[0], "-seed") == 0) {
+            argc--, argv++;
+            seed = atol(argv[0]);
+        } else if (strcmp(argv[0], "-nr") == 0) {
+            argc--, argv++;
+            nrep = atol(argv[0]);
+        } else if (strcmp(argv[0], "-m") == 0) {
             magma = 1;
-	} else if (strcmp(argv[0], "-mp") == 0) {
+        } else if (strcmp(argv[0], "-mp") == 0) {
             mp = 1; mul = 0;
-	} else if (strcmp(argv[0], "-mul") == 0) {
+        } else if (strcmp(argv[0], "-mul") == 0) {
             mul = 1; mp = 0;
-	} else {
-	    usage();
-	}
+        } else {
+            usage();
+        }
     }
     if (max_nbits_a == UINT_MAX)
-	max_nbits_a = 1000;
+        max_nbits_a = 1000;
     if (max_nbits_b == UINT_MAX)
-	max_nbits_b = max_nbits_a;
+        max_nbits_b = max_nbits_a;
     if (seed == ULONG_MAX) {
-	/* make this completely deterministic in debug mode */
+        /* make this completely deterministic in debug mode */
 #ifdef NDEBUG
-	srandom(time(NULL));
+        srandom(time(NULL));
 #ifdef  _POSIX_C_SOURCE
-	for (int i = 0; i < getpid() % 1009; i++)
-	    random();
+        for (int i = 0; i < getpid() % 1009; i++)
+            random();
 #endif
 #endif
-	seed = random();
+        seed = random();
     }
 
     next_seed = seed;
     printf("// Replicate full run with %s%s-a %u -b %u -seed %lu -nr %d\n",
             (mul && !mp) ? "-mul " : "",
             (mp && !mul) ? "-mp " : "",
-	   max_nbits_a, max_nbits_b, seed, nrep);
+           max_nbits_a, max_nbits_b, seed, nrep);
 
     if (mul) {
         docheck_mul(max_nbits_a, max_nbits_b, nrep);
