@@ -370,7 +370,7 @@ struct gf2x_fake_fft_info {
     /* pod: yes */
 #ifdef __cplusplus
 
-    class ctor_fails: public exception
+    class ctor_fails: public std::exception
     {
       virtual const char* what() const throw() {
         return "contructor failed for gf2x_fake_fft";
