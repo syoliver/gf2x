@@ -159,11 +159,10 @@ unsigned long rand2_ulong()
 
 #define ALLOC1(E,x) E ## _ptr E ## _ ## x = E ## _alloc(E, 1)
 
-#define SETUP_COMMON(E)                                         \
+#define SETUP(E)                                         \
     unsigned long * E ## _h = malloc(nwh * sizeof(unsigned long));      \
     unsigned long * E ## _hx = malloc(nwhx * sizeof(unsigned long));    \
     E ## _info_copy(E ## _copy, E);                             \
-    assert(E ## _info_compatible(E, E ## _copy));               \
     size_t E ## _fft_sizes[3];                                  \
     E ## _info_get_alloc_sizes(E, E ## _fft_sizes);             \
     E ## _ptr E ## _temp1 = malloc(E ## _fft_sizes[1]);         \
@@ -176,15 +175,10 @@ unsigned long rand2_ulong()
     ALLOC1(E, thx);                                             \
     do { } while (0)
 
-#define SETUP(E, OP, nf, ng)                                    \
+#define ENTER(E, OP, nf, ng)                                    \
     E ## _info_t E, E ## _copy;                                 \
     E ## _ ## OP (E, nf, ng);                                   \
-    SETUP_COMMON(E);
-
-#define SETUP3(E, OP, nf, ng, K)                                \
-    E ## _info_t E, E ## _copy;                                 \
-    E ## _ ## OP (E, nf, ng, K);                                \
-    SETUP_COMMON(E)
+    do { } while (0)
 
 #define DO_zero_th(E) E ## _zero(E, E ## _th, 1)
 #define DO_zero_thx(E) E ## _zero(E, E ## _thx, 1)
@@ -337,8 +331,9 @@ unsigned long rand2_ulong()
     FREE1(E, th);                                                       \
     FREE1(E, thx);                                                      \
     E ## _info_clear(E);                                                \
+    E ## _info_clear(E ## _copy);                                       \
     free(E ## _h);                                                      \
-    free(E ## _hx);                                                      \
+    free(E ## _hx);                                                     \
 } while (0)
 
 #define CHECK_SELF_ADDCOMPOSE_N_CONSISTENCY(E) do {                     \
@@ -760,9 +755,15 @@ int docheck_mul(size_t nf, size_t ng, int nrep)
 
         long K = randomly_pick_order_for_ternary(nh);
 
-        SETUP(gf2x_fake_fft, info_init, nf, ng);
-        SETUP(gf2x_cantor_fft, info_init, nf, ng);
-        SETUP3(gf2x_ternary_fft, info_init, nf, ng, K);
+        ENTER(gf2x_fake_fft, info_init, nf, ng);
+        ENTER(gf2x_cantor_fft, info_init, nf, ng);
+        ENTER(gf2x_ternary_fft, info_init, nf, ng);
+
+        gf2x_ternary_fft_info_adjust(gf2x_ternary_fft, GF2X_FFT_ADJUST_DEPTH, K);
+
+        SETUP(gf2x_fake_fft);
+        SETUP(gf2x_cantor_fft);
+        SETUP(gf2x_ternary_fft);
 
         CHOP_HEAD(f1);
         CHOP_HEAD(g1);
@@ -771,7 +772,388 @@ int docheck_mul(size_t nf, size_t ng, int nrep)
 
         ONE_TEST(gf2x_fake_fft);
         ONE_TEST(gf2x_cantor_fft);
-        ONE_TEST(gf2x_ternary_fft);
+        // ONE_TEST(gf2x_ternary_fft);
+do {
+    print_context_gf2x_ternary_fft(gf2x_ternary_fft);
+    do {
+	if (magma) {
+	    do {
+		display("f1", f1, nwf1);
+		printf("K" "f1" ":=Zseq_to_KP(" "f1" ");\n");
+		printf("L" "f1" ":=KP_to_LP(K" "f1" ");\n");
+	    } while (0);
+	}
+	gf2x_ternary_fft_dft(gf2x_ternary_fft, gf2x_ternary_fft_tf1, f1, nf1,
+			     gf2x_ternary_fft_temp1);
+	if (magma) {
+	    do {
+		display("gf2x_ternary_fft" "_t" "f1",
+			(unsigned long *) gf2x_ternary_fft_tf1,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		printf("T" "f1" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "f1"
+		       ");\n");
+	    } while (0);
+	    printf("assert T" "f1" " eq L_evaluate(L" "f1"
+		   ", transform_length(T" "f1" "));\n");
+	}
+    } while (0);
+    do {
+	if (magma) {
+	    do {
+		display("g1", g1, nwg1);
+		printf("K" "g1" ":=Zseq_to_KP(" "g1" ");\n");
+		printf("L" "g1" ":=KP_to_LP(K" "g1" ");\n");
+	    } while (0);
+	}
+	gf2x_ternary_fft_dft(gf2x_ternary_fft, gf2x_ternary_fft_tg1, g1, ng1,
+			     gf2x_ternary_fft_temp1);
+	if (magma) {
+	    do {
+		display("gf2x_ternary_fft" "_t" "g1",
+			(unsigned long *) gf2x_ternary_fft_tg1,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		printf("T" "g1" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "g1"
+		       ");\n");
+	    } while (0);
+	    printf("assert T" "g1" " eq L_evaluate(L" "g1"
+		   ", transform_length(T" "g1" "));\n");
+	}
+    } while (0);
+    do {
+	if (magma) {
+	    do {
+		display("f2", f2, nwf2);
+		printf("K" "f2" ":=Zseq_to_KP(" "f2" ");\n");
+		printf("L" "f2" ":=KP_to_LP(K" "f2" ");\n");
+	    } while (0);
+	}
+	gf2x_ternary_fft_dft(gf2x_ternary_fft, gf2x_ternary_fft_tf2, f2, nf2,
+			     gf2x_ternary_fft_temp1);
+	if (magma) {
+	    do {
+		display("gf2x_ternary_fft" "_t" "f2",
+			(unsigned long *) gf2x_ternary_fft_tf2,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		printf("T" "f2" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "f2"
+		       ");\n");
+	    } while (0);
+	    printf("assert T" "f2" " eq L_evaluate(L" "f2"
+		   ", transform_length(T" "f2" "));\n");
+	}
+    } while (0);
+    do {
+	if (magma) {
+	    do {
+		display("g2", g2, nwg2);
+		printf("K" "g2" ":=Zseq_to_KP(" "g2" ");\n");
+		printf("L" "g2" ":=KP_to_LP(K" "g2" ");\n");
+	    } while (0);
+	}
+	gf2x_ternary_fft_dft(gf2x_ternary_fft, gf2x_ternary_fft_tg2, g2, ng2,
+			     gf2x_ternary_fft_temp1);
+	if (magma) {
+	    do {
+		display("gf2x_ternary_fft" "_t" "g2",
+			(unsigned long *) gf2x_ternary_fft_tg2,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		printf("T" "g2" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "g2"
+		       ");\n");
+	    } while (0);
+	    printf("assert T" "g2" " eq L_evaluate(L" "g2"
+		   ", transform_length(T" "g2" "));\n");
+	}
+    } while (0);
+    gf2x_ternary_fft_zero(gf2x_ternary_fft, gf2x_ternary_fft_th, 1);
+    do {
+	if (magma) {
+	    do {
+		display("gf2x_ternary_fft" "_t" "h",
+			(unsigned long *) gf2x_ternary_fft_th,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		printf("T" "h" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "h"
+		       ");\n");
+	    } while (0);
+	    printf("previous_Th:=Th;\n");
+	}
+	gf2x_ternary_fft_addcompose(gf2x_ternary_fft, gf2x_ternary_fft_th,
+				    (gf2x_ternary_fft_srcptr)
+				    gf2x_ternary_fft_tf1,
+				    (gf2x_ternary_fft_srcptr)
+				    gf2x_ternary_fft_tg1,
+				    gf2x_ternary_fft_temp2,
+				    gf2x_ternary_fft_temp1);
+	if (magma) {
+	    do {
+		display("gf2x_ternary_fft" "_t" "h",
+			(unsigned long *) gf2x_ternary_fft_th,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		printf("T" "h" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "h"
+		       ");\n");
+	    } while (0);
+	    printf("assert Th eq transform_add(previous_Th,"
+		   " transform_pointwise(Tf" "1" ",Tg" "1" "));\n");
+	}
+    } while (0);
+    do {
+	if (magma) {
+	    do {
+		display("gf2x_ternary_fft" "_t" "h",
+			(unsigned long *) gf2x_ternary_fft_th,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		printf("T" "h" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "h"
+		       ");\n");
+	    } while (0);
+	    printf("previous_Th:=Th;\n");
+	}
+	gf2x_ternary_fft_addcompose(gf2x_ternary_fft, gf2x_ternary_fft_th,
+				    (gf2x_ternary_fft_srcptr)
+				    gf2x_ternary_fft_tf2,
+				    (gf2x_ternary_fft_srcptr)
+				    gf2x_ternary_fft_tg2,
+				    gf2x_ternary_fft_temp2,
+				    gf2x_ternary_fft_temp1);
+	if (magma) {
+	    do {
+		display("gf2x_ternary_fft" "_t" "h",
+			(unsigned long *) gf2x_ternary_fft_th,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		printf("T" "h" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "h"
+		       ");\n");
+	    } while (0);
+	    printf("assert Th eq transform_add(previous_Th,"
+		   " transform_pointwise(Tf" "2" ",Tg" "2" "));\n");
+	}
+    } while (0);
+    do {
+	if (magma) {
+	    printf("saved_T" "h" ":=T" "h" ";\n");
+	}
+	gf2x_ternary_fft_ift(gf2x_ternary_fft, gf2x_ternary_fft_h, nh,
+			     gf2x_ternary_fft_th, gf2x_ternary_fft_temp1);
+	if (magma) {
+	    printf("/* " "gf2x_ternary_fft"
+		   "_th has has undergone ift now */\n");
+	    do {
+		display("gf2x_ternary_fft" "_t" "h",
+			(unsigned long *) gf2x_ternary_fft_th,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		printf("T" "h" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "h"
+		       ");\n");
+	    } while (0);
+	    do {
+		display("gf2x_ternary_fft" "_" "h", gf2x_ternary_fft_h, nwh);
+		printf("K" "h" ":=Zseq_to_KP(" "gf2x_ternary_fft" "_" "h"
+		       ");\n");
+	    } while (0);
+	    printf("interpolated_" "h" ":=Lseq_as_LP(T" "h" ");\n");
+	    printf("assert L_evaluate(interpolated_" "h" ","
+		   "transform_length(T" "h" ")) eq " "saved_T" "h" ";\n");
+	    printf("assert interpolated_" "h" " eq " "L_interpolate(saved_T"
+		   "h" ", " "transform_length(T" "h" "));\n");
+	    printf("assert interpolated_" "h" " eq "
+		   "LP_canonical(LP_add(LP_mul(Lf1, Lg1),"
+		   " LP_mul(Lf2, Lg2)));\n");
+	    if (doing_mp) {
+		printf("if assigned Kwrap then\n"
+		       "\tassert (LP_to_KP(interpolated_" "h" ") - "
+		       "(Kf1*Kg1+Kf2*Kg2)) mod Kwrap eq 0;\n" "else\n"
+		       "\tassert LP_to_KP(interpolated_" "h" ") eq "
+		       "Kf1*Kg1+Kf2*Kg2;\n" "end if;\n");
+		printf("assert LP_to_KP(interpolated_" "h" ") "
+		       "mod x^%zu div x^%zu " "eq Zseq_to_KP("
+		       "gf2x_ternary_fft" "_h);\n", MAX(nf, ng), MIN(nf,
+								     ng) - 1);
+	    } else {
+		printf("assert LP_to_KP(interpolated_" "h" ") eq "
+		       "Kf1*Kg1+Kf2*Kg2;\n");
+	    }
+	}
+    } while (0);
+    gf2x_ternary_fft_zero(gf2x_ternary_fft, gf2x_ternary_fft_thx, 1);
+    do {
+	gf2x_ternary_fft_addcompose_n(gf2x_ternary_fft, gf2x_ternary_fft_thx,
+				      (gf2x_ternary_fft_srcptr *)
+				      gf2x_ternary_fft_tfs,
+				      (gf2x_ternary_fft_srcptr *)
+				      gf2x_ternary_fft_tgs, 2,
+				      gf2x_ternary_fft_temp2,
+				      gf2x_ternary_fft_temp1);
+	if (magma) {
+	    do {
+		display("gf2x_ternary_fft" "_t" "hx",
+			(unsigned long *) gf2x_ternary_fft_thx,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		printf("T" "hx" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "hx"
+		       ");\n");
+	    } while (0);
+	    printf("assert Thx eq transform_add("
+		   "transform_pointwise(Tf1,Tg1),"
+		   "transform_pointwise(Tf2,Tg2));\n");
+	}
+    } while (0);
+    do {
+	if (magma) {
+	    printf("saved_T" "hx" ":=T" "hx" ";\n");
+	}
+	gf2x_ternary_fft_ift(gf2x_ternary_fft, gf2x_ternary_fft_hx, nhx,
+			     gf2x_ternary_fft_thx, gf2x_ternary_fft_temp1);
+	if (magma) {
+	    printf("/* " "gf2x_ternary_fft"
+		   "_th has has undergone ift now */\n");
+	    do {
+		display("gf2x_ternary_fft" "_t" "hx",
+			(unsigned long *) gf2x_ternary_fft_thx,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		printf("T" "hx" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "hx"
+		       ");\n");
+	    } while (0);
+	    do {
+		display("gf2x_ternary_fft" "_" "hx", gf2x_ternary_fft_hx,
+			nwhx);
+		printf("K" "hx" ":=Zseq_to_KP(" "gf2x_ternary_fft" "_" "hx"
+		       ");\n");
+	    } while (0);
+	    printf("interpolated_" "hx" ":=Lseq_as_LP(T" "hx" ");\n");
+	    printf("assert L_evaluate(interpolated_" "hx" ","
+		   "transform_length(T" "hx" ")) eq " "saved_T" "hx" ";\n");
+	    printf("assert interpolated_" "hx" " eq " "L_interpolate(saved_T"
+		   "hx" ", " "transform_length(T" "hx" "));\n");
+	    printf("assert interpolated_" "hx" " eq "
+		   "LP_canonical(LP_add(LP_mul(Lf1, Lg1),"
+		   " LP_mul(Lf2, Lg2)));\n");
+	    if (doing_mp) {
+		printf("if assigned Kwrap then\n"
+		       "\tassert (LP_to_KP(interpolated_" "hx" ") - "
+		       "(Kf1*Kg1+Kf2*Kg2)) mod Kwrap eq 0;\n" "else\n"
+		       "\tassert LP_to_KP(interpolated_" "hx" ") eq "
+		       "Kf1*Kg1+Kf2*Kg2;\n" "end if;\n");
+		printf("assert LP_to_KP(interpolated_" "hx" ") "
+		       "mod x^%zu div x^%zu " "eq Zseq_to_KP("
+		       "gf2x_ternary_fft" "_h);\n", MAX(nf, ng), MIN(nf,
+								     ng) - 1);
+	    } else {
+		printf("assert LP_to_KP(interpolated_" "hx" ") eq "
+		       "Kf1*Kg1+Kf2*Kg2;\n");
+	    }
+	}
+    } while (0);
+    do {
+	if (memcmp
+	    (gf2x_ternary_fft_h, gf2x_ternary_fft_hx,
+	     nwh * sizeof(unsigned long)) != 0) {
+	    fprintf(stderr,
+		    "gf2x_ternary_fft" " != " "gf2x_ternary_fft" "x "
+		    "(addcompose_n consistency) for "
+		    "-%s -a %zu -b %zu -seed %u\n", __func__ + 8, nf, ng,
+		    seed);
+	    printf("w:=%d;\n", (int) ULONG_BITS);
+	    display("f1", f1, nwf1);
+	    display("g1", g1, nwg1);
+	    display("f2", f2, nwf2);
+	    display("g2", g2, nwg2);
+	    display("gf2x_ternary_fft" "_h", gf2x_ternary_fft_h, nwh);
+	    display("gf2x_ternary_fft" "_hx", gf2x_ternary_fft_hx, nwh);
+	    do {
+		display("gf2x_ternary_fft" "_tf1",
+			(unsigned long *) gf2x_ternary_fft_tf1,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		display("gf2x_ternary_fft" "_tg1",
+			(unsigned long *) gf2x_ternary_fft_tg1,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		display("gf2x_ternary_fft" "_tf2",
+			(unsigned long *) gf2x_ternary_fft_tf2,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		display("gf2x_ternary_fft" "_tg2",
+			(unsigned long *) gf2x_ternary_fft_tg2,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+	    } while (0);
+	    do {
+		display("gf2x_ternary_fft" "_th",
+			(unsigned long *) gf2x_ternary_fft_th,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		display("gf2x_ternary_fft" "_thx",
+			(unsigned long *) gf2x_ternary_fft_thx,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+	    } while (0);
+	    fflush(stdout);
+	    fflush(stderr);
+	    abort();
+	}
+    } while (0);
+    do {
+	if (memcmp
+	    (gf2x_fake_fft_h, gf2x_ternary_fft_h,
+	     nwh * sizeof(unsigned long)) != 0) {
+	    fprintf(stderr,
+		    "gf2x_fake_fft" " != " "gf2x_ternary_fft" " "
+		    "(cross check) for " "-%s -a %zu -b %zu -seed %u\n",
+		    __func__ + 8, nf, ng, seed);
+	    printf("w:=%d;\n", (int) ULONG_BITS);
+	    display("f1", f1, nwf1);
+	    display("g1", g1, nwg1);
+	    display("f2", f2, nwf2);
+	    display("g2", g2, nwg2);
+	    display("gf2x_fake_fft" "_h", gf2x_fake_fft_h, nwh);
+	    display("gf2x_ternary_fft" "_h", gf2x_ternary_fft_h, nwh);
+	    do {
+		display("gf2x_fake_fft" "_tf1",
+			(unsigned long *) gf2x_fake_fft_tf1,
+			gf2x_fake_fft_transform_size(gf2x_fake_fft) *
+			sizeof(gf2x_fake_fft_t) / sizeof(unsigned long));
+		display("gf2x_fake_fft" "_tg1",
+			(unsigned long *) gf2x_fake_fft_tg1,
+			gf2x_fake_fft_transform_size(gf2x_fake_fft) *
+			sizeof(gf2x_fake_fft_t) / sizeof(unsigned long));
+		display("gf2x_fake_fft" "_tf2",
+			(unsigned long *) gf2x_fake_fft_tf2,
+			gf2x_fake_fft_transform_size(gf2x_fake_fft) *
+			sizeof(gf2x_fake_fft_t) / sizeof(unsigned long));
+		display("gf2x_fake_fft" "_tg2",
+			(unsigned long *) gf2x_fake_fft_tg2,
+			gf2x_fake_fft_transform_size(gf2x_fake_fft) *
+			sizeof(gf2x_fake_fft_t) / sizeof(unsigned long));
+	    } while (0);
+	    do {
+		display("gf2x_ternary_fft" "_tf1",
+			(unsigned long *) gf2x_ternary_fft_tf1,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		display("gf2x_ternary_fft" "_tg1",
+			(unsigned long *) gf2x_ternary_fft_tg1,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		display("gf2x_ternary_fft" "_tf2",
+			(unsigned long *) gf2x_ternary_fft_tf2,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+		display("gf2x_ternary_fft" "_tg2",
+			(unsigned long *) gf2x_ternary_fft_tg2,
+			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
+			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+	    } while (0);
+	    fflush(stdout);
+	    fflush(stderr);
+	    abort();
+	}
+    } while (0);
+} while (0);
 
         LEAVE(gf2x_fake_fft);
         LEAVE(gf2x_cantor_fft);
@@ -820,9 +1202,16 @@ int docheck_mp(size_t nf, size_t ng, int nrep)
 
         long K = randomly_pick_order_for_ternary(nh);
 
-        SETUP(gf2x_fake_fft, info_init_mp, nf, ng);
-        SETUP(gf2x_cantor_fft, info_init_mp, nf, ng);
-        SETUP3(gf2x_ternary_fft, info_init_mp, nf, ng, K);
+        ENTER(gf2x_fake_fft, info_init_mp, nf, ng);
+        ENTER(gf2x_cantor_fft, info_init_mp, nf, ng);
+        ENTER(gf2x_ternary_fft, info_init_mp, nf, ng);
+
+        gf2x_ternary_fft_info_adjust(gf2x_ternary_fft, GF2X_FFT_ADJUST_DEPTH, K);
+
+        SETUP(gf2x_fake_fft);
+        SETUP(gf2x_cantor_fft);
+        SETUP(gf2x_ternary_fft);
+
 
         CHOP_HEAD(f1);
         CHOP_HEAD(g1);

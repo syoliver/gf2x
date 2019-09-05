@@ -41,40 +41,56 @@ extern "C" {
 int XXX_info_init(
         XXX_info_ptr p,
         size_t bits_a,
-        size_t bits_b,
-        ...); 
+        size_t bits_b);
 /* Basic constructor. Used to multiply polynomials with the given number
- * of bits. Extra (stdarg) arguments may be passed for implementations
- * that have a use for it.
+ * of bits.
+ *
+ * Extra tuning may be done with XXX_info_adjust
  *
  * Returns 0 if everything went well, and a negative number on error
- * (maybe if the extra arguments were incorrect)
- *
  */
 
 int XXX_info_init_mp(
         XXX_info_ptr p,
         size_t bits_a,
-        size_t bits_b,
-        ...); 
+        size_t bits_b);
 /* Used to compute middle products of polynomials with the given number
  * of bits. That is, the result MP(a, b) consists of coefficients of
  * degrees MIN(bits_a, bits_b)-1 to MAX(bits_a, bits_b)-1 (inclusive),
  * forming a result with MAX(bits_a, bits_b)-MIN(bits_a, bits_b)+1
- * coefficients.  Extra (stdarg) arguments may be passed for
- * implementations that have a use for it.
+ * coefficients.
+ * 
+ * Extra tuning may be done with XXX_info_adjust
  *
  * Returns 0 if everything went well, and a negative number on error
- * (maybe if the extra arguments were incorrect)
- *
  */
 
 void XXX_info_init_empty(
         XXX_info_ptr p);
 /* This is not really a constructor. Most often we expect this function
  * to be a noop, or at most an inline. It is just meant to provide some
- * default-initialization, so that info_clear does not choke.
+ * default-initialization, so that info_clear does not choke. Note that
+ *
+ * XXX_info_adjust on an empty-initialized info structure is likely to
+ * fail.
  */
+
+/* Adjust the fft structure with one of the GF2X_FFT_ADJUST_* tweaks, and
+ * an extra parameter.
+ *
+ * This must be done right after the info_init (or info_init_mp) call, as
+ * this might invalidate all transforms.
+ *
+ * Returns 0 if everything went well, and a negative number on error
+ * (maybe if the extra argument was incorrect).
+ *
+ * Note that adjustments that happen to exist but are valid for other fft
+ * engines are simply ignored.
+ */
+int XXX_info_adjust(
+        XXX_info_ptr p,
+        int adjust_kind,
+        long val);
 
 void XXX_info_clear(
         XXX_info_ptr p);
@@ -84,25 +100,6 @@ int XXX_info_copy(
         XXX_info_ptr p,
         XXX_info_srcptr other);
 /* Copy constructor. Returns 0 on success or GF2X_ERROR_OUT_OF_MEMORY.*/
-
-int XXX_info_init_similar(
-        XXX_info_ptr p,
-        XXX_info_srcptr other,
-        size_t bits_a,
-        size_t bits_b);
-/* Init a transform info type meant to multiply polynomials with the
- * given number of bits, but with the constraint that the transforms
- * obtained this way will be "compatible" with transforms obtained with
- * the other transform info type, in the sense that with appropriate
- * truncation, transforms can meaningfully be composed together.
- * Unfortunately, the API to deal with these is truncation (decimation)
- * operations not complete.
- * Returns 0 on success or GF2X_ERROR_OUT_OF_MEMORY.*/
-
-int XXX_info_compatible(
-        XXX_info_srcptr p,
-        XXX_info_srcptr other);
-/* Tell whether two info types are compatible in the above sense. */
 
 int XXX_info_order(
         XXX_info_srcptr p);
@@ -353,11 +350,6 @@ struct XXX_info {
         XXX_info_copy(this, &o);
         return *this;
     }
-    inline XXX_info(XXX_info const & other, size_t nF, size_t nG)
-    {
-        if (XXX_info_init_similar(this, &other, nF, nG) < 0)
-            throw ctor_fails();
-    }
     /* Use named constructor idiom for the variants */
     inline static XXX_info mul_info(size_t nF, size_t nG) {
         XXX_info a;
@@ -371,8 +363,8 @@ struct XXX_info {
             throw ctor_fails();
         return a;
     }
-    inline bool compatible(XXX_info const & other) const {
-        return XXX_info_compatible(this, &other);
+    inline int adjust(int adjust_kind, long val) {
+        return XXX_info_adjust(this, adjust_kind, val);
     }
     inline int order() const {
         return XXX_info_order(this);

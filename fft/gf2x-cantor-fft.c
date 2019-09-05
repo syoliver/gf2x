@@ -1440,7 +1440,7 @@ static void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift
 #endif
 
 /* nF is a number of coefficients == number of bits ; a.k.a. degree + 1 */
-int gf2x_cantor_fft_info_init(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, ...)
+int gf2x_cantor_fft_info_init(gf2x_cantor_fft_info_t p, size_t nF, size_t nG)
 {
     unsigned int k;
     size_t Hl;
@@ -1463,7 +1463,7 @@ int gf2x_cantor_fft_info_init(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, ..
     return 0;
 }
 
-int gf2x_cantor_fft_info_init_mp(gf2x_cantor_fft_info_t p, size_t nF, size_t nG, ...)
+int gf2x_cantor_fft_info_init_mp(gf2x_cantor_fft_info_t p, size_t nF, size_t nG)
 {
     unsigned int k;
 
@@ -1746,13 +1746,4 @@ void gf2x_cantor_fft_zero(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x,
 {
     memset(x, 0, n * gf2x_cantor_fft_transform_size(p) * sizeof(Kelt));
 }
-int gf2x_cantor_fft_info_init_similar(gf2x_cantor_fft_info_ptr o, gf2x_cantor_fft_info_srcptr other GF2X_MAYBE_UNUSED, size_t bits_a, size_t bits_b)
-{
-    return gf2x_cantor_fft_info_init(o, bits_a, bits_b);
-}
-int gf2x_cantor_fft_info_compatible(gf2x_cantor_fft_info_srcptr o1, gf2x_cantor_fft_info_srcptr o2)
-{
-    return o1->k == o2->k;
-}
-
 /* vim: set sw=4 sta et: */

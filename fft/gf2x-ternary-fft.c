@@ -39,6 +39,7 @@
 
 #include "gf2x.h"
 #include "gf2x/gf2x-impl.h"
+#include "gf2x-fft.h"
 #include "gf2x-ternary-fft.h"
 #include "gf2x-fft-impl-utils.h"
 
@@ -1009,6 +1010,73 @@ int gf2x_ternary_fft_ift(gf2x_ternary_fft_info_srcptr o, unsigned long * c, size
 }
 
 
+int gf2x_ternary_fft_info_adjust(
+        gf2x_ternary_fft_info_ptr o GF2X_MAYBE_UNUSED,
+        int adjust_kind GF2X_MAYBE_UNUSED,
+        long val)
+{
+    if (adjust_kind == GF2X_FFT_ADJUST_DEPTH) {
+        long K = val;
+        /* Since we have a dangerous interface with a variable argument which
+         * is a possibly _signed_ long, better try to catch the expected
+         * mistakes */
+        for(int i = 2*(K>0)-1 ; K/i > 1 ; i*=3) {
+            if ((K/i)%3) {
+                // fprintf(stderr, "extra argument to gf2x_ternary_fft_init (of type long) must be a power of 3 (got %ld)\n", K);
+                return GF2X_ERROR_INVALID_ARGUMENTS;
+            }
+        }
+        if (K <= 0)
+            return GF2X_ERROR_INVALID_ARGUMENTS;
+        if ((size_t) K == o->K) return 0;
+        free(o->perm);
+        o->perm = NULL;
+
+        o->K = K;
+        size_t nwa = W(o->bits_a);
+        size_t nwb = W(o->bits_b);
+        if (o->split == 0) {
+            o->M = CEIL((nwa + nwb) * WLEN, K);	// ceil(bits(product)/K)
+        } else {
+            ASSERT(K >= WLEN);
+            size_t cn2 = CEIL(nwa + nwb, 2);	// Space for half product
+            size_t m2 = CEIL(cn2 * WLEN, K);	// m2 = ceil(cn2*WLEN/K)
+            size_t m1 = m2 + 1;		        // next possible M
+            o->M = m1;
+        }
+        int rc = 0;
+        /* the temporary space used by this FFT is computed in
+         * gf2x_ternary_fft_info_get_alloc_sizes */
+        o->perm = (size_t *) malloc(o->K * sizeof(size_t));
+        if (o->perm == NULL)
+            rc = GF2X_ERROR_OUT_OF_MEMORY;
+        else
+            bitrev(0, 0, o->K, 1, o->perm);
+        return rc;
+    } else if (adjust_kind == GF2X_FFT_ADJUST_SPLIT_FFT) {
+        if (o->K == 0)
+            return GF2X_ERROR_INVALID_ARGUMENTS;
+        size_t nwa = W(o->bits_a);
+        size_t nwb = W(o->bits_b);
+        o->split = val != 0;
+        if (o->split == 0) {
+            if (o->mp_shift) {
+                o->M = CEIL(MAX(nwa, nwb) * WLEN, o->K);
+            } else {
+                o->M = CEIL((nwa + nwb) * WLEN, o->K);// ceil(bits(product)/K)
+            }
+        } else {
+            /* do the same for middle product and normal product */
+            ASSERT(o->K >= WLEN);
+            size_t cn2 = CEIL(nwa + nwb, 2);	// Space for half product
+            size_t m2 = CEIL(cn2 * WLEN, o->K);	// m2 = ceil(cn2*WLEN/K)
+            size_t m1 = m2 + 1;		        // next possible M
+            o->M = m1;
+        }
+    }
+    return 0;
+}
+
 /* multiplies {a, an} by {b, bn} using an FFT of length K,
    and stores the result into {c, an+bn}. If an+bn is too small
    then Toom-Cook is used.  */
@@ -1019,7 +1087,8 @@ int gf2x_ternary_fft_ift(gf2x_ternary_fft_info_srcptr o, unsigned long * c, size
 // because this algorithm needs to know about the K value, which in turns
 // depends on proper tuning, we ask for it to be provided by the caller.
 // Negative values of K mean to use FFT2.
-int gf2x_ternary_fft_info_init(gf2x_ternary_fft_info_ptr o, size_t bits_a, size_t bits_b, ...)
+
+static int gf2x_ternary_fft_info_init_common(gf2x_ternary_fft_info_ptr o, size_t bits_a, size_t bits_b, size_t shift)
 {
     o->bits_a = bits_a;
     o->bits_b = bits_b;
@@ -1027,39 +1096,9 @@ int gf2x_ternary_fft_info_init(gf2x_ternary_fft_info_ptr o, size_t bits_a, size_
     size_t nwa = W(bits_a);
     size_t nwb = W(bits_b);
 
-    va_list ap;
-    va_start(ap, bits_b);
-    long K = va_arg(ap, long);
-
-    /* Since we have a dangerous interface with a variable argument which
-     * is a possibly _signed_ long, better try to catch the expected
-     * mistakes */
-    for(int i = 2*(K>0)-1 ; K/i > 1 ; i*=3) {
-        if ((K/i)%3) {
-            // fprintf(stderr, "extra argument to gf2x_ternary_fft_init (of type long) must be a power of 3 (got %ld)\n", K);
-            va_end(ap);
-            return GF2X_ERROR_INVALID_ARGUMENTS;
-        }
-    }
-
-    o->mp_shift = 0;
-
-    size_t M;
-    if (K > 0) {
-        M = CEIL((nwa + nwb) * WLEN, K);	// ceil(bits(product)/K)
-        o->K = K;
-        o->M = M;
-        o->split = 0;
-    } else {
-        ASSERT(-K >= WLEN);
-        size_t cn2 = CEIL(nwa + nwb, 2);	// Space for half product
-        size_t m2 = CEIL(cn2 * WLEN, -K);	// m2 = ceil(cn2*WLEN/K)
-        size_t m1 = m2 + 1;		        // next possible M
-        M = m1;
-        o->K = -K;
-        o->M = M;
-        o->split = 1;
-    }
+    o->mp_shift = shift;
+    o->split = 0;
+    o->perm = NULL;
 
     if (nwa + nwb < MUL_FFT_THRESHOLD) {
         // make this special.
@@ -1069,84 +1108,55 @@ int gf2x_ternary_fft_info_init(gf2x_ternary_fft_info_ptr o, size_t bits_a, size_
         return 0;
     }
 
-    int rc = 0;
-    /* the temporary space used by this FFT is computed in
-     * gf2x_ternary_fft_info_get_alloc_sizes */
-    o->perm = (size_t *) malloc(o->K * sizeof(size_t));
-    if (o->perm == NULL)
-        rc = GF2X_ERROR_OUT_OF_MEMORY;
-    else
-        bitrev(0, 0, o->K, 1, o->perm);
-    va_end(ap);
+    /* pick a reasonable default -- TODO use a proper table for MP
+     * (shift>0), not the same as for multiplication.
+     * */
+#ifdef GF2X_MUL_FFT_TABLE
+    static int64_t T_FFT_TAB[][2] = GF2X_MUL_FFT_TABLE;
+    long ix, K, sab = MAX(nwa, nwb) / 2;
+    long max_ix = sizeof(T_FFT_TAB)/sizeof(T_FFT_TAB[0]);
+    for (ix = 0; ix + 1 < max_ix && T_FFT_TAB[ix + 1][0] <= sab; ix++);
+    /* now T_FFT_TAB[ix][0] <= sab < T_FFT_TAB[ix+1][0] */
+    K = T_FFT_TAB[ix][1];
+#else
+    K = 27;
+#endif
+
+    /* use this temporarily so that we can set the right arguments with
+     * the _adjust call */
+    o->split = 0;
+    o->K = 0;
+    
+    long split = K < 0;
+    if (split) K = -K;
+
+    if (K == 1) {
+        /* the semantics are not the same in FFT_TAB and in o->K, but
+         * really if we reach here with K == 1, it means that the
+         * fall-back that uses o->K==0 must be used
+         */
+        return 0;
+    }
+
+    int rc;
+
+    rc = gf2x_ternary_fft_info_adjust(o, GF2X_FFT_ADJUST_DEPTH, K);
+    if (rc < 0) return rc;
+
+    rc = gf2x_ternary_fft_info_adjust(o, GF2X_FFT_ADJUST_SPLIT_FFT, split);
+    if (rc < 0) return rc;
 
     return rc;
 }
 
-int gf2x_ternary_fft_info_init_mp(gf2x_ternary_fft_info_ptr o, size_t bits_a, size_t bits_b, ...)
+int gf2x_ternary_fft_info_init(gf2x_ternary_fft_info_ptr o, size_t bits_a, size_t bits_b)
 {
-    o->bits_a = bits_a;
-    o->bits_b = bits_b;
+    return gf2x_ternary_fft_info_init_common(o, bits_a, bits_b, 0);
+}
 
-    size_t nwa = W(bits_a);
-    size_t nwb = W(bits_b);
-
-    va_list ap;
-    va_start(ap, bits_b);
-    long K = va_arg(ap, long);
-
-    /* Since we have a dangerous interface with a variable argument which
-     * is a possibly _signed_ long, better try to catch the expected
-     * mistakes */
-    for(int i = 2*(K>0)-1 ; K/i > 1 ; i*=3) {
-        if ((K/i)%3) {
-            // fprintf(stderr, "extra argument to gf2x_ternary_fft_init (of type long) must be a power of 3 (got %ld)\n", K);
-            return GF2X_ERROR_INVALID_ARGUMENTS;
-        }
-    }
-
-    o->mp_shift = MIN(bits_a, bits_b) - 1;
-
-    size_t M;
-    if (K > 0) {
-        /* For the middle product, we only need the operands to fit.
-         * Since the polynomial product is computed mod X^K-1, having K*M
-         * >= max(bits_a, bits_b) is sufficient to ensure that the
-         * wraparound works precisely as we want it to.
-         */
-        M = CEIL(MAX(nwa, nwb) * WLEN, K);
-        o->K = K;
-        o->M = M;
-        o->split = 0;
-    } else {
-        ASSERT(-K >= WLEN);
-        size_t cn2 = CEIL(nwa + nwb, 2);	// Space for half product
-        size_t m2 = CEIL(cn2 * WLEN, -K);	// m2 = ceil(cn2*WLEN/K)
-        size_t m1 = m2 + 1;		        // next possible M
-        M = m1;
-        o->K = -K;
-        o->M = M;
-        o->split = 1;
-    }
-
-    if (nwa + nwb < MUL_FFT_THRESHOLD) {
-        // make this special.
-        o->K = 0;
-        o->M = 0;
-        o->perm = NULL;
-        return 0;
-    }
-
-    int rc = 0;
-    /* the temporary space used by this FFT is computed in
-     * gf2x_ternary_fft_info_get_alloc_sizes */
-    o->perm = (size_t *) malloc(o->K * sizeof(size_t));
-    if (o->perm == NULL)
-        rc = GF2X_ERROR_OUT_OF_MEMORY;
-    else
-        bitrev(0, 0, o->K, 1, o->perm);
-    va_end(ap);
-
-    return rc;
+int gf2x_ternary_fft_info_init_mp(gf2x_ternary_fft_info_ptr o, size_t bits_a, size_t bits_b)
+{
+    return gf2x_ternary_fft_info_init_common(o, bits_a, bits_b, MIN(bits_a, bits_b) - 1);
 }
 
 void gf2x_ternary_fft_info_empty(gf2x_ternary_fft_info_ptr o)
@@ -1186,17 +1196,6 @@ void gf2x_ternary_fft_info_get_alloc_sizes(
     }
 }
 
-
-int gf2x_ternary_fft_info_init_similar(gf2x_ternary_fft_info_ptr o, gf2x_ternary_fft_info_srcptr other, size_t bits_a, size_t bits_b)
-{
-    return gf2x_ternary_fft_info_init(o, bits_a, bits_b, other->K);
-}
-
-int gf2x_ternary_fft_info_compatible(gf2x_ternary_fft_info_srcptr o1, gf2x_ternary_fft_info_srcptr o2)
-{
-    return o1->K == o2->K && o1->M == o2->M;
-}
-
 void gf2x_ternary_fft_info_clear(gf2x_ternary_fft_info_ptr o)
 {
     if (o->K) {
@@ -1221,10 +1220,18 @@ int gf2x_mul_fft(unsigned long *c, const unsigned long *a, size_t an,
 {
     gf2x_ternary_fft_info_t o;
     int rc;
-    rc = gf2x_ternary_fft_info_init(o, an * WLEN, bn * WLEN, K);
-    if (rc < 0) {
-        return rc;
+    rc = gf2x_ternary_fft_info_init(o, an * WLEN, bn * WLEN);
+    if (rc < 0) return rc;
+    if (K < 0) {
+        rc = gf2x_ternary_fft_info_adjust(o, GF2X_FFT_ADJUST_DEPTH, -K);
+        if (rc < 0) return rc;
+        rc = gf2x_ternary_fft_info_adjust(o, GF2X_FFT_ADJUST_SPLIT_FFT, 1);
+        if (rc < 0) return rc;
+    } else {
+        rc = gf2x_ternary_fft_info_adjust(o, GF2X_FFT_ADJUST_DEPTH, K);
+        if (rc < 0) return rc;
     }
+
     size_t sizes[3];
     gf2x_ternary_fft_info_get_alloc_sizes(o, sizes);
     gf2x_ternary_fft_ptr temp = malloc(MAX(sizes[1], sizes[2]));

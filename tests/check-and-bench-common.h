@@ -47,6 +47,7 @@ extern int time_ift;
 #define ENGINE_srcptr gf2x_cantor_fft_srcptr
 #define ENGINE_ptr gf2x_cantor_fft_ptr
 #define ENGINE_init gf2x_cantor_fft_info_init
+#define ENGINE_adjust gf2x_cantor_fft_info_adjust
 #define ENGINE_alloc gf2x_cantor_fft_alloc
 #define ENGINE_dft gf2x_cantor_fft_dft
 #define ENGINE_zero gf2x_cantor_fft_zero
@@ -74,6 +75,7 @@ extern int time_ift;
 #define ENGINE_srcptr gf2x_ternary_fft_srcptr
 #define ENGINE_ptr gf2x_ternary_fft_ptr
 #define ENGINE_init gf2x_ternary_fft_info_init
+#define ENGINE_adjust gf2x_ternary_fft_info_adjust
 #define ENGINE_alloc gf2x_ternary_fft_alloc
 #define ENGINE_dft gf2x_ternary_fft_dft
 #define ENGINE_zero gf2x_ternary_fft_zero

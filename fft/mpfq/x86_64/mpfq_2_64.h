@@ -72,8 +72,8 @@ typedef mpfq_2_64_poly_struct mpfq_2_64_poly [1];
 typedef mpfq_2_64_poly_struct * mpfq_2_64_dst_poly;
 typedef mpfq_2_64_poly_struct * mpfq_2_64_src_poly;
 /* Extra types defined by implementation: */
-typedef mpfq_2_64_elt_ur * mpfq_2_64_src_vec_ur;
 typedef mpfq_2_64_elt_ur * mpfq_2_64_dst_vec_ur;
+typedef mpfq_2_64_elt_ur * mpfq_2_64_src_vec_ur;
 typedef mpfq_2_64_elt_ur * mpfq_2_64_vec_ur;
 
 #ifdef  __cplusplus

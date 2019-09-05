@@ -26,7 +26,7 @@
 
 AUTOMAKE_OPTIONS=subdir-objects
 ACLOCAL_AMFLAGS=-I config --install
-AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) -I$(top_builddir)/fft -I$(top_srcdir)/fft
 
 FFT_SOURCES_ALWAYS=fft/gf2x-ternary-fft.c
 

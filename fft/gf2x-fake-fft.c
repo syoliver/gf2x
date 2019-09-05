@@ -34,7 +34,7 @@
 #include "gf2x-fft-impl-utils.h"
 
 /* nF, nG : number of coefficients */
-int gf2x_fake_fft_info_init(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, ...)
+int gf2x_fake_fft_info_init(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG)
 {
     p->n1 = nF;
     p->n2 = nG;
@@ -46,7 +46,7 @@ int gf2x_fake_fft_info_init(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, ...)
     return 0;
 }
 
-int gf2x_fake_fft_info_init_mp(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, ...)
+int gf2x_fake_fft_info_init_mp(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG)
 {
     p->n1 = nF;
     p->n2 = nG;
@@ -56,16 +56,6 @@ int gf2x_fake_fft_info_init_mp(gf2x_fake_fft_info_ptr p, size_t nF, size_t nG, .
     if (p->n2 > nc) nc = p->n2;
     p->size = 2 * W(nc);
     return 0;
-}
-
-int gf2x_fake_fft_info_init_similar(gf2x_fake_fft_info_ptr o, gf2x_fake_fft_info_srcptr other GF2X_MAYBE_UNUSED, size_t bits_a, size_t bits_b)
-{
-    return gf2x_fake_fft_info_init(o, bits_a, bits_b);
-}
-
-int gf2x_fake_fft_compatible(gf2x_fake_fft_info_srcptr o1 GF2X_MAYBE_UNUSED, gf2x_fake_fft_info_srcptr o2 GF2X_MAYBE_UNUSED)
-{
-    return 1;
 }
 
 void gf2x_fake_fft_info_get_alloc_sizes(

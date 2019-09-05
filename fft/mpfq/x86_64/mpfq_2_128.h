@@ -73,8 +73,8 @@ typedef mpfq_2_128_poly_struct * mpfq_2_128_dst_poly;
 typedef mpfq_2_128_poly_struct * mpfq_2_128_src_poly;
 /* Extra types defined by implementation: */
 typedef mpfq_2_128_elt_ur * mpfq_2_128_vec_ur;
-typedef mpfq_2_128_elt_ur * mpfq_2_128_src_vec_ur;
 typedef mpfq_2_128_elt_ur * mpfq_2_128_dst_vec_ur;
+typedef mpfq_2_128_elt_ur * mpfq_2_128_src_vec_ur;
 
 #ifdef  __cplusplus
 extern "C" {

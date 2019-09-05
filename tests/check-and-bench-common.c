@@ -36,6 +36,7 @@
 
 #include "gf2x/gf2x-impl.h"
 #include "gf2x/gf2x-thresholds.h"
+#include "fft/gf2x-fft.h"
 
 #include "test-tools.h"
 #include "check-and-bench-common.h"
@@ -65,7 +66,8 @@ long ENGINE_mul(unsigned long ** H, unsigned long ** F, size_t Fl, unsigned long
     ENGINE_info_t order;
 
     t=cputime(); time_total -= t;
-    ENGINE_init(order, Fl * GF2X_WORDSIZE, Gl * GF2X_WORDSIZE, init_extra_arg);
+    ENGINE_init(order, Fl * GF2X_WORDSIZE, Gl * GF2X_WORDSIZE);
+    ENGINE_adjust(order, GF2X_FFT_ADJUST_DEPTH, init_extra_arg);
     size_t sizes[3];
     ENGINE_get_alloc_sizes(order, sizes);
     ENGINE_t * temp1 = malloc(sizes[1]);
