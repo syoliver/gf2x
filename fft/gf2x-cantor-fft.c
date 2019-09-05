@@ -125,6 +125,15 @@ int gf2x_cantor_fft_check(
     return 1;
 }
 
+static inline void zeropad_transform(
+        gf2x_cantor_fft_info_srcptr o,
+        gf2x_cantor_fft_ptr ptr)
+{
+    size_t n0 = significant_transform_size(o);
+    size_t n1 = gf2x_cantor_fft_transform_size(o);
+    if (n0 == n1) return;
+    memset(ptr + n0, 0, (n1 - n0) * sizeof(Kelt));
+}
 
 
 /*
@@ -841,7 +850,7 @@ void reduce_top_cantor(unsigned int k, unsigned int kappa, Kelt * f, size_t j)
 }
 #endif
 
-
+#ifndef WITHOUT_CANTOR_TRUNCATION
 // The generic reduction function.
 // truncated version
 static inline void reduceSiNobeta_trunc(unsigned int k, Kelt * f, size_t L)
@@ -864,6 +873,7 @@ static inline void reduceSiNobeta_trunc(unsigned int k, Kelt * f, size_t L)
     for (i = 0; i < K1; ++i)
         Kadd(f[i + K1], f[i + K1], f[i]);
 }
+#endif
 
 // A generic interpolation function.
 // TODO: unroll small sizes, like for reduction.
@@ -997,6 +1007,7 @@ static int multievaluateGM(Kelt * f, unsigned int k, size_t length GF2X_MAYBE_UN
 }
 #endif
 
+#ifndef WITHOUT_CANTOR_TRUNCATION
 // evaluate f, having _length_ coefficients, at the 2^i roots following
 // rep_beta
 static void multievaluateKrec_trunc(Kelt * f, unsigned int i, size_t rep_beta, size_t length)
@@ -1074,6 +1085,7 @@ static void multievaluateKnew_trunc(Kelt * f, unsigned int k, size_t length)
     multievaluateKrec_trunc(f + (1UL << (k - 1)), k - 1, 1,
                             length - (1UL << (k - 1)));
 }
+#endif
 
 // Interpolation with subproduct tree.
 static void interpolateK(Kelt * f, unsigned int k)
@@ -1092,6 +1104,7 @@ static void interpolateK(Kelt * f, unsigned int k)
 }
 
 
+#ifndef WITHOUT_CANTOR_TRUNCATION
 // Quotrem Si. f is possibly larger than 2 times 1UL<<k.
 // Degree of f is given by L (with L > 1UL<<k)
 // Inplace computation: low part of f receive rem, high part gets quo.
@@ -1136,6 +1149,7 @@ static inline void mulSi(unsigned int k, Kelt * f, size_t L, Kelt beta)
         Kadd(f[i - K1], f[i - K1], coeff);
     }
 }
+#endif
 
 #if GNUC_VERSION_ATLEAST(3,4,0)
 #define gf2x_clzl(x)         __builtin_clzl(x)
@@ -1168,6 +1182,7 @@ static inline int gf2x_ctzl(unsigned long x)
 }
 #endif
 
+#ifndef WITHOUT_CANTOR_TRUNCATION
 // Reduce f (with 1UL<<k coeffs) modulo the product of s_i corresponding
 // to length.
 static inline void reduceModTrunc(Kelt * f, unsigned int k, size_t length)
@@ -1209,7 +1224,6 @@ static inline void reduceModTrunc(Kelt * f, unsigned int k, size_t length)
     }
 }
 
-
 // Interpolation with subproduct tree.
 // This is a truncated version, where we reconstruct length coefficients,
 // from length values. (length <= 1UL<<k)
@@ -1248,6 +1262,7 @@ static void interpolateK_trunc(Kelt * f, unsigned int k, size_t length)
 
     reduceModTrunc(f, k, length);
 }
+#endif
 
 #if CANTOR_BASE_FIELD_SIZE == 2 * WLEN/*{{{*/
 static void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
@@ -1570,6 +1585,7 @@ int gf2x_cantor_fft_dft(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x, c
     multievaluateKnew_trunc(x, p->k, p->n);
 #endif
 #endif
+    zeropad_transform(p, x);
     return 0;
 }
 
