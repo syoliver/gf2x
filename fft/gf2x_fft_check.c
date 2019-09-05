@@ -712,10 +712,10 @@ void print_context_gf2x_ternary_fft(gf2x_ternary_fft_info_srcptr p GF2X_MAYBE_UN
 
 long randomly_pick_order_for_ternary(size_t N)
 {
-    long Kmin = 1, imin = 0;
+    size_t Kmin = 1, imin = 0;
     for( ; Kmin * Kmin * 27 < N ; Kmin *= 3, imin++) ;
     for( ; Kmin < 64 ; Kmin *= 3, imin++) ;
-    long Kmax = Kmin, imax = imin;
+    size_t Kmax = Kmin, imax = imin;
     for( ; Kmax * Kmax < N * 27 ; Kmax *= 3, imax++) ;
     if (imax == imin) { imax++, Kmax *= 3; }
     int i = imin + random() % (imax - imin);

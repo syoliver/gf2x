@@ -31,6 +31,9 @@ AC_SUBST([GF2X_VERSION_MINOR],
 [regexp(AC_PACKAGE_VERSION,[\([0-9]+\)\.\([0-9]+\)\.\([0-9]+\)],[\2])])
 AC_SUBST([GF2X_VERSION_PATCHLEVEL],
 [regexp(AC_PACKAGE_VERSION,[\([0-9]+\)\.\([0-9]+\)\.\([0-9]+\)],[\3])])
+AC_SUBST([GF2X_FFT_VERSION_MAJOR],[GF2X_VERSION_MAJOR])
+AC_SUBST([GF2X_FFT_VERSION_MINOR],[GF2X_VERSION_MINOR])
+AC_SUBST([GF2X_FFT_VERSION_PATCHLEVEL],[GF2X_VERSION_PATCHLEVEL])
 
 if test "x$CFLAGS" != x ; then
  has_CFLAGS_from_env=yes
@@ -276,18 +279,8 @@ fi
 
 AC_CONFIG_HEADERS([gf2x/gf2x-config.h gf2x/gf2x-config-export.h gf2x.h])
 
-#if test -d "$srcdir/gf2x-fft" ; then
-# AC_MSG_NOTICE([Enabling optional gf2x-fft])
-# AC_CONFIG_SUBDIRS([gf2x-fft])
-# MAYBE_GF2X_FFT=gf2x-fft
-#else
-# AC_MSG_NOTICE([optional gf2x-fft not found])
-# MAYBE_GF2X_FFT=
-#fi
-#AC_SUBST([MAYBE_GF2X_FFT])
-
 AC_CONFIG_FILES([version.sh Makefile tests/Makefile lowlevel/Makefile
-                 src/Makefile fft/Makefile apps/Makefile gf2x.h.in gf2x.pc])
+                 src/Makefile fft/Makefile apps/Makefile fft/gf2x-fft.h gf2x.h.in gf2x.pc])
 
 AC_OUTPUT
 

@@ -69,6 +69,10 @@
 /* The section below is automatically generated */
 /* inline: init_empty clear order copy */
 
+#ifndef GF2X_FFT_EXPORTED
+#define GF2X_FFT_EXPORTED
+#endif
+
 struct gf2x_cantor_fft_info;
 // gf2x_cantor_fft_info_t is defined after the struct fields.
 // typedef struct gf2x_cantor_fft_info gf2x_cantor_fft_info_t[1];
@@ -97,7 +101,7 @@ typedef const struct gf2x_cantor_fft_info * gf2x_cantor_fft_info_srcptr;
 extern "C" {
 #endif
 
-extern int GF2X_EXPORTED gf2x_cantor_fft_info_init(
+extern int GF2X_FFT_EXPORTED gf2x_cantor_fft_info_init(
         gf2x_cantor_fft_info_ptr p,
         size_t bits_a,
         size_t bits_b,
@@ -111,7 +115,7 @@ extern int GF2X_EXPORTED gf2x_cantor_fft_info_init(
  *
  */
 
-extern int GF2X_EXPORTED gf2x_cantor_fft_info_init_mp(
+extern int GF2X_FFT_EXPORTED gf2x_cantor_fft_info_init_mp(
         gf2x_cantor_fft_info_ptr p,
         size_t bits_a,
         size_t bits_b,
@@ -144,7 +148,7 @@ static inline int gf2x_cantor_fft_info_copy(
         gf2x_cantor_fft_info_srcptr other);
 /* Copy constructor. Returns 0 on success or GF2X_ERROR_OUT_OF_MEMORY.*/
 
-extern int GF2X_EXPORTED gf2x_cantor_fft_info_init_similar(
+extern int GF2X_FFT_EXPORTED gf2x_cantor_fft_info_init_similar(
         gf2x_cantor_fft_info_ptr p,
         gf2x_cantor_fft_info_srcptr other,
         size_t bits_a,
@@ -158,7 +162,7 @@ extern int GF2X_EXPORTED gf2x_cantor_fft_info_init_similar(
  * operations not complete.
  * Returns 0 on success or GF2X_ERROR_OUT_OF_MEMORY.*/
 
-extern int GF2X_EXPORTED gf2x_cantor_fft_info_compatible(
+extern int GF2X_FFT_EXPORTED gf2x_cantor_fft_info_compatible(
         gf2x_cantor_fft_info_srcptr p,
         gf2x_cantor_fft_info_srcptr other);
 /* Tell whether two info types are compatible in the above sense. */
@@ -167,7 +171,7 @@ static inline int gf2x_cantor_fft_info_order(
         gf2x_cantor_fft_info_srcptr p);
 /* Return the "order", whatever that means for the underlying info type.  */
 
-extern void GF2X_EXPORTED gf2x_cantor_fft_info_get_alloc_sizes(
+extern void GF2X_FFT_EXPORTED gf2x_cantor_fft_info_get_alloc_sizes(
         gf2x_cantor_fft_info_srcptr p,
         size_t sizes[3]);
 /* Fill the sizes array with three byte counts:
@@ -217,41 +221,41 @@ typedef const gf2x_cantor_fft_t * gf2x_cantor_fft_srcptr;
 extern "C" {
 #endif
 
-extern size_t GF2X_EXPORTED gf2x_cantor_fft_transform_size(
+extern size_t GF2X_FFT_EXPORTED gf2x_cantor_fft_transform_size(
         gf2x_cantor_fft_info_srcptr o);
 /* Number of gf2x_cantor_fft_t objects it takes to allocate one transform. */
 
-extern gf2x_cantor_fft_ptr GF2X_EXPORTED gf2x_cantor_fft_alloc(
+extern gf2x_cantor_fft_ptr GF2X_FFT_EXPORTED gf2x_cantor_fft_alloc(
         gf2x_cantor_fft_info_srcptr o,
         size_t n);
 /* Allocate space for n transforms. Equivalent to (gf2x_cantor_fft_ptr) malloc(n *
  * gf2x_cantor_fft_transform_size(p) * sizeof(gf2x_cantor_fft_t)); */
 
-extern void GF2X_EXPORTED gf2x_cantor_fft_free(
+extern void GF2X_FFT_EXPORTED gf2x_cantor_fft_free(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_ptr ptr,
         size_t n);
 /* Free space for n transforms. */
 
-extern gf2x_cantor_fft_ptr GF2X_EXPORTED gf2x_cantor_fft_get(
+extern gf2x_cantor_fft_ptr GF2X_FFT_EXPORTED gf2x_cantor_fft_get(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_ptr ptr,
         size_t k);
 /* Get the k-th transform. */
 
-extern gf2x_cantor_fft_srcptr GF2X_EXPORTED gf2x_cantor_fft_get_const(
+extern gf2x_cantor_fft_srcptr GF2X_FFT_EXPORTED gf2x_cantor_fft_get_const(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_srcptr ptr,
         size_t k);
 /* Get the k-th transform. */
 
-extern void GF2X_EXPORTED gf2x_cantor_fft_zero(
+extern void GF2X_FFT_EXPORTED gf2x_cantor_fft_zero(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_ptr ptr,
         size_t n);
 /* Zero n consecutive transforms. */
 
-extern void GF2X_EXPORTED gf2x_cantor_fft_cpy(
+extern void GF2X_FFT_EXPORTED gf2x_cantor_fft_cpy(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_ptr y,
         gf2x_cantor_fft_srcptr x,
@@ -293,7 +297,7 @@ static inline int gf2x_cantor_fft_check(
  * are free of any pointers, which is always the case with gf2x. */
 
 #if 0 && defined(__GNU_MP__) /* we don't want a gmp dependency... */
-extern void GF2X_EXPORTED gf2x_cantor_fft_fill_random(
+extern void GF2X_FFT_EXPORTED gf2x_cantor_fft_fill_random(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_ptr ptr,
         size_t n,
@@ -303,14 +307,14 @@ extern void GF2X_EXPORTED gf2x_cantor_fft_fill_random(
  */
 #endif
 
-extern void GF2X_EXPORTED gf2x_cantor_fft_add(
+extern void GF2X_FFT_EXPORTED gf2x_cantor_fft_add(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_ptr tc,
         gf2x_cantor_fft_srcptr ta,
         gf2x_cantor_fft_srcptr tb);
 /* Add two transforms to tc. tc==ta or tc==tb are allowed. */
 
-extern int GF2X_EXPORTED gf2x_cantor_fft_dft(
+extern int GF2X_FFT_EXPORTED gf2x_cantor_fft_dft(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_ptr tr,
         const unsigned long * a,
@@ -325,7 +329,7 @@ extern int GF2X_EXPORTED gf2x_cantor_fft_dft(
  * allocation is needed by some implementations).
  */
 
-extern int GF2X_EXPORTED gf2x_cantor_fft_ift(
+extern int GF2X_FFT_EXPORTED gf2x_cantor_fft_ift(
         gf2x_cantor_fft_info_srcptr o,
         unsigned long * c,
         size_t bits_c,
@@ -340,7 +344,7 @@ extern int GF2X_EXPORTED gf2x_cantor_fft_ift(
  * allocation is needed by some implementations).
  */
 
-extern int GF2X_EXPORTED gf2x_cantor_fft_compose(
+extern int GF2X_FFT_EXPORTED gf2x_cantor_fft_compose(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_ptr tc,
         gf2x_cantor_fft_srcptr ta,
@@ -353,7 +357,7 @@ extern int GF2X_EXPORTED gf2x_cantor_fft_compose(
  * allocation is needed by some implementations).
  */
 
-extern int GF2X_EXPORTED gf2x_cantor_fft_addcompose_n(
+extern int GF2X_FFT_EXPORTED gf2x_cantor_fft_addcompose_n(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_ptr tc,
         gf2x_cantor_fft_srcptr * ta,
@@ -369,7 +373,7 @@ extern int GF2X_EXPORTED gf2x_cantor_fft_addcompose_n(
  * allocation is needed by some implementations).
  */
 
-extern int GF2X_EXPORTED gf2x_cantor_fft_addcompose(
+extern int GF2X_FFT_EXPORTED gf2x_cantor_fft_addcompose(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_ptr tc,
         gf2x_cantor_fft_srcptr ta,

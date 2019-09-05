@@ -74,8 +74,9 @@
 #include "mpfq/mpfq_name_K.h"
 
 /* It's a placeholder, really. After macro expansion, nobody really uses
- * this */
-Kfield K;
+ * this. The symbol must exist, though, because we have static inlines
+ * here and there. So an empty macro won't do. */
+static Kfield K;
 
 
 /*
@@ -661,7 +662,7 @@ void gm_trick(unsigned int two_t, Kelt * f, size_t j)
     }
 }
 
-void multievaluateKrec(Kelt * f, unsigned int i, size_t rep_beta);
+static void multievaluateKrec(Kelt * f, unsigned int i, size_t rep_beta);
 
 /* This is the same gao-mateer trick. It reduces a length 2^two_t
  * polynomial to 2^t polynomials of length 2^t. Recursive work for the
@@ -670,7 +671,7 @@ void multievaluateKrec(Kelt * f, unsigned int i, size_t rep_beta);
  * evaluations are also processed the same way, and also handed over to
  * multievaluateKrec
  */
-void multievaluateKrecGM(Kelt * f, unsigned int two_t, size_t j)
+static void multievaluateKrecGM(Kelt * f, unsigned int two_t, size_t j)
 {
     assert((two_t & (two_t-1)) == 0);
     unsigned int t = two_t >> 1;
@@ -867,7 +868,7 @@ static inline void interpolateSiNobeta(unsigned int k, Kelt * f)
 }
 
 // f has length 2^i
-void multievaluateKrec(Kelt * f, unsigned int i, size_t rep_beta)
+static void multievaluateKrec(Kelt * f, unsigned int i, size_t rep_beta)
 {
     Kelt beta;
 
@@ -959,7 +960,7 @@ static int multievaluateGM(Kelt * f, unsigned int k, size_t length GF2X_MAYBE_UN
 
 // evaluate f, having _length_ coefficients, at the 2^i roots following
 // rep_beta
-void multievaluateKrec_trunc(Kelt * f, unsigned int i, size_t rep_beta, size_t length)
+static void multievaluateKrec_trunc(Kelt * f, unsigned int i, size_t rep_beta, size_t length)
 {
     Kelt beta;
 
@@ -1010,7 +1011,7 @@ void multievaluateKrec_trunc(Kelt * f, unsigned int i, size_t rep_beta, size_t l
 
 // evaluate f, having length coefficients, at all the roots of the polynomial
 // s_k
-void multievaluateKnew_trunc(Kelt * f, unsigned int k, size_t length)
+static void multievaluateKnew_trunc(Kelt * f, unsigned int k, size_t length)
 {
     assert(length <= (1UL << k));
     if (k == 0) {
@@ -1036,7 +1037,7 @@ void multievaluateKnew_trunc(Kelt * f, unsigned int k, size_t length)
 }
 
 // Interpolation with subproduct tree.
-void interpolateK(Kelt * f, unsigned int k)
+static void interpolateK(Kelt * f, unsigned int k)
 {
     size_t i, j;
     Kelt beta;
@@ -1174,7 +1175,7 @@ static inline void reduceModTrunc(Kelt * f, unsigned int k, size_t length)
 // This is a truncated version, where we reconstruct length coefficients,
 // from length values. (length <= 1UL<<k)
 // Assume that non-computed values are set to zero.
-void interpolateK_trunc(Kelt * f, unsigned int k, size_t length)
+static void interpolateK_trunc(Kelt * f, unsigned int k, size_t length)
 {
     unsigned int i;
     size_t j;
@@ -1210,7 +1211,7 @@ void interpolateK_trunc(Kelt * f, unsigned int k, size_t length)
 }
 
 #if CANTOR_BASE_FIELD_SIZE == 2 * WLEN/*{{{*/
-void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
+static void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
 {
     assert(Fl <= (1UL << k));
     for (size_t i = 0; i < Fl; ++i) {
@@ -1221,14 +1222,14 @@ void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
     memset(f + Fl, 0, ((1UL << k) - Fl) * sizeof(Kelt));
 }
 
-void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
+static void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
 {
     assert(Fl <= (1UL << k));
     F[0] = f[0][0];
     for (size_t i = 1; i < Fl ; ++i)
         F[i] = f[i][0] ^ f[i - 1][1];
 }
-void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift, int k GF2X_MAYBE_UNUSED)
+static void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift, int k GF2X_MAYBE_UNUSED)
 {
     size_t Fl = W(nF);
     size_t words_full = W(nF + shift);
@@ -1255,7 +1256,7 @@ void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift, int k
         F[I(nF)] &= MASK(R(nF));
 }/*}}}*/
 #elif CANTOR_BASE_FIELD_SIZE == 64 && WLEN == 64/*{{{*/
-void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
+static void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
 {
     size_t i;
     /* We're computing a DFT of length 2^k, so we can accomodate 2^k*32
@@ -1272,7 +1273,7 @@ void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
     memset(f + i, 0, ((1UL << k) - 2*Fl) * sizeof(Kelt));
 }
 
-void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
+static void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
 {
     size_t i;
     assert(Fl <= (1UL << (k-1)));
@@ -1282,7 +1283,7 @@ void recomposeK(unsigned long * F, Kelt * f, size_t Fl, int k GF2X_MAYBE_UNUSED)
         F[i] = f[2*i][0] ^ (f[2*i+1][0] << 32) ^ (f[2*i-1][0] >> 32);
     }
 }
-void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift, int k GF2X_MAYBE_UNUSED)
+static void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift, int k GF2X_MAYBE_UNUSED)
 {
     size_t Fl = W(nF);
     size_t words_full = W(nF + shift);
@@ -1306,7 +1307,7 @@ void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift, int k
         F[I(nF)] &= MASK(R(nF));
 }/*}}}*/
 #elif CANTOR_BASE_FIELD_SIZE == 128 && WLEN == 32/*{{{*/
-void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
+static void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
 {
     size_t i;
     assert(Fl <= (1UL << (k+1)));
@@ -1328,7 +1329,7 @@ void decomposeK(Kelt * f, const unsigned long * F, size_t Fl, int k)
     memset(f + i, 0, ((1UL << k) - i) * sizeof(Kelt));
 }
 
-void recomposeK(unsigned long * F, Kelt * f, size_t Fl, unsigned int k GF2X_MAYBE_UNUSED)
+static void recomposeK(unsigned long * F, Kelt * f, size_t Fl, unsigned int k GF2X_MAYBE_UNUSED)
 {
     size_t i;
 
@@ -1343,7 +1344,7 @@ void recomposeK(unsigned long * F, Kelt * f, size_t Fl, unsigned int k GF2X_MAYB
             F[i] = f[i/2][0] ^ f[i/2 - 1][2];
     }
 }
-void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift, int k GF2X_MAYBE_UNUSED)
+static void recomposeK_bits(unsigned long * F, size_t nF, Kelt * f, size_t shift, int k GF2X_MAYBE_UNUSED)
 {
     size_t Fl = W(nF);
     size_t words_full = W(nF + shift);

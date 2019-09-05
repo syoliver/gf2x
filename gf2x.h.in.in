@@ -95,6 +95,14 @@ extern int GF2X_EXPORTED gf2x_mul_r(unsigned long *c,
 extern const char * gf2x_toom_gpl_status GF2X_EXPORTED;
 extern int gf2x_lib_version_code GF2X_EXPORTED;
 
+/* multiply with a guarantee than no fft (and no extra allocation) is
+ * done. stk must point to at least gf2x_toomspace unsigned longs
+ */
+extern void GF2X_EXPORTED gf2x_mul_toom(unsigned long *c, const unsigned long *a,
+			    const unsigned long *b, long n,
+			    unsigned long *stk);
+extern long GF2X_EXPORTED gf2x_toomspace(long n);
+
 #ifdef __cplusplus
 }
 #endif

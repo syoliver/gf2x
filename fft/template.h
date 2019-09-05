@@ -6,6 +6,10 @@
 
 /* BEGIN SECTION 1: the typical interface for XXX_info */
 
+#ifndef GF2X_FFT_EXPORTED
+#define GF2X_FFT_EXPORTED
+#endif
+
 struct XXX_info;
 // XXX_info_t is defined after the struct fields.
 // typedef struct XXX_info XXX_info_t[1];
