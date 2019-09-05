@@ -79,6 +79,54 @@
 static Kfield K;
 
 
+/* Cantor transforms are always powers of two in size. But for truncated
+ * transforms, we spare some of the computation. For direct transforms,
+ * it seems just silly to not have shorter data. However, inverse
+ * transforms need the full data size, because interpolation is done on
+ * data which has zeros everywhere, and then it's reduced later on modulo
+ * the proper minimal polynomial.
+ *
+ * After _dft, all transforms have zero high part, and it remains so
+ * after gf2x_cantor_fft_{add,compose,addcompose} and so on.
+ *
+ * The only situation where transformed data temporarily has non-zero
+ * data in the high part is during the ift operation, and even then the
+ * data that comes out of the ift still has zero high part.
+ */
+size_t gf2x_cantor_fft_transform_size(const gf2x_cantor_fft_info_t p)
+{
+    return 1UL << p->k;
+}
+
+size_t significant_transform_size(const gf2x_cantor_fft_info_t p)
+{
+    // the _size() is a number of Kelt of the result.
+    // n normally, except when not truncating...
+    size_t n = p->n;
+#ifdef WITHOUT_CANTOR_TRUNCATION
+    n = 1 << p->k;
+#endif
+    return n;
+}
+
+int gf2x_cantor_fft_check(
+        gf2x_cantor_fft_info_srcptr o,
+        gf2x_cantor_fft_srcptr ptr,
+        size_t n,
+        int printf_diagnostics GF2X_MAYBE_UNUSED)
+{
+    for(size_t k = 0 ; k < n ; k++) {
+        gf2x_cantor_fft_srcptr xptr = gf2x_cantor_fft_get_const(o, ptr, k);
+        for(size_t i = significant_transform_size(o) ; i < gf2x_cantor_fft_transform_size(o) ; i++) {
+            if (!Kis_zero(xptr[i]))
+                return 0;
+        }
+    }
+    return 1;
+}
+
+
+
 /*
 #define Kdst_elt        unsigned long *
 #define Ksrc_elt        const unsigned long *
@@ -1528,7 +1576,7 @@ int gf2x_cantor_fft_dft(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr x, c
 
 int gf2x_cantor_fft_compose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2, gf2x_cantor_fft_ptr temp2 GF2X_MAYBE_UNUSED)
 {
-    for (size_t j = 0; j < gf2x_cantor_fft_transform_size(p) ; j++) {
+    for (size_t j = 0; j < significant_transform_size(p) ; j++) {
         Kmul(y[j], x1[j], x2[j]);
     }
     return 0;
@@ -1542,7 +1590,7 @@ int gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft
      * simultaneous accumulators */
 #define ACCUMULATE      256
     size_t j;
-    for (j = 0; j + ACCUMULATE - 1 < gf2x_cantor_fft_transform_size(p) ; j+= ACCUMULATE) {
+    for (j = 0; j + ACCUMULATE - 1 < significant_transform_size(p) ; j+= ACCUMULATE) {
         Kelt_ur e[ACCUMULATE], s[ACCUMULATE];
         for(int t = 0 ; t < ACCUMULATE ; t++)
             Kelt_ur_set_zero(s[t]);
@@ -1557,7 +1605,7 @@ int gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft
             Kadd(y[j+t], y[j+t], er);
         }
     }
-    for (; j < gf2x_cantor_fft_transform_size(p) ; j++) {
+    for (; j < significant_transform_size(p) ; j++) {
         Kelt_ur e, s;
         Kelt_ur_set_zero(s);
         for(size_t k = 0 ; k < n ; k++) {
@@ -1574,7 +1622,7 @@ int gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft
 #define SIMULTANEOUS    8
     size_t k;
     for(k = 0 ; k + SIMULTANEOUS - 1 < n ; k += SIMULTANEOUS) {
-        for(size_t j = 0 ; j < gf2x_cantor_fft_transform_size(p) ; j++) {
+        for(size_t j = 0 ; j < significant_transform_size(p) ; j++) {
             Kelt_ur s;
             Kelt_ur_set_zero(s);
             for(size_t r = 0 ; r < SIMULTANEOUS ; r++) {
@@ -1589,7 +1637,7 @@ int gf2x_cantor_fft_addcompose_n(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft
         x2 += SIMULTANEOUS;
     }
     for( ; k < n ; k ++) {
-        for(size_t j = 0 ; j < gf2x_cantor_fft_transform_size(p) ; j++) {
+        for(size_t j = 0 ; j < significant_transform_size(p) ; j++) {
             Kelt_ur s;
             Kelt_ur_set_zero(s);
             {
@@ -1616,25 +1664,14 @@ int gf2x_cantor_fft_addcompose(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_p
 
 void gf2x_cantor_fft_add(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x1, gf2x_cantor_fft_srcptr x2)
 {
-    for (size_t j = 0; j < gf2x_cantor_fft_transform_size(p) ; j++) {
+    for (size_t j = 0; j < significant_transform_size(p) ; j++) {
         Kadd(y[j], x1[j], x2[j]);
     }
 }
 
 void gf2x_cantor_fft_cpy(const gf2x_cantor_fft_info_t p, gf2x_cantor_fft_ptr y, gf2x_cantor_fft_srcptr x, size_t n)
 {
-    memcpy(y, x, n * gf2x_cantor_fft_transform_size(p) * sizeof(Kelt));
-}
-
-size_t gf2x_cantor_fft_transform_size(const gf2x_cantor_fft_info_t p)
-{
-    // the _size() is a number of Kelt of the result.
-    // n normally, except when not truncating...
-    size_t n = p->n;
-#ifdef WITHOUT_CANTOR_TRUNCATION
-    n = 1 << p->k;
-#endif
-    return n;
+    memcpy(y, x, n * significant_transform_size(p) * sizeof(Kelt));
 }
 
 /* nH is a number of coefficients */
@@ -1672,7 +1709,7 @@ int gf2x_cantor_fft_ift(
 
 gf2x_cantor_fft_ptr gf2x_cantor_fft_alloc(const gf2x_cantor_fft_info_t p, size_t n)
 {
-    return (Kelt *) malloc((n+(n << p->k)) * sizeof(Kelt));
+    return (Kelt *) malloc(n * gf2x_cantor_fft_transform_size(p) * sizeof(Kelt));
 }
 void gf2x_cantor_fft_free(
         const gf2x_cantor_fft_info_t p GF2X_MAYBE_UNUSED,

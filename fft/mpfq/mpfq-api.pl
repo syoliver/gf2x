@@ -26,6 +26,10 @@ hdr('Elementary assignment functions'),
 'set'		=> 'dst_elt src_elt',
 'set_zero'	=> 'dst_elt',
 
+############################
+hdr('Comparison functions'),
+
+'is_zero'	=> 'int <- src_elt',
 ###############################################
 hdr('Arithmetic operations on elements'),
 

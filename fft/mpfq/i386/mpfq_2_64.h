@@ -72,9 +72,9 @@ typedef mpfq_2_64_poly_struct mpfq_2_64_poly [1];
 typedef mpfq_2_64_poly_struct * mpfq_2_64_dst_poly;
 typedef mpfq_2_64_poly_struct * mpfq_2_64_src_poly;
 /* Extra types defined by implementation: */
+typedef mpfq_2_64_elt_ur * mpfq_2_64_vec_ur;
 typedef mpfq_2_64_elt_ur * mpfq_2_64_dst_vec_ur;
 typedef mpfq_2_64_elt_ur * mpfq_2_64_src_vec_ur;
-typedef mpfq_2_64_elt_ur * mpfq_2_64_vec_ur;
 
 #ifdef  __cplusplus
 extern "C" {
@@ -85,6 +85,10 @@ static inline
 void mpfq_2_64_set(mpfq_2_64_dst_field, mpfq_2_64_dst_elt, mpfq_2_64_src_elt);
 static inline
 void mpfq_2_64_set_zero(mpfq_2_64_dst_field, mpfq_2_64_dst_elt);
+
+/* Comparison functions */
+static inline
+int mpfq_2_64_is_zero(mpfq_2_64_dst_field, mpfq_2_64_src_elt);
 
 /* Arithmetic operations on elements */
 static inline
@@ -128,6 +132,17 @@ static inline
 void mpfq_2_64_set_zero(mpfq_2_64_dst_field K MAYBE_UNUSED, mpfq_2_64_dst_elt r)
 {
     mpfq_2_64_vec_set_zero(K,(mpfq_2_64_dst_vec)r,1);
+}
+
+/* *Mpfq::defaults::flatdata::code_for_is_zero, Mpfq::gf2n::trivialities */
+static inline
+int mpfq_2_64_is_zero(mpfq_2_64_dst_field K MAYBE_UNUSED, mpfq_2_64_src_elt r)
+{
+        unsigned int i;
+        for(i = 0 ; i < sizeof(mpfq_2_64_elt)/sizeof(r[0]) ; i++) {
+            if (r[i]) return 0;
+        }
+        return 1;
 }
 
 /* *Mpfq::gf2n::trivialities::code_for_add */

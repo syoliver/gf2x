@@ -210,7 +210,7 @@ typedef mpfq_2_64_elt gf2x_cantor_fft_base_field_elt;
 #endif
 typedef gf2x_cantor_fft_base_field_elt gf2x_cantor_fft_t;
 /* The section below is automatically generated */
-/* inline: export import prepare check */
+/* inline: export import prepare */
 
 typedef gf2x_cantor_fft_t * gf2x_cantor_fft_ptr;
 typedef const gf2x_cantor_fft_t * gf2x_cantor_fft_srcptr;
@@ -287,7 +287,7 @@ static inline void gf2x_cantor_fft_prepare(
  * conceivably simpler than gf2x_cantor_fft_zero. This is a noop if the transforms
  * are free of any pointers, which is always the case with gf2x. */
 
-static inline int gf2x_cantor_fft_check(
+extern int GF2X_FFT_EXPORTED gf2x_cantor_fft_check(
         gf2x_cantor_fft_info_srcptr o,
         gf2x_cantor_fft_srcptr ptr,
         size_t n,
@@ -539,11 +539,6 @@ static inline void gf2x_cantor_fft_prepare(
         gf2x_cantor_fft_info_srcptr o GF2X_MAYBE_UNUSED,
         gf2x_cantor_fft_ptr ptr GF2X_MAYBE_UNUSED,
         size_t n GF2X_MAYBE_UNUSED) {}
-static inline int gf2x_cantor_fft_check(
-        gf2x_cantor_fft_info_srcptr o GF2X_MAYBE_UNUSED,
-        gf2x_cantor_fft_srcptr ptr GF2X_MAYBE_UNUSED,
-        size_t n GF2X_MAYBE_UNUSED,
-        int printf_diagnostics GF2X_MAYBE_UNUSED) { return 1; }
 
 #ifdef __cplusplus
 }
