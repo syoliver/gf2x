@@ -320,6 +320,8 @@ struct XXX_info {
     /* BEGIN SECTION 3: member function proxies for the XXX_info type */
 #ifdef __cplusplus
 
+    static constexpr const char * name = "XXX";
+
     class ctor_fails: public std::exception
     {
       virtual const char* what() const throw() {

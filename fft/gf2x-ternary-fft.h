@@ -352,6 +352,8 @@ struct gf2x_ternary_fft_info {
     /* pod: no */
 #ifdef __cplusplus
 
+    static constexpr const char * name = "gf2x_ternary_fft";
+
     class ctor_fails: public std::exception
     {
       virtual const char* what() const throw() {

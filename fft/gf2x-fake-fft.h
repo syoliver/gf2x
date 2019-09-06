@@ -367,6 +367,8 @@ struct gf2x_fake_fft_info {
     /* pod: yes */
 #ifdef __cplusplus
 
+    static constexpr const char * name = "gf2x_fake_fft";
+
     class ctor_fails: public std::exception
     {
       virtual const char* what() const throw() {
