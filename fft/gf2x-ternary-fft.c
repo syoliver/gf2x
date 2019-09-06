@@ -672,12 +672,12 @@ size_t gf2x_ternary_fft_transform_size(gf2x_ternary_fft_info_srcptr o)
 
 void gf2x_ternary_fft_zero(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr ptr, size_t n)
 {
-    memset(ptr, 0, n * gf2x_ternary_fft_transform_size(o) * sizeof(gf2x_ternary_fft_t));
+    memset(ptr, 0, n * gf2x_ternary_fft_transform_size(o) * sizeof(gf2x_ternary_fft_elt));
 }
 
 void gf2x_ternary_fft_cpy(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr y, gf2x_ternary_fft_srcptr x, size_t n)
 {
-    memcpy(y, x, n * gf2x_ternary_fft_transform_size(o) * sizeof(gf2x_ternary_fft_t));
+    memcpy(y, x, n * gf2x_ternary_fft_transform_size(o) * sizeof(gf2x_ternary_fft_elt));
 }
 
 gf2x_ternary_fft_ptr gf2x_ternary_fft_get(gf2x_ternary_fft_info_srcptr o, gf2x_ternary_fft_ptr ptr, size_t k)
@@ -692,7 +692,7 @@ gf2x_ternary_fft_srcptr gf2x_ternary_fft_get_const(gf2x_ternary_fft_info_srcptr 
 
 gf2x_ternary_fft_ptr gf2x_ternary_fft_alloc(gf2x_ternary_fft_info_srcptr o, size_t n)
 {
-    return malloc(n * gf2x_ternary_fft_transform_size(o) * sizeof(gf2x_ternary_fft_t));
+    return malloc(n * gf2x_ternary_fft_transform_size(o) * sizeof(gf2x_ternary_fft_elt));
 }
 
 void gf2x_ternary_fft_free(gf2x_ternary_fft_info_srcptr o GF2X_MAYBE_UNUSED, gf2x_ternary_fft_ptr ptr, size_t n GF2X_MAYBE_UNUSED)
@@ -1183,7 +1183,7 @@ void gf2x_ternary_fft_info_get_alloc_sizes(
         gf2x_ternary_fft_info_srcptr o,
         size_t sizes[3])
 {
-    sizes[0] = gf2x_ternary_fft_transform_size(o) * sizeof(gf2x_ternary_fft_t);
+    sizes[0] = gf2x_ternary_fft_transform_size(o) * sizeof(gf2x_ternary_fft_elt);
     if (o->K == 0) {
         sizes[1] = sizes[2] = 0;
     } else {
@@ -1191,8 +1191,8 @@ void gf2x_ternary_fft_info_get_alloc_sizes(
         size_t i = gf2x_toomspace(2 * np);
         if (i < 2 * np)
             i = 2 * np;
-        sizes[1] = (4 * np + i) * sizeof(gf2x_ternary_fft_t);
-        sizes[2] = (4 * np + i) * sizeof(gf2x_ternary_fft_t);
+        sizes[1] = (4 * np + i) * sizeof(gf2x_ternary_fft_elt);
+        sizes[2] = (4 * np + i) * sizeof(gf2x_ternary_fft_elt);
     }
 }
 

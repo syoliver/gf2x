@@ -62,7 +62,7 @@ void gf2x_fake_fft_info_get_alloc_sizes(
         gf2x_fake_fft_info_srcptr o,
         size_t sizes[3])
 {
-    sizes[0] = o->size * sizeof(gf2x_fake_fft_t);
+    sizes[0] = o->size * sizeof(gf2x_fake_fft_elt);
     sizes[1] = 0;
     sizes[2] = 0;
 }

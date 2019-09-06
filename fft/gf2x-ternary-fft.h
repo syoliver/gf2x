@@ -135,7 +135,7 @@ extern void GF2X_FFT_EXPORTED gf2x_ternary_fft_info_get_alloc_sizes(
         gf2x_ternary_fft_info_srcptr p,
         size_t sizes[3]);
 /* Fill the sizes array with three byte counts:
- *     sizes[0] : equivalent to gf2x_ternary_fft_transform_size(p) * sizeof(gf2x_ternary_fft_t)
+ *     sizes[0] : equivalent to gf2x_ternary_fft_transform_size(p) * sizeof(gf2x_ternary_fft_elt)
  *     sizes[1] : number of bytes of temp space that must be passed to each
  *                gf2x_ternary_fft_dft or gf2x_ternary_fft_ift call.
  *     sizes[2] : number of bytes of temp space that must be passed to each
@@ -150,13 +150,13 @@ extern void GF2X_FFT_EXPORTED gf2x_ternary_fft_info_get_alloc_sizes(
 
 /* End of automatically generated section */
 
-typedef unsigned long gf2x_ternary_fft_t;
+typedef unsigned long gf2x_ternary_fft_elt;
 /* The section below is automatically generated */
 /* inline: export import prepare check */
 
-typedef gf2x_ternary_fft_t * gf2x_ternary_fft_ptr;
-typedef const gf2x_ternary_fft_t * gf2x_ternary_fft_srcptr;
-/* A transform has type gf2x_ternary_fft_ptr. It is made of a series of gf2x_ternary_fft_t
+typedef gf2x_ternary_fft_elt * gf2x_ternary_fft_ptr;
+typedef const gf2x_ternary_fft_elt * gf2x_ternary_fft_srcptr;
+/* A transform has type gf2x_ternary_fft_ptr. It is made of a series of gf2x_ternary_fft_elt
  * objects. */
 
 #ifdef __cplusplus
@@ -165,13 +165,13 @@ extern "C" {
 
 extern size_t GF2X_FFT_EXPORTED gf2x_ternary_fft_transform_size(
         gf2x_ternary_fft_info_srcptr o);
-/* Number of gf2x_ternary_fft_t objects it takes to allocate one transform. */
+/* Number of gf2x_ternary_fft_elt objects it takes to allocate one transform. */
 
 extern gf2x_ternary_fft_ptr GF2X_FFT_EXPORTED gf2x_ternary_fft_alloc(
         gf2x_ternary_fft_info_srcptr o,
         size_t n);
 /* Allocate space for n transforms. Equivalent to (gf2x_ternary_fft_ptr) malloc(n *
- * gf2x_ternary_fft_transform_size(p) * sizeof(gf2x_ternary_fft_t)); */
+ * gf2x_ternary_fft_transform_size(p) * sizeof(gf2x_ternary_fft_elt)); */
 
 extern void GF2X_FFT_EXPORTED gf2x_ternary_fft_free(
         gf2x_ternary_fft_info_srcptr o,
@@ -361,6 +361,7 @@ struct gf2x_ternary_fft_info {
       }
     };
 
+    typedef gf2x_ternary_fft_elt elt;
     typedef gf2x_ternary_fft_ptr ptr;
     typedef gf2x_ternary_fft_srcptr srcptr;
 
@@ -405,6 +406,22 @@ struct gf2x_ternary_fft_info {
     }
     inline void get_alloc_sizes(size_t sizes[3]) const {
         gf2x_ternary_fft_info_get_alloc_sizes(this, sizes);
+    }
+    /* This is equal to transform_size() * sizeof(elt) */
+    inline size_t size0_bytes() const {
+        size_t sizes[3];
+        gf2x_ternary_fft_info_get_alloc_sizes(this, sizes);
+        return sizes[1];
+    }
+    inline size_t size1_bytes() const {
+        size_t sizes[3];
+        gf2x_ternary_fft_info_get_alloc_sizes(this, sizes);
+        return sizes[1];
+    }
+    inline size_t size2_bytes() const {
+        size_t sizes[3];
+        gf2x_ternary_fft_info_get_alloc_sizes(this, sizes);
+        return sizes[2];
     }
     inline size_t transform_size() const { return gf2x_ternary_fft_transform_size(this); }
     inline ptr alloc(size_t n = 1) const { return gf2x_ternary_fft_alloc(this, n); }

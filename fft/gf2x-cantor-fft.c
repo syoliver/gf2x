@@ -1554,7 +1554,7 @@ extern void GF2X_EXPORTED gf2x_cantor_fft_info_get_alloc_sizes(
         gf2x_cantor_fft_info_srcptr p,
         size_t sizes[3])
 {
-    sizes[0] = gf2x_cantor_fft_transform_size(p) * sizeof(gf2x_cantor_fft_t);
+    sizes[0] = gf2x_cantor_fft_transform_size(p) * sizeof(gf2x_cantor_fft_elt);
     sizes[1] = 0;
     sizes[2] = 0;
 }

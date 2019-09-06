@@ -197,7 +197,7 @@ unsigned long rand2_ulong()
 #define display_full_transform(E, P) do {                               \
         display(#E "_t" #P,                                             \
             (unsigned long *) E ## _t ## P,                             \
-            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));   \
+            E ## _transform_size(E) * sizeof(E ## _elt) / sizeof(unsigned long));   \
         printf("T" #P ":=Zseq_to_Lseq(" #E "_t" #P ");\n");             \
 } while (0)
 
@@ -299,13 +299,13 @@ unsigned long rand2_ulong()
 
 #define EXTRA_DISPLAY(E)  do {                                          \
     display(#E "_tf1", (unsigned long *) E ## _tf1,                     \
-            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));   \
-    display(#E "_tg1", (unsigned long *) E ## _tg1,                     \
-            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long)); \
-    display(#E "_tf2", (unsigned long *) E ## _tf2,                     \
-            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long)); \
-    display(#E "_tg2", (unsigned long *) E ## _tg2,                     \
-            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long)); \
+            E ## _transform_size(E) * sizeof(E ## _elt) / sizeof(unsigned long));   \
+    display(#E "_tg1", (unsigned long *) E ## _tg1,                       \
+            E ## _transform_size(E) * sizeof(E ## _elt) / sizeof(unsigned long)); \
+    display(#E "_tf2", (unsigned long *) E ## _tf2,                       \
+            E ## _transform_size(E) * sizeof(E ## _elt) / sizeof(unsigned long)); \
+    display(#E "_tg2", (unsigned long *) E ## _tg2,                       \
+            E ## _transform_size(E) * sizeof(E ## _elt) / sizeof(unsigned long)); \
 } while (0)
 // Either th and thx are different, meaning that addcompose and
 // addcompose_n disagree -- in which case we want to print them both.
@@ -314,9 +314,9 @@ unsigned long rand2_ulong()
 // course better off not printing any data.
 #define EXTRA_DISPLAY_TH_THX(E)  do {                                           \
     display(#E "_th",  (unsigned long *) E ## _th,                      \
-            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long)); \
+            E ## _transform_size(E) * sizeof(E ## _elt) / sizeof(unsigned long)); \
     display(#E "_thx",  (unsigned long *) E ## _thx,                    \
-            E ## _transform_size(E) * sizeof(E ## _t) / sizeof(unsigned long));   \
+            E ## _transform_size(E) * sizeof(E ## _elt) / sizeof(unsigned long));   \
 } while (0)
 
 #define FREE1(E, x) do {                                                \
@@ -790,7 +790,7 @@ do {
 		display("gf2x_ternary_fft" "_t" "f1",
 			(unsigned long *) gf2x_ternary_fft_tf1,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		printf("T" "f1" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "f1"
 		       ");\n");
 	    } while (0);
@@ -813,7 +813,7 @@ do {
 		display("gf2x_ternary_fft" "_t" "g1",
 			(unsigned long *) gf2x_ternary_fft_tg1,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		printf("T" "g1" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "g1"
 		       ");\n");
 	    } while (0);
@@ -836,7 +836,7 @@ do {
 		display("gf2x_ternary_fft" "_t" "f2",
 			(unsigned long *) gf2x_ternary_fft_tf2,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		printf("T" "f2" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "f2"
 		       ");\n");
 	    } while (0);
@@ -859,7 +859,7 @@ do {
 		display("gf2x_ternary_fft" "_t" "g2",
 			(unsigned long *) gf2x_ternary_fft_tg2,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		printf("T" "g2" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "g2"
 		       ");\n");
 	    } while (0);
@@ -874,7 +874,7 @@ do {
 		display("gf2x_ternary_fft" "_t" "h",
 			(unsigned long *) gf2x_ternary_fft_th,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		printf("T" "h" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "h"
 		       ");\n");
 	    } while (0);
@@ -892,7 +892,7 @@ do {
 		display("gf2x_ternary_fft" "_t" "h",
 			(unsigned long *) gf2x_ternary_fft_th,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		printf("T" "h" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "h"
 		       ");\n");
 	    } while (0);
@@ -906,7 +906,7 @@ do {
 		display("gf2x_ternary_fft" "_t" "h",
 			(unsigned long *) gf2x_ternary_fft_th,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		printf("T" "h" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "h"
 		       ");\n");
 	    } while (0);
@@ -924,7 +924,7 @@ do {
 		display("gf2x_ternary_fft" "_t" "h",
 			(unsigned long *) gf2x_ternary_fft_th,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		printf("T" "h" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "h"
 		       ");\n");
 	    } while (0);
@@ -945,7 +945,7 @@ do {
 		display("gf2x_ternary_fft" "_t" "h",
 			(unsigned long *) gf2x_ternary_fft_th,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		printf("T" "h" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "h"
 		       ");\n");
 	    } while (0);
@@ -992,7 +992,7 @@ do {
 		display("gf2x_ternary_fft" "_t" "hx",
 			(unsigned long *) gf2x_ternary_fft_thx,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		printf("T" "hx" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "hx"
 		       ");\n");
 	    } while (0);
@@ -1014,7 +1014,7 @@ do {
 		display("gf2x_ternary_fft" "_t" "hx",
 			(unsigned long *) gf2x_ternary_fft_thx,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		printf("T" "hx" ":=Zseq_to_Lseq(" "gf2x_ternary_fft" "_t" "hx"
 		       ");\n");
 	    } while (0);
@@ -1068,29 +1068,29 @@ do {
 		display("gf2x_ternary_fft" "_tf1",
 			(unsigned long *) gf2x_ternary_fft_tf1,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		display("gf2x_ternary_fft" "_tg1",
 			(unsigned long *) gf2x_ternary_fft_tg1,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		display("gf2x_ternary_fft" "_tf2",
 			(unsigned long *) gf2x_ternary_fft_tf2,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		display("gf2x_ternary_fft" "_tg2",
 			(unsigned long *) gf2x_ternary_fft_tg2,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 	    } while (0);
 	    do {
 		display("gf2x_ternary_fft" "_th",
 			(unsigned long *) gf2x_ternary_fft_th,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		display("gf2x_ternary_fft" "_thx",
 			(unsigned long *) gf2x_ternary_fft_thx,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 	    } while (0);
 	    fflush(stdout);
 	    fflush(stderr);
@@ -1116,37 +1116,37 @@ do {
 		display("gf2x_fake_fft" "_tf1",
 			(unsigned long *) gf2x_fake_fft_tf1,
 			gf2x_fake_fft_transform_size(gf2x_fake_fft) *
-			sizeof(gf2x_fake_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_fake_fft_elt) / sizeof(unsigned long));
 		display("gf2x_fake_fft" "_tg1",
 			(unsigned long *) gf2x_fake_fft_tg1,
 			gf2x_fake_fft_transform_size(gf2x_fake_fft) *
-			sizeof(gf2x_fake_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_fake_fft_elt) / sizeof(unsigned long));
 		display("gf2x_fake_fft" "_tf2",
 			(unsigned long *) gf2x_fake_fft_tf2,
 			gf2x_fake_fft_transform_size(gf2x_fake_fft) *
-			sizeof(gf2x_fake_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_fake_fft_elt) / sizeof(unsigned long));
 		display("gf2x_fake_fft" "_tg2",
 			(unsigned long *) gf2x_fake_fft_tg2,
 			gf2x_fake_fft_transform_size(gf2x_fake_fft) *
-			sizeof(gf2x_fake_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_fake_fft_elt) / sizeof(unsigned long));
 	    } while (0);
 	    do {
 		display("gf2x_ternary_fft" "_tf1",
 			(unsigned long *) gf2x_ternary_fft_tf1,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		display("gf2x_ternary_fft" "_tg1",
 			(unsigned long *) gf2x_ternary_fft_tg1,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		display("gf2x_ternary_fft" "_tf2",
 			(unsigned long *) gf2x_ternary_fft_tf2,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 		display("gf2x_ternary_fft" "_tg2",
 			(unsigned long *) gf2x_ternary_fft_tg2,
 			gf2x_ternary_fft_transform_size(gf2x_ternary_fft) *
-			sizeof(gf2x_ternary_fft_t) / sizeof(unsigned long));
+			sizeof(gf2x_ternary_fft_elt) / sizeof(unsigned long));
 	    } while (0);
 	    fflush(stdout);
 	    fflush(stderr);

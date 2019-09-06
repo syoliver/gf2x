@@ -109,7 +109,7 @@ void XXX_info_get_alloc_sizes(
         XXX_info_srcptr p,
         size_t sizes[3]);
 /* Fill the sizes array with three byte counts:
- *     sizes[0] : equivalent to XXX_transform_size(p) * sizeof(XXX_t)
+ *     sizes[0] : equivalent to XXX_transform_size(p) * sizeof(XXX_elt)
  *     sizes[1] : number of bytes of temp space that must be passed to each
  *                XXX_dft or XXX_ift call.
  *     sizes[2] : number of bytes of temp space that must be passed to each
@@ -124,13 +124,13 @@ void XXX_info_get_alloc_sizes(
 
 /* END SECTION 1 */
 
-typedef int /* implementation-defined */ XXX_t;
+typedef int /* implementation-defined */ XXX_elt;
 
 /* BEGIN SECTION 2: the typical interface for transforms that use XXX_info */
 
-typedef XXX_t * XXX_ptr;
-typedef const XXX_t * XXX_srcptr;
-/* A transform has type XXX_ptr. It is made of a series of XXX_t
+typedef XXX_elt * XXX_ptr;
+typedef const XXX_elt * XXX_srcptr;
+/* A transform has type XXX_ptr. It is made of a series of XXX_elt
  * objects. */
 
 #ifdef __cplusplus
@@ -139,13 +139,13 @@ extern "C" {
 
 size_t XXX_transform_size(
         XXX_info_srcptr o);
-/* Number of XXX_t objects it takes to allocate one transform. */
+/* Number of XXX_elt objects it takes to allocate one transform. */
 
 XXX_ptr XXX_alloc(
         XXX_info_srcptr o,
         size_t n);
 /* Allocate space for n transforms. Equivalent to (XXX_ptr) malloc(n *
- * XXX_transform_size(p) * sizeof(XXX_t)); */
+ * XXX_transform_size(p) * sizeof(XXX_elt)); */
 
 void XXX_free(
         XXX_info_srcptr o,
@@ -329,6 +329,7 @@ struct XXX_info {
       }
     };
 
+    typedef XXX_elt elt;
     typedef XXX_ptr ptr;
     typedef XXX_srcptr srcptr;
 
@@ -373,6 +374,22 @@ struct XXX_info {
     }
     inline void get_alloc_sizes(size_t sizes[3]) const {
         XXX_info_get_alloc_sizes(this, sizes);
+    }
+    /* This is equal to transform_size() * sizeof(elt) */
+    inline size_t size0_bytes() const {
+        size_t sizes[3];
+        XXX_info_get_alloc_sizes(this, sizes);
+        return sizes[1];
+    }
+    inline size_t size1_bytes() const {
+        size_t sizes[3];
+        XXX_info_get_alloc_sizes(this, sizes);
+        return sizes[1];
+    }
+    inline size_t size2_bytes() const {
+        size_t sizes[3];
+        XXX_info_get_alloc_sizes(this, sizes);
+        return sizes[2];
     }
     inline size_t transform_size() const { return XXX_transform_size(this); }
     inline ptr alloc(size_t n = 1) const { return XXX_alloc(this, n); }

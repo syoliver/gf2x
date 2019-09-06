@@ -42,7 +42,7 @@ extern int time_ift;
 #define ENGINE_EXTRA_ARG_DEFAULT  0     /* does not make sense here (yet) */
 
 #define ENGINE_info_t gf2x_cantor_fft_info_t
-#define ENGINE_t gf2x_cantor_fft_t
+#define ENGINE_t gf2x_cantor_fft_elt
 #define ENGINE_get_alloc_sizes gf2x_cantor_fft_info_get_alloc_sizes
 #define ENGINE_srcptr gf2x_cantor_fft_srcptr
 #define ENGINE_ptr gf2x_cantor_fft_ptr
@@ -70,7 +70,7 @@ extern int time_ift;
 #define ENGINE_EXTRA_ARG_DEFAULT  0
 
 #define ENGINE_info_t gf2x_ternary_fft_info_t
-#define ENGINE_t gf2x_ternary_fft_t
+#define ENGINE_t gf2x_ternary_fft_elt
 #define ENGINE_get_alloc_sizes gf2x_ternary_fft_info_get_alloc_sizes
 #define ENGINE_srcptr gf2x_ternary_fft_srcptr
 #define ENGINE_ptr gf2x_ternary_fft_ptr
