@@ -449,7 +449,7 @@ struct gf2x_fake_fft_info {
     {
         gf2x_fake_fft_add(this, y, x1, x2);
     }
-    inline void cpy(ptr y, srcptr x, size_t n) const
+    inline void cpy(ptr y, srcptr x, size_t n = 1) const
     {
         gf2x_fake_fft_cpy(this, y, x, n);
     }

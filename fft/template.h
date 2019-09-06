@@ -413,7 +413,7 @@ struct XXX_info {
     {
         XXX_add(this, y, x1, x2);
     }
-    inline void cpy(ptr y, srcptr x, size_t n) const
+    inline void cpy(ptr y, srcptr x, size_t n = 1) const
     {
         XXX_cpy(this, y, x, n);
     }
