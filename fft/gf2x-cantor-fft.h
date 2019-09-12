@@ -402,6 +402,13 @@ struct gf2x_cantor_fft_info {
     /* pod: yes */
 #ifdef __cplusplus
 
+    // a C++ compilation unit that uses this interface must include a
+    // definition like
+    //
+    // constexpr const char * gf2x_cantor_fft_info::name;
+    //
+    // Note that libgf2x-fft has no C++ compilation unit, so we request
+    // the user to do this extra bit of work
     static constexpr const char * name = "gf2x_cantor_fft";
 
     class ctor_fails: public std::exception

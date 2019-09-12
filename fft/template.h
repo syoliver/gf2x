@@ -320,6 +320,13 @@ struct XXX_info {
     /* BEGIN SECTION 3: member function proxies for the XXX_info type */
 #ifdef __cplusplus
 
+    // a C++ compilation unit that uses this interface must include a
+    // definition like
+    //
+    // constexpr const char * XXX_info::name;
+    //
+    // Note that libgf2x-fft has no C++ compilation unit, so we request
+    // the user to do this extra bit of work
     static constexpr const char * name = "XXX";
 
     class ctor_fails: public std::exception
