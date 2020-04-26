@@ -111,8 +111,6 @@ const char * gf2x_utoom_select_string[] = {
     [GF2X_SELECT_UNB_TC3U]  = "TC3U",
 };
 
-FILE *rp;
-
 void tunetoom(long tablesz)
 {
     long high, n;
