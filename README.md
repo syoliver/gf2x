@@ -79,9 +79,10 @@ Actual code:
 Code adapted for the selected hardware
 - [`already_tuned/`](already_tuned/)              ; pre-configured codes for selected architectures.
 - [`already_tuned/*/gf2x-thresholds.h`](already_tuned/) ; pre-tuned thresholds files
-- [`already_tuned/generic/gf2x-thresholds.h`](already_tuned/generic/gf2x-thresholds.h) ; placeholder thresholds
 - [`already_tuned/generic64/`](already_tuned/generic64/)    ; code that works on any 64-bit platform
+- [`already_tuned/generic64/gf2x-thresholds.h`](already_tuned/generic64/gf2x-thresholds.h) ; placeholder thresholds
 - [`already_tuned/generic32/`](already_tuned/generic32/)    ; code that works on any 32-bit platform
+- [`already_tuned/generic32/gf2x-thresholds.h`](already_tuned/generic32/gf2x-thresholds.h) ; placeholder thresholds
 - [`already_tuned/x86_64/`](already_tuned/x86_64/)       ; code that works on amd64 and intel core2
 - [`already_tuned/x86_sse2/`](already_tuned/x86_sse2/)     ; code that works on x86 platforms supporting sse2
 - [`already_tuned/generic/`](already_tuned/generic/)      ; code that works everywhere. Does _not_ include mul1
@@ -92,19 +93,18 @@ For testing:
 - [`tests/do-check-mul.sh`](tests/do-check-mul.sh)   ; shell script driving check-mul
 
 For tuning:
-- [`lowlevel/mul*.c`](lowlevel/)              ; various candidate code samples for basic routines
-- [`src/tuneup.c`](src/tuneup.c)            ; tuning program for basecase multiplication
-- [`src/tunetoom.c`](src/tunetoom.c)          ; tuning program for Karatsuba/Toom-Cook multiplication
-- [`src/tunefft.c`](src/tunefft.c)           ; tuning program for FFT multiplication
+- [`lowlevel/mul*.c`](lowlevel/) ; various candidate code samples for basic routines
+- [`src/tuneup.c`](src/tuneup.c) ; tuning program for basecase multiplication
+- [`src/tunetoom.c`](src/tunetoom.c) ; tuning program for Karatsuba/Toom-Cook multiplication
+- [`src/tunefft.c`](src/tunefft.c) ; tuning program for FFT multiplication
 src/tune-lowlevel.pl
-
 - [`src/gen_bb_mul_code.c`](src/gen_bb_mul_code.c)   ; program to generate many alternatives for mul1
-- [`src/replace.h`](src/replace.h)           ; helper code
-- [`src/replace.c`](src/replace.c)           ; helper code
-- [`src/tuning-common.h`](src/tuning-common.h)     ; helper code
-- [`src/tuning-common.c`](src/tuning-common.c)     ; helper code
-- [`src/timing.h`](src/timing.h)            ; helper code
-- [`src/timing.c`](src/timing.c)            ; helper code
+- [`src/replace.h`](src/replace.h) ; helper code
+- [`src/replace.c`](src/replace.c) ; helper code
+- [`src/tuning-common.h`](src/tuning-common.h) ; helper code
+- [`src/tuning-common.c`](src/tuning-common.c) ; helper code
+- [`src/timing.h`](src/timing.h) ; helper code
+- [`src/timing.c`](src/timing.c) ; helper code
 - [`src/modify-thresholds.c`](src/modify-thresholds.c) ; helper code
 
 Applications that use gf2x and NTL. These applications are covered by the
@@ -247,7 +247,7 @@ want to control the allocation needs -- within a call to `gf2x_mul_r`,
 below the FFT threshold, no allocation is performed. Above, there is
 some, and this is an acknowledged bug.
 
-Some "half-public2"' headers are in the [`gf2x/`](gf2x/) subdirectory.
+Some "half-public"' headers are in the [`gf2x/`](gf2x/) subdirectory.
 Some of these headers (`gf2x/gf2x-thresholds.h` and `gf2x/gf2x_mul*`) are
 architecture-dependent. In order to use the inlined multiplication
 routines for small sizes, you may use
