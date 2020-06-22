@@ -20,8 +20,9 @@ License (for the library) is either:
       version 2.1 of the License, or (at your option) any later
       version.
 
-License for the apps/ subdir is the GNU General Public License, either
-version 2 of the License, or (at your option) any later version.
+License for the [`apps/`](apps/) subdir is the GNU General Public
+License, either version 2 of the License, or (at your option) any later
+version.
 
 
 Dependencies
@@ -29,10 +30,10 @@ Dependencies
 
 `gf2x` has no external dependencies.
 
-Some of the demos in the apps/ subdirectory require the gmp and NTL
-libraries. (use ./configure ; make from that directory. You may want to
-use PKG_CONFIG_PATH to have the autotools stuff there find gf2x
-properly).
+Some of the demos in the [`apps/`](apps/) subdirectory require the gmp
+and NTL libraries. (use `./configure ; make` from that directory. You may
+want to use `PKG_CONFIG_PATH` to have the autotools stuff there find
+`gf2x` properly).
 
 
 WARNING: The text below is somewhat outdated, and was originally written
@@ -58,13 +59,13 @@ Package contents:
 It contains the following files:
 
 Miscellaneous doc files:
-| [`README`](README)
-| [`BUGS`](BUGS)
-| [`src/TODO`](src/TODO)
-| [`src/README`](src/README)
-| [`already_tuned/tuned/README`](already_tuned/tuned/README)
-| [`AUTHORS`](AUTHORS)
-| [`ChangeLog`](ChangeLog)
+| [`README`](README) |
+| [`BUGS`](BUGS) |
+| [`src/TODO`](src/TODO) |
+| [`src/README`](src/README) |
+| [`already_tuned/tuned/README`](already_tuned/tuned/README) |
+| [`AUTHORS`](AUTHORS) |
+| [`ChangeLog`](ChangeLog) |
 
 Actual code:
 | [`gf2x.h`](gf2x.h)            | main api
