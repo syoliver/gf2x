@@ -254,3 +254,40 @@ routines for small sizes, you may use
 [`gf2x/gf2x-small.h`](gf2x/gf2x-small.h).
 
 By default, `gf2x` creates both static and dynamic libraries.
+
+(Very) Old versions
+===================
+
+The gzipped tar file for `gf2x` version `0.2` is
+[here](http://wwwmaths.anu.edu.au/~brent/ftp/trinom/gf2x-0.2.tar.gz).
+
+The gzipped tar file for `gf2x` version `0.1` is
+[here](http://wwwmaths.anu.edu.au/~brent/ftp/trinom/gf2x-0.1.tar.gz).
+
+References
+==========
+
+[Richard P. Brent](http://wwwmaths.anu.edu.au/~brent) and
+[Paul Zimmermann](https://members.loria.fr/PZimmermann/)
+[A multi-level blocking distinct degree factorization
+algorithm](http://wwwmaths.anu.edu.au/~brent/pub/pub230.html),
+presented at the *Eighth International Conference on Finite Fields and
+Applications (Fq8)*, Melbourne, 9-13 July 2007. Published in
+*Contemporary Mathematics*, Vol. 461, 2008, 47-58.
+Also appeared as [INRIA Tech Report RR-6331](http://hal.inria.fr/inria-00181029/) (October 2007, 16 pp.) and as [arXiv:0710.4410](http://arxiv.org/abs/0710.4410).
+
+[Richard P. Brent](http://wwwmaths.anu.edu.au/~brent) and
+[Pierrick Gaudry](https://members.loria.fr/PGaudry/)
+[Emmanuel Thomé](https://members.loria.fr/EThome/)
+[Paul Zimmermann](https://members.loria.fr/PZimmermann/)
+[Faster multiplication in
+GF(2)[x]](http://wwwmaths.anu.edu.au/~brent/pub/pub232.html)
+*Proc. ANTS-VIII* (Banff, May 2008),
+*Lecture Notes in Computer Science*, Vol. 5011,
+Springer-Verlag, 2008, 153-166.
+Also [INRIA Tech. Report RR-6359](http://hal.inria.fr/inria-00188261/) (Nov. 2007, 19 pp.)
+
+[Richard P. Brent](http://wwwmaths.anu.edu.au/~brent) and
+[Paul Zimmermann](https://members.loria.fr/PZimmermann/)
+[Ten new primitive binary trinomials](http://wwwmaths.anu.edu.au/~brent/pub/pub233.html), *Mathematics of Computation*, Volume 78, Number 266, April 2009, Pages 1197–1199.
+[article on Inria HAL](https://hal.inria.fr/inria-00337525)
