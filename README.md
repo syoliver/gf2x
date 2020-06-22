@@ -59,60 +59,60 @@ Package contents:
 It contains the following files:
 
 Miscellaneous doc files:
-| [`README`](README) |
-| [`BUGS`](BUGS) |
-| [`src/TODO`](src/TODO) |
-| [`src/README`](src/README) |
-| [`already_tuned/tuned/README`](already_tuned/tuned/README) |
-| [`AUTHORS`](AUTHORS) |
-| [`ChangeLog`](ChangeLog) |
+- [`README`](README)
+- [`BUGS`](BUGS)
+- [`src/TODO`](src/TODO)
+- [`src/README`](src/README)
+- [`already_tuned/tuned/README`](already_tuned/tuned/README)
+- [`AUTHORS`](AUTHORS)
+- [`ChangeLog`](ChangeLog)
 
 Actual code:
-| [`gf2x.h`](gf2x.h)            | main api
-| [`gf2x-impl.h`](gf2x-impl.h)  | internal api
-| [`gf2x.c`](gf2x.c)            | top-level source for multiplication code
-| [`gf2x-small.h`](gf2x-small.h)| small-sized inlined multiplication routines
-| [`toom.c`](toom.c)            | main file for Karatsuba and Toom-Cook multiplication
-| [`toom-gpl.c`](toom-gpl.c)    | same, for GPL-tainted distribution
-| [`fft.c`](fft.c)              | multiplication using Fast Fourier Transform
+- [`gf2x.h`](gf2x.h)            ; main api
+- [`gf2x-impl.h`](gf2x-impl.h)  ; internal api
+- [`gf2x.c`](gf2x.c)            ; top-level source for multiplication code
+- [`gf2x-small.h`](gf2x-small.h); small-sized inlined multiplication routines
+- [`toom.c`](toom.c)            ; main file for Karatsuba and Toom-Cook multiplication
+- [`toom-gpl.c`](toom-gpl.c)    ; same, for GPL-tainted distribution
+- [`fft.c`](fft.c)              ; multiplication using Fast Fourier Transform
 
 Code adapted for the selected hardware
-| [`already_tuned/`](already_tuned/)              | pre-configured codes for selected architectures.
-| [`already_tuned/*/gf2x-thresholds.h`](already_tuned/) | pre-tuned thresholds files
-| [`already_tuned/generic/gf2x-thresholds.h`](already_tuned/generic/gf2x-thresholds.h) | placeholder thresholds
-| [`already_tuned/generic64/`](already_tuned/generic64/)    | code that works on any 64-bit platform
-| [`already_tuned/generic32/`](already_tuned/generic32/)    | code that works on any 32-bit platform
-| [`already_tuned/x86_64/`](already_tuned/x86_64/)       | code that works on amd64 and intel core2
-| [`already_tuned/x86_sse2/`](already_tuned/x86_sse2/)     | code that works on x86 platforms supporting sse2
-| [`already_tuned/generic/`](already_tuned/generic/)      | code that works everywhere. Does _not_ include mul1
-| [`gf2x/`](gf2x/)                  | place where symlinks to the files above go
+- [`already_tuned/`](already_tuned/)              ; pre-configured codes for selected architectures.
+- [`already_tuned/*/gf2x-thresholds.h`](already_tuned/) ; pre-tuned thresholds files
+- [`already_tuned/generic/gf2x-thresholds.h`](already_tuned/generic/gf2x-thresholds.h) ; placeholder thresholds
+- [`already_tuned/generic64/`](already_tuned/generic64/)    ; code that works on any 64-bit platform
+- [`already_tuned/generic32/`](already_tuned/generic32/)    ; code that works on any 32-bit platform
+- [`already_tuned/x86_64/`](already_tuned/x86_64/)       ; code that works on amd64 and intel core2
+- [`already_tuned/x86_sse2/`](already_tuned/x86_sse2/)     ; code that works on x86 platforms supporting sse2
+- [`already_tuned/generic/`](already_tuned/generic/)      ; code that works everywhere. Does _not_ include mul1
+- [`gf2x/`](gf2x/)                  ; place where symlinks to the files above go
 
 For testing:
-| [`tests/check-mul.c`](tests/check-mul.c)       | simple check program
-| [`tests/do-check-mul.sh`](tests/do-check-mul.sh)   | shell script driving check-mul
+- [`tests/check-mul.c`](tests/check-mul.c)       ; simple check program
+- [`tests/do-check-mul.sh`](tests/do-check-mul.sh)   ; shell script driving check-mul
 
 For tuning:
-| [`lowlevel/mul*.c`](lowlevel/)              | various candidate code samples for basic routines
-| [`src/tuneup.c`](src/tuneup.c)            | tuning program for basecase multiplication
-| [`src/tunetoom.c`](src/tunetoom.c)          | tuning program for Karatsuba/Toom-Cook multiplication
-| [`src/tunefft.c`](src/tunefft.c)           | tuning program for FFT multiplication
+- [`lowlevel/mul*.c`](lowlevel/)              ; various candidate code samples for basic routines
+- [`src/tuneup.c`](src/tuneup.c)            ; tuning program for basecase multiplication
+- [`src/tunetoom.c`](src/tunetoom.c)          ; tuning program for Karatsuba/Toom-Cook multiplication
+- [`src/tunefft.c`](src/tunefft.c)           ; tuning program for FFT multiplication
 src/tune-lowlevel.pl
 
-| [`src/gen_bb_mul_code.c`](src/gen_bb_mul_code.c)   | program to generate many alternatives for mul1
-| [`src/replace.h`](src/replace.h)           | helper code
-| [`src/replace.c`](src/replace.c)           | helper code
-| [`src/tuning-common.h`](src/tuning-common.h)     | helper code
-| [`src/tuning-common.c`](src/tuning-common.c)     | helper code
-| [`src/timing.h`](src/timing.h)            | helper code
-| [`src/timing.c`](src/timing.c)            | helper code
-| [`src/modify-thresholds.c`](src/modify-thresholds.c) | helper code
+- [`src/gen_bb_mul_code.c`](src/gen_bb_mul_code.c)   ; program to generate many alternatives for mul1
+- [`src/replace.h`](src/replace.h)           ; helper code
+- [`src/replace.c`](src/replace.c)           ; helper code
+- [`src/tuning-common.h`](src/tuning-common.h)     ; helper code
+- [`src/tuning-common.c`](src/tuning-common.c)     ; helper code
+- [`src/timing.h`](src/timing.h)            ; helper code
+- [`src/timing.c`](src/timing.c)            ; helper code
+- [`src/modify-thresholds.c`](src/modify-thresholds.c) ; helper code
 
 Applications that use gf2x and NTL. These applications are covered by the
 GPL.
-| [`apps/halfgcd.hpp`](apps/halfgcd.hpp) | subquadratic gcd over GF(2)[x]
-| [`apps/halfgcd.cpp`](apps/halfgcd.cpp) | subquadratic gcd over GF(2)[x]
-| [`apps/factor.cpp`](apps/factor.cpp)  | finds smallest irreducible factor of trinomial over GF(2)
-| [`apps/check*.sh`](apps/)   | some tests using factor
+- [`apps/halfgcd.hpp`](apps/halfgcd.hpp) ; subquadratic gcd over GF(2)[x]
+- [`apps/halfgcd.cpp`](apps/halfgcd.cpp) ; subquadratic gcd over GF(2)[x]
+- [`apps/factor.cpp`](apps/factor.cpp)  ; finds smallest irreducible factor of trinomial over GF(2)
+- [`apps/check*.sh`](apps/)   ; some tests using factor
 
 Caution for users of old gcc versions
 =====================================
