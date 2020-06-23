@@ -12,10 +12,10 @@ GCD) and searching for irreducible/primitive trinomials.
 Authors: Richard Brent, Pierrick Gaudry, Emmanuel Thomé, Paul Zimmermann.
 
 License (for the library) is either:
- - If the archive contains a file named toom-gpl.c (not a trivial
+ - If the archive contains a file named `toom-gpl.c` (not a trivial
    placeholder), the GNU General Public License, either version 3 of the
    License, or (at your option) any later version.
- - If the archive contains a file named toom-gpl.c which is a trivial
+ - If the archive contains a file named `toom-gpl.c` which is a trivial
    placeholder, the GNU Lesser General Public License, either version 2.1
    of the License, or (at your option) any later version.
 
@@ -48,7 +48,7 @@ This README covers:
  - Caution for gcc users
  - Instructions to install the package
  - Caution regarding installation
- - Hooking gf2x into ntl
+ - Hooking `gf2x` into ntl
  - Using the library
 
 
@@ -118,7 +118,7 @@ Caution for users of old gcc versions
 
 gcc versions 4.3.0 and 4.3.1 have a bug which affects gf2x in a an
 unpredictable way. It is recommended to upgrade to at least 4.3.2, or
-configure with --disable-sse2
+configure with `--disable-sse2`
 
 Instructions to install the package:
 ====================================
