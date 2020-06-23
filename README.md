@@ -258,6 +258,9 @@ By default, `gf2x` creates both static and dynamic libraries.
 (Very) Old versions
 ===================
 
+The gzipped tar file for `gf2x` version `0.3.1` is
+[here](http://wwwmaths.anu.edu.au/~brent/ftp/trinom/gf2x-0.3.1.tar.gz).
+
 The gzipped tar file for `gf2x` version `0.2` is
 [here](http://wwwmaths.anu.edu.au/~brent/ftp/trinom/gf2x-0.2.tar.gz).
 
