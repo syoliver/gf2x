@@ -67,6 +67,7 @@
 #include <sys/utsname.h>	/* for uname */
 #include "gf2x.h"
 #include "gf2x/gf2x-impl.h"
+#include "fft/gf2x-fft-impl-utils.h"
 #include "timing.h"
 #include "tuning-common.h"
 
@@ -85,6 +86,13 @@
    In fact we take for m the largest integer such that g(n) = g(m) with
    g(n) = ceil(6*n*GF2X_WORDSIZE/K^2).
 */
+
+static inline void wantzero(int x)
+{
+    if (x != 0) {
+        abort();
+    }
+}
 
 long end_of_stair(long n, long K)
 {
@@ -236,13 +244,13 @@ int main(int argc, char *argv[])
         i = 1;
 ugly_label:
 	for ( ; i <= 3; i++, K *= 3) {
-	    TIME(t1[i], gf2x_mul_fft(c, a, mid, b, mid, K));
+	    TIME(t1[i], wantzero(gf2x_mul_fft(c, a, mid, b, mid, K) == 0));
             if (tc_takes_too_long) {
                 memcpy(u, c, 2 * maxn * sizeof(unsigned long));
             }
             check(a, mid, b, mid, reference, u, "F1", c);
             if (K >= GF2X_WORDSIZE) {
-                TIME(t2[i], gf2x_mul_fft(v, a, mid, b, mid, -K));
+                TIME(t2[i], wantzero(gf2x_mul_fft(v, a, mid, b, mid, -K) == 0));
                 check(a, mid, b, mid, "F1", c, "F2", v);
             } else {
                 t2[i] = DBL_MAX;
