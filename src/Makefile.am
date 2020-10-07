@@ -56,7 +56,7 @@ CLEANFILES=
 DISTCLEANFILES=
 BUILT_SOURCES=
 
-# EXTRA_PROGRAMS=gen_bb_mul_code$(EXEEXT_FOR_BUILD)
+# EXTRA_PROGRAMS=gen_bb_mul_code
 # gen_bb_mul_code_SOURCES=gen_bb_mul_code.c
 
 gen_bb_mul_code$(EXEEXT_FOR_BUILD): ../lowlevel/gen_bb_mul_code.c
@@ -776,11 +776,11 @@ EXTRA_DIST+=tune-lowlevel.pl
 ######################################################################
 noinst_HEADERS=timing.h tuning-common.h replace.h
 
-EXTRA_PROGRAMS+=modify-thresholds$(EXEEXT)
+EXTRA_PROGRAMS+=modify-thresholds
 modify_thresholds_SOURCES=modify-thresholds.c replace.c
 
 ######################################################################
-EXTRA_PROGRAMS+=tunetoom$(EXEEXT)
+EXTRA_PROGRAMS+=tunetoom
 tunetoom_SOURCES=tunetoom.c tuning-common.c
 tunetoom_LDADD=libtiming.la ../libgf2x-local.a -lm
 
@@ -806,7 +806,7 @@ tune-toom:
 endif
 
 ######################################################################
-EXTRA_PROGRAMS+=tunefft$(EXEEXT)
+EXTRA_PROGRAMS+=tunefft
 tunefft_SOURCES=tunefft.c tuning-common.c
 tunefft_LDADD=libtiming.la ../libgf2x-local.a
 
