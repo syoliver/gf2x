@@ -42,7 +42,6 @@ EXTRA_DIST+=tuning_undef_wrapper.h
 EXTRA_DIST+=tuning_undefs_pre.h
 
 
-
 # We've got a lot of per-target cfiles here, but it's rather silly to
 # have automake produce separate .o files for the files which fo _not_
 # change in this regard. So we resort to having lots of silly libraries,
@@ -825,6 +824,14 @@ tune-fft: tunefft.res modify-thresholds$(EXEEXT)
 	rm -f ../gf2x/gf2x-thresholds.h
 	ln -sf ../already_tuned/tuned/gf2x-thresholds.h ../gf2x/
 	cd $(top_builddir) ; $(MAKE)
+
+# This holds all the things that we possibly compile if we want to run
+# tune-lowlevel / tune-toom / tune-fft ; it might make sense to build
+# them in CD settings, even if we're not always running the tests anyway.
+# Note also that tuen-lowlevel changes the inlined code, so conceivably
+# there could be compilation errors that are hard to spot.
+tune-progs: $(EXTRA_PROGRAMS)
+	:
 
 CLEANFILES+=$(EXTRA_PROGRAMS) $(EXTRA_LTLIBRARIES) tunetoom.res tunefft.res
 CLEANFILES+=$(BUILT_SOURCES)
