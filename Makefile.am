@@ -71,6 +71,9 @@ nobase_nodist_include_HEADERS=	\
 
 libgf2x_la_LDFLAGS=-version-info @gf2x_lib_version@ -no-undefined
 
+check-local: all
+	:
+
 SUBDIRS=lowlevel src . fft tests
 
 DIST_SUBDIRS=lowlevel src . fft tests apps
