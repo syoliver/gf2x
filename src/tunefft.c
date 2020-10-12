@@ -27,7 +27,15 @@
 
 /* Program to tune the FFT multiplication over GF(2). */
 
-/* How to use this program:
+/* This program is called by "make tune-fft". You may also want to call
+ * it independently.
+ *
+ * You are advised to run "make tune-lowlevel" and "make tune-toom"
+ * beforehand, or otherwise the tuning results that you obtain with this
+ * program are likely to have limited significance.
+ *
+ * _IF_ you want to run this program independently of the "make
+ * tune-fft" scenario, the instructions are as follows.
 
    1) beforehand, tune the low-level and mid-sized multiplication routines
       with ``make tune-lowlevel'' and ``make tune-toom''
