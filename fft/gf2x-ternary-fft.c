@@ -1244,6 +1244,17 @@ int gf2x_mul_fft(unsigned long *c, const unsigned long *a, size_t an,
         if (rc < 0) return rc;
     }
 
+    if (o->K == 0) {
+	printf("gf2x_mul_fft: arguments (%zu, %zu) too small\n", an, bn);
+        /* Note that actually the routines below do work, because they're
+         * specified for working. However, this contradicts the fact that
+         * via this entry point, we have explicitly asked to _not_
+         * fall back to standard gf2x routines. So it's a caller bug
+         */
+        gf2x_ternary_fft_info_clear(o);
+        return -1;
+    }
+
     size_t sizes[3];
     gf2x_ternary_fft_info_get_alloc_sizes(o, sizes);
     gf2x_ternary_fft_ptr temp = malloc(MAX(sizes[1], sizes[2]));
@@ -1252,15 +1263,6 @@ int gf2x_mul_fft(unsigned long *c, const unsigned long *a, size_t an,
         return GF2X_ERROR_OUT_OF_MEMORY;
     }
 
-    if (o->K == 0) {
-	printf("gf2x_mul_fft: arguments (%zu, %zu) too small\n", an, bn);
-        /* Note that actually the routines below do work, because they're
-         * specified for working. However, this contradicts the fact that
-         * via this entry point, we have explicitly asked to _not_
-         * fall back to standard gf2x routines. So it's a caller bug
-         */
-        return -1;
-    }
     gf2x_ternary_fft_ptr ta = gf2x_ternary_fft_alloc(o, 1);
     if (ta == NULL) {
         free(temp);
