@@ -93,6 +93,12 @@ static void Lshift(unsigned long *a, unsigned long *b, uint64_t k, size_t N)
     if (k == 0) {
 	if (a != b)
 	    Copy(a, b, n);
+        /* mask high bits of result */
+        r = R(2 * N);
+        if (r > 0)
+            /* Because of a!=b above, a is always initialized. */
+            // coverity[read_parm]
+            a[n - 1] &= MASK(r);
     } else if (k <= N) {
 	/*  ------------------------------------------
 	   |  L0  |      L1      |  L2  |      H      |
@@ -141,6 +147,10 @@ static void Lshift(unsigned long *a, unsigned long *b, uint64_t k, size_t N)
 		a[I(N)] ^=
 		    (b[I(N + l)] & MASK(R(N + l))) >> (R(N + l) - R(N));
 	}
+        /* mask high bits of result */
+        r = R(2 * N);
+        if (r > 0)
+            a[n - 1] &= MASK(r);
     } else if (k <= 2 * N) {
 	/*  ------------------------------------------
 	   |  L   |      H0      |  H1  |     H2      |
@@ -186,6 +196,10 @@ static void Lshift(unsigned long *a, unsigned long *b, uint64_t k, size_t N)
 	   then s1 contains R(N+h)-R2(l) bits from L */
 	if (R(N + h) > R2(l))
 	    a[I(N + h) + W(l)] ^= s1 & MASK(R(N + h) - R2(l));
+        /* mask high bits of result */
+        r = R(2 * N);
+        if (r > 0)
+            a[n - 1] &= MASK(r);
     } else {			/* 2*N < k < 3*N */
 
 	/*  ------------------------------------------
@@ -223,11 +237,11 @@ static void Lshift(unsigned long *a, unsigned long *b, uint64_t k, size_t N)
 	    a[ih + W(l)] = s1 & MASK(R(N + h) - R2(l));
 	if (R(N + h) > 0)
 	    a[ih] ^= s2;
+        /* mask high bits of result */
+        r = R(2 * N);
+        if (r > 0)
+            a[n - 1] &= MASK(r);
     }
-    /* mask high bits of result */
-    r = R(2 * N);
-    if (r > 0)
-	a[n - 1] &= MASK(r);
 #ifdef DEBUG_LSHIFT
     printf("a:=");
     dump(a, n);
