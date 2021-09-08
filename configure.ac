@@ -24,7 +24,7 @@
 #  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 #  02110-1301, USA.
 
-AC_INIT([gf2x], [1.3.1dev])
+AC_INIT([gf2x],[1.3.1dev])
 AC_SUBST([GF2X_VERSION_MAJOR],
 [regexp(AC_PACKAGE_VERSION,[\([0-9]+\)\.\([0-9]+\)\.\([0-9]+\)],[\1])])
 AC_SUBST([GF2X_VERSION_MINOR],
@@ -105,6 +105,9 @@ AM_CONDITIONAL([ENABLE_FFT_INTERFACE],[test "x$enable_fft_interface" = xyes])
 AC_PROG_CC
 AC_PROG_CXX
 AC_COMPILE_WARNINGS
+# We used to call AC_PROG_CC_C99, but this is now obsolete with
+# autoconf-2.71 (which is not in debian testing though -- so this
+# obsolete directive is still here)
 AC_PROG_CC_C99
 AC_PROG_CPP
 

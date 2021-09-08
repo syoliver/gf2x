@@ -671,7 +671,7 @@ EOF
 gf2x_compile="$1 conftest.c"
 cc_for_build_works=no
 if AC_TRY_EVAL(gf2x_compile); then
-  if (./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest) >&AC_FD_CC 2>&1; then
+  if (./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest) >&AS_MESSAGE_LOG_FD 2>&1; then
     cc_for_build_works=yes
   fi
 fi
@@ -710,7 +710,7 @@ EOF
 for i in .exe ,ff8 ""; do
   gf2x_compile="$CC_FOR_BUILD conftest.c -o conftest$i"
   if AC_TRY_EVAL(gf2x_compile); then
-    if (./conftest) 2>&AC_FD_CC; then
+    if (./conftest) 2>&AS_MESSAGE_LOG_FD; then
       gf2x_cv_prog_exeext_for_build=$i
       break
     fi
