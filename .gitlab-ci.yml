@@ -77,6 +77,10 @@ checks out-of-source with gcc:
     - ci/00-prepare-docker.sh
   script:
     - *checks-script
+  artifacts:
+    paths:
+      - /tmp/checks_out-of-source_with_gcc/config.log
+    expire_in: 1 week
 
 #  checks on debian10 system with gcc:
 #    <<: *common-template
