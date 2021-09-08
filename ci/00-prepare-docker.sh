@@ -24,6 +24,7 @@ enter_section install_packages "Installing required packages"
 
 debian_packages="$debian_packages     bc"
 debian_packages="$debian_packages     locales"
+debian_packages="$debian_packages     make autoconf automake"
 debian_packages="$debian_packages     libgmp-dev"
 debian_packages="$debian_packages     autoconf automake"
 # is full perl really needed ?
@@ -44,7 +45,7 @@ fedora_packages="$fedora_packages     hostname"
 
 alpine_packages="$alpine_packages     bc"
 alpine_packages="$alpine_packages     gmp-dev"
-alpine_packages="$alpine_packages     make"
+alpine_packages="$alpine_packages     make autoconf automake"
 alpine_packages="$alpine_packages     bash"
 alpine_packages="$alpine_packages     perl"
 
