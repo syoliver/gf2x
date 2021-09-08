@@ -42,11 +42,6 @@ workflow:
   - ci/02-build.sh
   - ci/03-check.sh
 
-.checks-junit-report: &checks-junit-report
-  artifacts:
-    reports:
-      junit: junit.xml
-
 checks with gcc:
   <<: *common-template
   stage: early
@@ -55,38 +50,34 @@ checks with gcc:
     - ci/00-prepare-docker.sh
   script:
     - *checks-script
-  <<: *checks-junit-report
-#  
-#  checks on alpine system with gcc:
-#    <<: *common-template
-#    stage: early
-#    image: alpine:latest
-#    before_script:
-#      - ci/00-prepare-docker.sh
-#    script:
-#      - *checks-script
-#    <<: *checks-junit-report
-#  
-#  checks on debian system with 32-bit gcc:
-#    <<: *common-template
-#    stage: early
-#    image: debian
-#    before_script:
-#      - ci/00-prepare-docker.sh
-#    script:
-#      - *checks-script
-#    <<: *checks-junit-report
-#  
-#  checks using cmake directly with gcc:
-#    <<: *common-template
-#    stage: early
-#    image: alpine
-#    before_script:
-#      - ci/00-prepare-docker.sh
-#    script:
-#      - *checks-script
-#    <<: *checks-junit-report
-#  
+  
+checks on alpine system with gcc:
+  <<: *common-template
+  stage: early
+  image: alpine:latest
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - *checks-script
+
+checks on debian system with 32-bit gcc:
+  <<: *common-template
+  stage: early
+  image: debian
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - *checks-script
+
+checks out-of-source with gcc:
+  <<: *common-template
+  stage: early
+  image: alpine
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - *checks-script
+
 #  checks on debian10 system with gcc:
 #    <<: *common-template
 #    stage: early
@@ -95,7 +86,6 @@ checks with gcc:
 #      - ci/00-prepare-docker.sh
 #    script:
 #      - *checks-script
-#    <<: *checks-junit-report
 #  
 #  checks on debian9 system with gcc:
 #    <<: *common-template
@@ -105,7 +95,6 @@ checks with gcc:
 #      - ci/00-prepare-docker.sh
 #    script:
 #      - *checks-script
-#    <<: *checks-junit-report
 #  
 #  checks on opensuse system with gcc:
 #    <<: *common-template
@@ -115,7 +104,6 @@ checks with gcc:
 #      - ci/00-prepare-docker.sh
 #    script:
 #      - *checks-script
-#    <<: *checks-junit-report
 #  
 #  checks with clang:
 #    <<: *common-template
@@ -125,7 +113,6 @@ checks with gcc:
 #      - ci/00-prepare-docker.sh
 #    script:
 #      - *checks-script
-#    <<: *checks-junit-report
 #  
 #  checks with icc:
 #    <<: *common-template
@@ -137,7 +124,6 @@ checks with gcc:
 #      - ci/00-prepare-docker.sh
 #    script:
 #      - *checks-script
-#    <<: *checks-junit-report
 #  
 #  expensive checks with gcc:
 #    <<: *common-template
@@ -148,7 +134,6 @@ checks with gcc:
 #      - ci/00-prepare-docker.sh
 #    script:
 #      - *checks-script
-#    <<: *checks-junit-report
 #  
 #  ############################################################################
 #  # coverage. Actually, this is not really dependent on checks, after all.
@@ -230,7 +215,6 @@ checks with gcc:
 #  #     - ci/00-prepare-shell.sh
 #  #   script:
 #  #     - *checks-script
-#  #   <<: *checks-junit-report
 #   
 #  # in fact, this one should be quick !
 #  checks on osx system:
@@ -244,7 +228,6 @@ checks with gcc:
 #      - ci/00-prepare-shell.sh
 #    script:
 #      - *checks-script
-#    <<: *checks-junit-report
 #   
 #  checks on freebsd12.2 system with gcc:
 #    variables:
