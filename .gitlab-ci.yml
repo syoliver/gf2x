@@ -2,7 +2,7 @@
 
 stages:
   - early
-#  - thorough
+  - thorough
 #  - publish
 
 image: gcc
@@ -150,7 +150,7 @@ checks with icc:
 # # # 00-prepare-shell.sh can only check if software is present.
 run on very slow machines:
   <<: *common-template
-  stage: thorough
+  stage: early
   needs: []
   tags:
     - raspberry
