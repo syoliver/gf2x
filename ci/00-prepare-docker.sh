@@ -27,32 +27,29 @@ debian_packages="$debian_packages     locales"
 debian_packages="$debian_packages     make autoconf automake libtool"
 debian_packages="$debian_packages     libgmp-dev"
 debian_packages="$debian_packages     autoconf automake"
-# is full perl really needed ?
-# debian_packages="$debian_packages     perl"
 
 opensuse_packages="$opensuse_packages     bc"
 opensuse_packages="$opensuse_packages     which"  # is type -p more portable?
 opensuse_packages="$opensuse_packages     hostname"
+opensuse_packages="$opensuse_packages     make autoconf automake libtool"
 opensuse_packages="$opensuse_packages     gmp-devel"
 opensuse_packages="$opensuse_packages     gzip"
 
 fedora_packages="$fedora_packages     bc"
 fedora_packages="$fedora_packages     gmp-devel"
 fedora_packages="$fedora_packages     hostname"
-# is full perl really needed ? seems that perl-interpreter and the auto
-# dependencies that we pull already pull what we need.
-# fedora_packages="$fedora_packages     perl"
+fedora_packages="$fedora_packages     make autoconf automake libtool"
 
 alpine_packages="$alpine_packages     bc"
 alpine_packages="$alpine_packages     gmp-dev"
 alpine_packages="$alpine_packages     make autoconf automake libtool"
 alpine_packages="$alpine_packages     bash"
-alpine_packages="$alpine_packages     perl"
 
 freebsd_packages="$freebsd_packages     gmp"
 freebsd_packages="$freebsd_packages     gmake"
 freebsd_packages="$freebsd_packages     bash"
 freebsd_packages="$freebsd_packages     perl5"
+freebsd_packages="$freebsd_packages     gmake autoconf automake libtool"
 
 while [ $# -gt 0 ] ; do
     case "$1" in

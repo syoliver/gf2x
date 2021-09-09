@@ -7,7 +7,7 @@ echo "Enter CI script for $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME, stage $CI_JOB_
 
 enter_section preparation "System preparation (shell).  Checking required and optional software"
 
-check_mandatory_tools
+check_mandatory_tools autoconf autoreconf
 
 # These are directories where we want to search for include files, but
 # without any assurance that these directories exist.
