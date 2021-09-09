@@ -44,6 +44,7 @@ fi
 : ${CFLAGS=-g -O4}
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([config])
+m4_include([config/features.m4])
 AC_CANONICAL_TARGET
 
 AC_LANG([C])
