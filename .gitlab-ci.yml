@@ -2,7 +2,6 @@
 
 stages:
   - early
-
 #  - thorough
 #  - publish
 
@@ -82,53 +81,53 @@ checks out-of-source with gcc:
       - /tmp/checks_out-of-source_with_gcc/config.log
     expire_in: 1 week
 
-#  checks on debian10 system with gcc:
-#    <<: *common-template
-#    stage: early
-#    image: debian:10
-#    before_script:
-#      - ci/00-prepare-docker.sh
-#    script:
-#      - *checks-script
-#  
-#  checks on debian9 system with gcc:
-#    <<: *common-template
-#    stage: early
-#    image: debian:9
-#    before_script:
-#      - ci/00-prepare-docker.sh
-#    script:
-#      - *checks-script
-#  
-#  checks on opensuse system with gcc:
-#    <<: *common-template
-#    stage: early
-#    image: opensuse/leap
-#    before_script:
-#      - ci/00-prepare-docker.sh
-#    script:
-#      - *checks-script
-#  
-#  checks with clang:
-#    <<: *common-template
-#    image: debian:testing
-#    stage: early
-#    before_script:
-#      - ci/00-prepare-docker.sh
-#    script:
-#      - *checks-script
-#  
-#  checks with icc:
-#    <<: *common-template
-#    image: intel/oneapi-hpckit:latest
-#    stage: early
-#    tags:
-#      - icc
-#    before_script:
-#      - ci/00-prepare-docker.sh
-#    script:
-#      - *checks-script
-#  
+checks on debian10 system with gcc:
+  <<: *common-template
+  stage: early
+  image: debian:10
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - *checks-script
+
+checks on debian9 system with gcc:
+  <<: *common-template
+  stage: early
+  image: debian:9
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - *checks-script
+
+checks on opensuse system with gcc:
+  <<: *common-template
+  stage: early
+  image: opensuse/leap
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - *checks-script
+
+checks with clang:
+  <<: *common-template
+  image: debian:testing
+  stage: early
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - *checks-script
+
+checks with icc:
+  <<: *common-template
+  image: intel/oneapi-hpckit:latest
+  stage: early
+  tags:
+    - icc
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - *checks-script
+
 #  expensive checks with gcc:
 #    <<: *common-template
 #    stage: thorough
@@ -139,160 +138,50 @@ checks out-of-source with gcc:
 #    script:
 #      - *checks-script
 #  
-#  ############################################################################
-#  # coverage. Actually, this is not really dependent on checks, after all.
-#  # It does depend on the availability of the coverage images, though!
-#  #
-#  coverage tests on checks with gcc:
-#    <<: *common-template
-#    stage: thorough
-#    # do not start it prematurely, in case previous jobs failed
-#    image: alpine:latest
-#    before_script:
-#      - ci/00-prepare-docker.sh
-#    script:
-#      - *checks-script
-#    artifacts:
-#      paths:
-#        - coverage-*.info
-#        - coverage-*.json
-#      expire_in: 1 week
-#  
-#  
-#  # The json coverage reports for different runs are imported, provided we
-#  # get the needs/artifacts combination right.
-#  #
-#  # https://stackoverflow.com/questions/38140996/how-can-i-pass-artifacts-to-another-stage
-#  # https://docs.gitlab.com/ee/ci/yaml/#artifact-downloads-with-needs
-#  #
-#  # Once this job has run, the job artifacts, and in particular the html
-#  # rendering of the coverage report, can be downloaded using links that
-#  # are formed according to the following rules:
-#  #
-#  # https://docs.gitlab.com/ee/ci/pipelines/job_artifacts.html#downloading-the-latest-artifacts
-#  #
-#  # Actually it took me a while to figure out the correct url. For the
-#  # master branch, we want: https://gitlab.inria.fr/cado-nfs/cado-nfs/-/jobs/artifacts/master/file/coverage/index.html?job=merge+coverage+tests
-#  #
-#  # The good thing is that we don't need to play dirty tricks with gitlab
-#  # pages and subdirectories. As it turns out, the final rendered page does
-#  # show up under cado-nfs.gitlabpages.inria.fr, but we do not need to care
-#  # about it.
-#  merge coverage tests:
-#    <<: *common-template
-#    stage: publish
-#    needs:
-#      - job: coverage tests on checks with gcc
-#        artifacts: true
-#      # list more of these...
-#    # This image has gcovr installed
-#    image: alpine:latest
-#    before_script:
-#      - ci/00-prepare-docker.sh
-#    script:
-#      - ci/09-merge-coverage.sh
-#    artifacts:
-#      paths:
-#        - coverage
-#        - coverage.tar.gz
-#      expire_in: 30 days
-#      reports:
-#        cobertura: coverage.xml
-#  
-#  ############################################################################
-#  # Tests on slow machines and/or shell executors. They depend on nothing.
-#  
-#  # # It would be possible to run the following test on arm64 as well, but my
-#  # # only runner is an allwinner CPU with 2G of RAM, and it takes more than
-#  # # two hours :-(. I think I would have to reduce the test surface first.
-#  # #    - arm64
-#  # #
-#  # # # very slow machines run with the shell executor anyway.
-#  # # # 00-prepare-shell.sh can only check if software is present.
-#  # run on very slow machines:
-#  #   <<: *common-template
-#  #   stage: thorough
-#  #   needs: []
-#  #   tags:
-#  #     - raspberry
-#  #   before_script:
-#  #     - ci/00-prepare-shell.sh
-#  #   script:
-#  #     - *checks-script
-#   
-#  # in fact, this one should be quick !
-#  checks on osx system:
-#    <<: *common-template
-#    # do it early. It's one of our quickest runners.
-#    stage: early
-#    needs: []
-#    tags:
-#      - osx
-#    before_script:
-#      - ci/00-prepare-shell.sh
-#    script:
-#      - *checks-script
-#   
-#  checks on freebsd12.2 system with gcc:
-#    variables:
-#      GIT_SUBMODULE_STRATEGY: recursive
-#    <<: *common-template
-#    stage: thorough
-#    # do not start it prematurely, in case previous jobs failed
-#    # needs: []
-#    tags:
-#      - freebsd-tanker
-#    script:
-#      - make -C ci/utilities/tanker
-#      - ci/50-libvirt-wrap-tests.sh freebsd:12.2 ci/40-testsuite.sh
-#    # https://gitlab.com/gitlab-org/gitlab/-/issues/15603 should be
-#    # implemented someday. We would like to have it, to make sure that the
-#    # cleanup sequence is called no matter what.
-#  
-#  checks on freebsd13.0 system with gcc:
-#    variables:
-#      GIT_SUBMODULE_STRATEGY: recursive
-#    <<: *common-template
-#    stage: thorough
-#    # do not start it prematurely, in case previous jobs failed
-#    # needs: []
-#    tags:
-#      - freebsd-tanker
-#    script:
-#      - make -C ci/utilities/tanker
-#      - ci/50-libvirt-wrap-tests.sh freebsd:13.0 ci/40-testsuite.sh
-#  
-#  coverity on debian10 system with gcc:
-#    # override the common template.
-#    rules:
-#      - if: $CI_COMMIT_MESSAGE =~ /skip some ci/
-#        when: manual
-#        allow_failure: false
-#      - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "coverity")
-#        when: always
-#      - when: never
-#    stage: early
-#    image: debian:10
-#    before_script:
-#      - ci/00-prepare-docker.sh
-#    script:
-#    - curl -o /tmp/cov-analysis-linux64.tgz
-#      https://scan.coverity.com/download/linux64
-#      --form project=$COVERITY_SCAN_PROJECT_NAME
-#      --form token=$COVERITY_SCAN_TOKEN
-#    - tar xfz /tmp/cov-analysis-linux64.tgz
-#    - ci/01-conf.sh
-#    - cov-analysis-linux64-*/bin/cov-build --dir cov-int ci/02-build.sh
-#    - tar cfz cov-int.tar.gz cov-int
-#    - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
-#      --form token=$COVERITY_SCAN_TOKEN
-#      --form email=$COVERITY_SCAN_USER_EMAIL
-#      --form file=@cov-int.tar.gz
-#      --form version="`git describe --tags`"
-#      --form description="`git describe --tags` / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID"
-#  
-# "cache" is only when the runners have a notion of available cache
-# server, it seems. Don't do that for now.
-# cache:
-# # paths:
-# - "*.o"
+############################################################################
+# Tests on slow machines and/or shell executors. They depend on nothing.
+
+# # It would be possible to run the following test on arm64 as well, but my
+# # only runner is an allwinner CPU with 2G of RAM, and it takes more than
+# # two hours :-(. I think I would have to reduce the test surface first.
+# #    - arm64
+# #
+# # # very slow machines run with the shell executor anyway.
+# # # 00-prepare-shell.sh can only check if software is present.
+run on very slow machines:
+  <<: *common-template
+  stage: thorough
+  needs: []
+  tags:
+    - raspberry
+  before_script:
+    - ci/00-prepare-shell.sh
+  script:
+    - *checks-script
+ 
+# in fact, this one should be quick !
+checks on osx system:
+  <<: *common-template
+  # do it early. It's one of our quickest runners.
+  stage: early
+  needs: []
+  tags:
+    - osx
+  before_script:
+    - ci/00-prepare-shell.sh
+  script:
+    - *checks-script
+ 
+checks on freebsd13.0 system with gcc:
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  <<: *common-template
+  stage: thorough
+  # do not start it prematurely, in case previous jobs failed
+  # needs: []
+  tags:
+    - freebsd-tanker
+  script:
+    - make -C ci/utilities/tanker
+    - ci/50-libvirt-wrap-tests.sh freebsd:13.0 ci/40-testsuite.sh
+
