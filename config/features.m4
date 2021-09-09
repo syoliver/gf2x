@@ -49,7 +49,7 @@ m4_define(<<FEATURE_CHECK>>,<<
     fi
   # Publish this as a config.h macro
     case "$gf2x_cv_cc_supports_>><<$4>><<" in #((
-      yes)
+      yes*)
         AC_DEFINE([GF2X_HAVE_>><<$1>><<_SUPPORT],[1],[Define if >><<$2>><< code as present in the source tree is supported by the compiler])
         ;;
       *) : ;;
