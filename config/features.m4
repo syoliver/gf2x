@@ -6,6 +6,9 @@ dnl       sse-2   # human-readable feature name
 dnl       -msse2  # for compiler flag
 dnl       sse2    # for shell variable gf2x_cv_cc_supports_sse2
 dnl       msse2   # for shell variable gf2x_cv_cpp_needs_msse2
+dnl       parent  # name of parent feature. checks gf2x_cv_cc_supports_parent
+dnl
+dnl
 
 
 m4_define(<<FEATURE_CHECK>>,<<
@@ -13,15 +16,19 @@ m4_define(<<FEATURE_CHECK>>,<<
   # First check the compiler support
     AC_CACHE_CHECK([whether $CC can compile and run >><<$2>><< code], [gf2x_cv_cc_supports_>><<$4>><<],[
       gf2x_cv_cc_supports_>><<$4>><<=no
-      if test "x${enable_>><<$4>><<}" = xno ; then
+      if >>m4_if(<<$6>>,<<>>,<<>>,<<test "x${gf2x_cv_cc_supports_>><<$6>><<}" = xno ; then
+        echo $ECHO_N "skipped>><<<<,>>>><< "
+      elif >>)<<
+      test "x${enable_>><<$4>><<}" = xno ; then
         echo $ECHO_N "explicitly disabled, "
       else
         AC_RUN_IFELSE([>><<$1>><<_EXAMPLE()],[
           gf2x_cv_cc_supports_>><<$4>><<=yes
         ],[
-          case "$CFLAGS" in #((
+          case "x$CFLAGS" in #((
            *-march=*)
-             gf2x_cv_cc_supports_>><<$4>><<="no (not testing >><<$3>><< because -march is already present)";;
+             echo $ECHO_N "(not testing >><<$3>><< because -march is already present), "
+             gf2x_cv_cc_supports_>><<$4>><<="no";;
            *)
              ac_save_CFLAGS=$CFLAGS
              CFLAGS="$ac_save_CFLAGS >><<$3>><<"
@@ -81,14 +88,19 @@ m4_define(<<FEATURE_CHECK>>,<<
 >>)
 changequote([, ])dnl
 
-AC_DEFUN([CHECK_SSE2_SUPPORT],[FEATURE_CHECK(SSE2,sse-2,-msse2,sse2,msse2)])
-
-AC_DEFUN([CHECK_SSE3_SUPPORT],[FEATURE_CHECK(SSE3,sse-3,-msse3,sse3,msse3)])
-AC_DEFUN([CHECK_SSSE3_SUPPORT],[FEATURE_CHECK(SSSE3,ssse-3,-mssse3,ssse3,mssse3)])
-AC_DEFUN([CHECK_SSE41_SUPPORT],[FEATURE_CHECK(SSE41,sse-4.1,-msse4.1,sse41,msse41)])
-AC_DEFUN([CHECK_PCLMUL_SUPPORT],[FEATURE_CHECK(PCLMUL,pclmul,-mpclmul,pclmul,mpclmul)])
+AC_DEFUN([CHECK_SSE2_SUPPORT],
+ [FEATURE_CHECK(SSE2,sse-2,-msse2,sse2,msse2)])
+AC_DEFUN([CHECK_SSE3_SUPPORT],
+ [FEATURE_CHECK(SSE3,sse-3,-msse3,sse3,msse3,sse2)])
+AC_DEFUN([CHECK_SSSE3_SUPPORT],
+ [FEATURE_CHECK(SSSE3,ssse-3,-mssse3,ssse3,mssse3,sse3)])
+AC_DEFUN([CHECK_SSE41_SUPPORT],
+ [FEATURE_CHECK(SSE41,sse-4.1,-msse4.1,sse41,msse41,ssse3)])
+AC_DEFUN([CHECK_PCLMUL_SUPPORT],
+ [FEATURE_CHECK(PCLMUL,pclmul,-mpclmul,pclmul,mpclmul,sse41)])
 # Only checked by apps/
-AC_DEFUN([CHECK_BMI2_SUPPORT],[FEATURE_CHECK(BMI2,bmi2,-mbmi2,bmi2,mbmi2)])
+AC_DEFUN([CHECK_BMI2_SUPPORT],
+ [FEATURE_CHECK(BMI2,bmi2,-mbmi2,bmi2,mbmi2,sse41)])
 
 # pepper this check with more sse-2 only statements, or we might be
 # fooled by some early athlon64 cpus supporting extended 3dnow, which
