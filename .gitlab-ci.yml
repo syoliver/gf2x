@@ -172,7 +172,9 @@ checks on osx system:
   script:
     - *checks-script
  
-checks on freebsd13.0 system with gcc:
+# freebsd has clang by default, I see no compelling reason to test
+# primarily gcc. Sure, we may want to do both.
+checks on freebsd13.0 system with clang:
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   <<: *common-template
