@@ -48,6 +48,8 @@ alpine_packages="$alpine_packages     bash"
 freebsd_packages="$freebsd_packages     gmp"
 freebsd_packages="$freebsd_packages     gmake"
 freebsd_packages="$freebsd_packages     bash"
+freebsd_packages="$freebsd_packages     perl5"
+freebsd_packages="$freebsd_packages     gmake autoconf automake libtool"
 
 while [ $# -gt 0 ] ; do
     case "$1" in
