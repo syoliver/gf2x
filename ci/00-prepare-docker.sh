@@ -51,14 +51,6 @@ freebsd_packages="$freebsd_packages     bash"
 freebsd_packages="$freebsd_packages     perl5"
 freebsd_packages="$freebsd_packages     gmake autoconf automake libtool"
 
-while [ $# -gt 0 ] ; do
-    case "$1" in
-        coverage|clang|gcc|debug|icc) eval "$1=1";;
-        *) echo "$1 -> ???" >&2 ; exit 1;;
-    esac
-    shift
-done
-
 # These variables are set in ci/001-environment.sh
 if [ "$coverage" ] ; then
     # vim is needed because we have a bit of ex scripting...

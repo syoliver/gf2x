@@ -36,11 +36,6 @@ workflow:
 # Basically, much of the work is done in shell scripts for convenience,
 # and they're grouped in the template below.
 
-.checks-script: &checks-script
-  - ci/01-conf.sh
-  - ci/02-build.sh
-  - ci/03-check.sh
-
 checks with gcc:
   <<: *common-template
   stage: early
@@ -48,8 +43,80 @@ checks with gcc:
   before_script:
     - ci/00-prepare-docker.sh
   script:
-    - *checks-script
-  
+    - ci/40-testsuite.sh
+
+checks LGPL code with gcc:
+  <<: *common-template
+  stage: early
+  image: gcc:latest
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - ci/40-testsuite.sh
+
+checks make-dist tarball with gcc:
+  <<: *common-template
+  stage: early
+  image: gcc:latest
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - ci/40-testsuite.sh
+
+checks out-of-source make-dist tarball with gcc:
+  <<: *common-template
+  stage: early
+  image: gcc:latest
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - ci/40-testsuite.sh
+
+checks make-dist LGPL tarball with gcc:
+  <<: *common-template
+  stage: early
+  image: gcc:latest
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - ci/40-testsuite.sh
+
+checks with gcc and architecture x86-64:
+  <<: *common-template
+  stage: early
+  image: gcc:latest
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - ci/40-testsuite.sh
+
+checks with gcc and architecture nocona:
+  <<: *common-template
+  stage: early
+  image: gcc:latest
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - ci/40-testsuite.sh
+
+checks with gcc and architecture core2:
+  <<: *common-template
+  stage: early
+  image: gcc:latest
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - ci/40-testsuite.sh
+
+checks with gcc and architecture westmere:
+  <<: *common-template
+  stage: early
+  image: gcc:latest
+  before_script:
+    - ci/00-prepare-docker.sh
+  script:
+    - ci/40-testsuite.sh
+
 checks on alpine system with gcc:
   <<: *common-template
   stage: early
@@ -57,7 +124,7 @@ checks on alpine system with gcc:
   before_script:
     - ci/00-prepare-docker.sh
   script:
-    - *checks-script
+    - ci/40-testsuite.sh
 
 checks on debian system with 32-bit gcc:
   <<: *common-template
@@ -66,7 +133,7 @@ checks on debian system with 32-bit gcc:
   before_script:
     - ci/00-prepare-docker.sh
   script:
-    - *checks-script
+    - ci/40-testsuite.sh
 
 checks out-of-source with gcc:
   <<: *common-template
@@ -75,11 +142,7 @@ checks out-of-source with gcc:
   before_script:
     - ci/00-prepare-docker.sh
   script:
-    - *checks-script
-  artifacts:
-    paths:
-      - /tmp/checks_out-of-source_with_gcc/config.log
-    expire_in: 1 week
+    - ci/40-testsuite.sh
 
 checks on debian10 system with gcc:
   <<: *common-template
@@ -88,7 +151,7 @@ checks on debian10 system with gcc:
   before_script:
     - ci/00-prepare-docker.sh
   script:
-    - *checks-script
+    - ci/40-testsuite.sh
 
 checks on debian9 system with gcc:
   <<: *common-template
@@ -97,7 +160,7 @@ checks on debian9 system with gcc:
   before_script:
     - ci/00-prepare-docker.sh
   script:
-    - *checks-script
+    - ci/40-testsuite.sh
 
 checks on opensuse system with gcc:
   <<: *common-template
@@ -106,8 +169,9 @@ checks on opensuse system with gcc:
   before_script:
     - ci/00-prepare-docker.sh
   script:
-    - *checks-script
+    - ci/40-testsuite.sh
 
+# We might consider testing various architectures with clang and gcc too.
 checks with clang:
   <<: *common-template
   image: debian:testing
@@ -115,7 +179,7 @@ checks with clang:
   before_script:
     - ci/00-prepare-docker.sh
   script:
-    - *checks-script
+    - ci/40-testsuite.sh
 
 checks with icc:
   <<: *common-template
@@ -126,7 +190,7 @@ checks with icc:
   before_script:
     - ci/00-prepare-docker.sh
   script:
-    - *checks-script
+    - ci/40-testsuite.sh
 
 #  expensive checks with gcc:
 #    <<: *common-template
@@ -136,7 +200,7 @@ checks with icc:
 #    before_script:
 #      - ci/00-prepare-docker.sh
 #    script:
-#      - *checks-script
+#      - ci/40-testsuite.sh
 #  
 ############################################################################
 # Tests on slow machines and/or shell executors. They depend on nothing.
@@ -157,7 +221,7 @@ run on very slow machines:
   before_script:
     - ci/00-prepare-shell.sh
   script:
-    - *checks-script
+    - ci/40-testsuite.sh
  
 # in fact, this one should be quick !
 checks on osx system:
@@ -170,7 +234,7 @@ checks on osx system:
   before_script:
     - ci/00-prepare-shell.sh
   script:
-    - *checks-script
+    - ci/40-testsuite.sh
  
 # freebsd has clang by default, I see no compelling reason to test
 # primarily gcc. Sure, we may want to do both.

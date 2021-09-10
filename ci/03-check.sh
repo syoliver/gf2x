@@ -7,10 +7,6 @@ NCPUS=`"$(dirname $0)/utilities/ncpus.sh"`
 export NCPUS
 export OMP_DYNAMIC=true STATS_PARSING_ERRORS_ARE_FATAL=1
 
-if ! [ "$out_of_source" ] ; then
-    export build_tree=$PWD
-fi
-
 if [ "$coverage" ] ; then
     # The "base" coverage file has zero coverage for every instrumented
     # line of the project. At a later stage, we will combine this data
