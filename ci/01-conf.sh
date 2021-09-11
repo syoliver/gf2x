@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
-. "$(dirname $0)/000-functions.sh"
-. "$(dirname $0)/001-environment.sh"
+# This is actually __ONLY__ called from ci/40-testsuite.sh now
+
+if ! [ "$sourced_from_testsuite" ] ; then
+    . "${CI_PATH:-$(dirname $0)}/000-functions.sh"
+    . "${CI_PATH:-$(dirname $0)}/001-environment.sh"
+fi
 
 enter_section configuration Configuring
 autoreconf -i
@@ -18,6 +22,7 @@ if [ "$out_of_source" ] ; then
     if ! [ -d "$build_tree" ] ; then
         mkdir "$build_tree"
     fi
+    $ECHO_E "${CSI_BLUE}out-of-source build tree is $build_tree${CSI_RESET}"
     configure_call="$source_tree/configure"
 else
     build_tree=$PWD
@@ -37,15 +42,19 @@ fi
 
 if [ "$do_make_dist" ] ; then
     eval $(cd "$build_tree" > /dev/null ; grep '^\(PACKAGE_\(TARNAME\|VERSION\)\)' Makefile | tr -d \  )
+    $ECHO_E "${CSI_BLUE}Creating archive ${PACKAGE_TARNAME}-${PACKAGE_VERSION}.tar.gz${CSI_RESET}"
+    (cd "$build_tree" ; "${MAKE}" dist)
     cd "${TMPDIR:-/tmp}"
+    source_tree="$PWD/${PACKAGE_TARNAME}-${PACKAGE_VERSION}"
+    $ECHO_E "${CSI_BLUE}Unpacking in $source_tree, and configuring there${CSI_RESET}"
     tar xf "$build_tree/${PACKAGE_TARNAME}-${PACKAGE_VERSION}.tar.gz"
     # hack, and change source tree and build tree.
-    source_tree="$PWD/${PACKAGE_TARNAME}-${PACKAGE_VERSION}"
     if [ "$out_of_source" ] ; then
         rm -rf "$build_tree"
         build_tree="${TMPDIR:-/tmp}/$CI_BUILD_NAME"
         build_tree="${build_tree// /_}"
         mkdir "$build_tree"
+        $ECHO_E "${CSI_BLUE}out-of-source build tree is $build_tree${CSI_RESET}"
         configure_call="$source_tree/configure"
     else
         $ECHO_E "${CSI_BLUE}Changing source directory to $source_tree${CSI_RESET}"

@@ -121,7 +121,7 @@ case "$CI_BUILD_NAME" in
     *"out-of-source"*) out_of_source=1 ;;
 esac
 case "$CI_BUILD_NAME" in
-    *"make-dist"*"tarball") do_make_dist=1 ;;
+    *"make-dist"*"tarball"*) do_make_dist=1 ;;
 esac
 case "$CI_BUILD_NAME" in
     *"LGPL code"*|*"LGPL tarball"*) remove_gpl_sources=1 ;;
