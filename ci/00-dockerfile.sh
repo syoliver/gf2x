@@ -70,10 +70,17 @@ if [ "$CI_BUILD_NAME" ] ; then
     echo "ENV CI_BUILD_NAME=\"$CI_BUILD_NAME\""
 fi
 
+if [ "$1" = debug ] ; then
+cat <<EOF
+COPY ./ /tmp/ci/
+RUN bash -x /tmp/ci/00-prepare-docker.sh
+EOF
+else
 cat <<EOF
 COPY ./ /tmp/ci/
 RUN /tmp/ci/00-prepare-docker.sh
 EOF
+fi
 
 if [ "$icc" ] ; then
     cat <<EOF

@@ -136,7 +136,7 @@ else
     # /bin/sh shell that groks "set -o pipefail", which appears in
     # ci/00-docker-build.sh ; such is not the case of /bin/sh on debian,
     # at least.
-    bash ci/00-docker-build.sh "$imagename"
+    ci/00-docker-build.sh "$imagename" "$@"
     echo "# NOTE: docker image is $imagename"
     echo "# NOTE: this image contains a few extra debug tools"
     # CI_BUILD_NAME is passed to the script via 00-dockerfile.sh
