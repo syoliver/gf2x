@@ -22,6 +22,7 @@ needed_files() {
 00-prepare-docker.sh
 utilities/ncpus.sh
 EOF
+    find phony-packages -type f
 }
 
 (cd "$(dirname $0)" ; needed_files | xargs tar cf $tmp/context.tar.gz)
