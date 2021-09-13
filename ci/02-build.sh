@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
 
-. "$(dirname $0)/000-functions.sh"
-. "$(dirname $0)/001-environment.sh"
+# This is actually __ONLY__ called from ci/40-testsuite.sh now
 
-NCPUS=`"$(dirname $0)/utilities/ncpus.sh"`
-enter_section build Building
-if [ "$out_of_source" ] ; then
-    SOURCEDIR="$PWD"
-    (cd "$build_tree" ; "${MAKE}" -j$NCPUS)
-else
-    "${MAKE}" -j$NCPUS
+if ! [ "$sourced_from_testsuite" ] ; then
+    . "${CI_PATH:-$(dirname $0)}/000-functions.sh"
+    . "${CI_PATH:-$(dirname $0)}/001-environment.sh"
 fi
-leave_section
 
+NCPUS=`"${CI_PATH:-$(dirname $0)}/utilities/ncpus.sh"`
+enter_section build Building
+(cd "$build_tree" ; "${MAKE}" -j$NCPUS)
+leave_section

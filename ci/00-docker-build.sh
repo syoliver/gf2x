@@ -1,9 +1,4 @@
-#!/bin/sh
-
-# This wrapper is run on the hosts that build the containers, i.e.  from
-# the "docker" docker image, using /bin/sh. We do like to have
-# "pipefail", although it's not obvious that it will work with /bin/sh.
-# As a matter of fact, currently it does work, so we're happy.
+#!/bin/bash
 
 set -e
 set -o pipefail
@@ -13,6 +8,7 @@ set -o pipefail
 # containers.
 
 IMAGE="$1"
+shift
 
 tmp=$(mktemp -d /tmp/XXXXXXXXXX)
 trap "rm -rf $tmp" EXIT
@@ -26,6 +22,7 @@ needed_files() {
 00-prepare-docker.sh
 utilities/ncpus.sh
 EOF
+    find phony-packages -type f
 }
 
 (cd "$(dirname $0)" ; needed_files | xargs tar cf $tmp/context.tar.gz)
@@ -33,6 +30,6 @@ EOF
 
 (cd "$tmp"/context ; tar xf $tmp/context.tar.gz)
 
-ci/00-dockerfile.sh > "$tmp/context/Dockerfile"
+ci/00-dockerfile.sh "$@" > "$tmp/context/Dockerfile"
 
 docker build --pull -t $IMAGE --cache-from $IMAGE:latest $tmp/context

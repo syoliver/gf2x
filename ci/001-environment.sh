@@ -32,19 +32,10 @@ else
     HOSTNAME="[[placeholder]]"
 fi
 case "$HOSTNAME" in
-    # docker runners (gitlab ones) are apparently called "runner-*"
-    runner-*) ;;
-    docker-script-*) ;;
-    cado-*) ;;
-    raclette|fondue|tartiflette|berthoud) ;;
-    plafrim|fcatrel|fnancy|catrel-*|miriel*|mistral*|bora*) ;;
-    gcc*) ;;
-    poire*) ;;
-    macintosh*home) ;;
-    fedora*|debian*|ubuntu*|centos*|freebsd*|openbsd*|netbsd*) ;;
     # some of our very slow machines have so little ram that clearly, we
     # must not tax them too much.
     genepi|calva|pine64) export NCPUS_FAKE=1;;
+    *) : ;;
 esac
 
 if ! [ "$CI_BUILD_NAME" ] && [ "$1" ] ; then
@@ -92,6 +83,13 @@ case "$CI_BUILD_NAME" in
     ;;
 esac
 case "$CI_BUILD_NAME" in
+    *"and architecture "*)
+    set ${CI_BUILD_NAME#*and architecture }
+    : ${CFLAGS="$CFLAGS -march=$1"}
+    : ${CXXFLAGS="$CXXFLAGS -march=$1"}
+    ;;
+esac
+case "$CI_BUILD_NAME" in
     *"with clang"*)
     : ${CC=clang}
     : ${CXX=clang++}
@@ -106,45 +104,27 @@ case "$CI_BUILD_NAME" in
     ;;
 esac
 case "$CI_BUILD_NAME" in
-    *"checks"*)
-        checks=1
-    ;;
+    *"checks"*) checks=1 ;;
 esac
 case "$CI_BUILD_NAME" in
-    *"coverity"*)
-        coverity=1
-    ;;
+    *"coverity"*) coverity=1 ;;
 esac
 
-    # adapted from cado-nfs's mechanism for using cmake directly
 case "$CI_BUILD_NAME" in
-    *"out-of-source"*)
-        out_of_source=1
-        source_tree="$PWD"
-        export source_tree
-        if [ "$BASH_VERSION" ] ; then
-            if ! [ "$build_tree" ] ; then
-                build_tree="/tmp/$CI_BUILD_NAME"
-                # spaces in dir names don't work, mostly because of libtool
-                # (look at gf2x/fft/libgf2x-fft.la)
-                # This substitution is bash-only, but this should be fine to 
-                # have in a conditional that non-bash skips over
-                build_tree="${build_tree// /_}"
-                export build_tree
-            fi
-            if ! [ -d "$build_tree" ] ; then
-                mkdir "$build_tree"
-            fi
-        else
-            # just a safeguard
-            build_tree=/no/build_tree/set/because/we/require/bash/for/that
-        fi
-    ;;
+    *"expensive checks"*) export CHECKS_EXPENSIVE=1 ;;
+esac
+
+source_tree="$PWD"
+export source_tree
+
+case "$CI_BUILD_NAME" in
+    *"out-of-source"*) out_of_source=1 ;;
 esac
 case "$CI_BUILD_NAME" in
-    *"expensive checks"*)
-        export CHECKS_EXPENSIVE=1
-    ;;
+    *"make-dist"*"tarball"*) do_make_dist=1 ;;
+esac
+case "$CI_BUILD_NAME" in
+    *"LGPL code"*|*"LGPL tarball"*) remove_gpl_sources=1 ;;
 esac
 
 if [ -x /opt/homebrew/bin/brew ] ; then

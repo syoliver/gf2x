@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-. "$(dirname $0)/000-functions.sh"
-. "$(dirname $0)/001-environment.sh"
+# This is actually __ONLY__ called from ci/40-testsuite.sh now
 
-NCPUS=`"$(dirname $0)/utilities/ncpus.sh"`
+if ! [ "$sourced_from_testsuite" ] ; then
+    . "${CI_PATH:-$(dirname $0)}/000-functions.sh"
+    . "${CI_PATH:-$(dirname $0)}/001-environment.sh"
+fi
+
+NCPUS=`"${CI_PATH:-$(dirname $0)}/utilities/ncpus.sh"`
 export NCPUS
 export OMP_DYNAMIC=true STATS_PARSING_ERRORS_ARE_FATAL=1
-
-if ! [ "$out_of_source" ] ; then
-    export build_tree=$PWD
-fi
 
 if [ "$coverage" ] ; then
     # The "base" coverage file has zero coverage for every instrumented
@@ -21,7 +21,7 @@ if [ "$coverage" ] ; then
     C=coverage-$CI_COMMIT_SHORT_SHA-$CI_JOB_ID
     set -x
     lcov -q -c -i -d $build_tree -b . -o ${C}-base.info --no-external
-    $(dirname $0)/utilities/coverage_local_infofile_modifications.pl -d $build_tree ${C}-base.info
+    ${CI_PATH:-$(dirname $0)}/utilities/coverage_local_infofile_modifications.pl -d $build_tree ${C}-base.info
     set +x
     leave_section
 fi
@@ -50,7 +50,7 @@ if [ "$coverage" ] ; then
     gcovr --json . > ${C}-app.json
     set -x
     geninfo --ignore-errors gcov,source -q --output-filename ${C}-app.info -b . $build_tree --no-external
-    $(dirname $0)/utilities/coverage_local_infofile_modifications.pl -d $build_tree ${C}-app.info
+    ${CI_PATH:-$(dirname $0)}/utilities/coverage_local_infofile_modifications.pl -d $build_tree ${C}-app.info
     set +x
     leave_section
 fi
@@ -65,7 +65,7 @@ fi
 #enter_section "postprocessing" "Post-processing ${STATUS}ctest result into JUnit format"
 #xmls=(`find "$build_tree/Testing" -name Test.xml`)
 #if [ "${#xmls[@]}" = 1 ] ; then
-#    xsltproc "$(dirname $0)/utilities/ctest-to-junit.xsl" "${xmls[0]}" > junit.xml
+#    xsltproc "${CI_PATH:-$(dirname $0)}/utilities/ctest-to-junit.xsl" "${xmls[0]}" > junit.xml
 #    $ECHO_E "${CSI_BLUE}20 most expensive tests (real time):${CSI_RESET}"
 #    perl -ne '/testcase.*" name="([^"]+)" time="([\d\.]+)"/ && print "$2 $1\n";' junit.xml  |sort -n | tail -n 20
 #else
