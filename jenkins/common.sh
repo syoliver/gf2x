@@ -55,7 +55,7 @@ if ! [ "$DISABLE_FFT" ] ; then
     configure_extra="$configure_extra --enable-fft-interface"
 fi
 
-if type -p gmake > /dev/null 2>&1 ; then
+if type gmake > /dev/null 2>&1 ; then
     MAKE=gmake
 else
     MAKE=make
