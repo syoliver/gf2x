@@ -5,15 +5,15 @@ TMP=`mktemp -d /tmp/${BUILD_TAG}-XXXXXXX`
 cleanup() { rm -rf "$TMP" ; }
 trap cleanup EXIT
 
-if ! (cd "$TMP" ; $src/configure $configure_extra && make dist) ; then
+if ! (cd "$TMP" ; $src/configure $configure_extra && "$MAKE" dist) ; then
    echo "FAILED"
    exit 1
 fi
-version=$(grep AC_INIT configure.ac | perl -ne '/(\d+(?:\.\d+)+)/ && print "$1\n";')
+version=$(grep AC_INIT configure.ac | perl -ne '/(\d+(?:\.\w+)+)/ && print "$1\n";')
 cd "$TMP"
 tar xzf gf2x-$version.tar.gz
 cd gf2x-$version
-if ! (./configure $configure_extra && make && make check) ; then
+if ! (./configure $configure_extra && "$MAKE" && "$MAKE" check) ; then
    echo "FAILED"
    cd "$src"
    exit 1

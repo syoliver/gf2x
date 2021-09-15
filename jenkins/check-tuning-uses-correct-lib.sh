@@ -17,7 +17,7 @@ src="$PWD"
 mkdir $wdir/prepare
 cd $wdir/prepare
 $src/configure $configure_extra
-make dist
+"$MAKE" dist
 eval `egrep '^PACKAGE_(TARNAME|VERSION)=' $src/configure`
 cd $wdir
 tar xzf "$wdir/prepare/$PACKAGE_TARNAME-$PACKAGE_VERSION".tar.gz
@@ -35,21 +35,21 @@ abort();
 wq
 EOF
 $src/configure --prefix=$wdir/inst $configure_extra
-make
-make install
+"$MAKE"
+"$MAKE" install
 
 # now rebuild the good source, and try to see whether the included
 # binaries pass. Make sure we rebuild the whole thing !
 cd $wdir
 tar xzf "$wdir/prepare/$PACKAGE_TARNAME-$PACKAGE_VERSION".tar.gz
 cd "$PACKAGE_TARNAME-$PACKAGE_VERSION"
-make distclean
+"$MAKE" distclean
 $src/configure --prefix=$wdir/inst $configure_extra
-make
+"$MAKE"
 # it's a bit unfortunate as far as check times are concerned, but we need
 # to do testing at least that far in order to have a valid threshold at
 # the end of the day.
-make tune-toom TOOM_TUNING_LIMIT=64
+"$MAKE" tune-toom TOOM_TUNING_LIMIT=64
 
 if [ "$DEBUG_SCRIPTS" ] ; then
     echo "data left in $wdir"

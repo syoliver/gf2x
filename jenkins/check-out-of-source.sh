@@ -5,7 +5,7 @@ TMP=`mktemp -d /tmp/${BUILD_TAG}-XXXXXXX`
 cleanup() { rm -rf "$TMP" ; }
 trap cleanup EXIT
 cd "$TMP"
-if ! ($src/configure $configure_extra && make && make check) ; then
+if ! ($src/configure $configure_extra && "$MAKE" && "$MAKE" check) ; then
    echo "FAILED"
    cd "$src"
    exit 1
