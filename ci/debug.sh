@@ -93,6 +93,10 @@ else
     echo "# NOTE: the container will remain up on script exit"
 fi
 
+if [[ "$CI_BUILD_NAME" =~ 32-bit.freebsd ]] ; then
+    export FREEBSD_ARCH=i386
+fi
+
 if [[ "$CI_BUILD_NAME" =~ freebsd([0-9]+\.[0-9]+) ]] ; then
     # use tanker script instead
     IMAGE_NAME=freebsd:"${BASH_REMATCH[1]}"
