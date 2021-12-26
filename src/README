@@ -35,7 +35,7 @@ may be adapted by a manual procedure.
 
 
 The developers may be interested by your tuning results. You may thus
-post on https://gitlab.inria.fr/gf2x/gf2x ; we need:
+post on `gf2x@inria.fr` ; we need:
 
 - the contents of the already_tuned/tuned subdirectory
 - anything relevant for identifying your machine, or machine family, and
